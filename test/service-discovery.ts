@@ -1,5 +1,5 @@
 import test from 'ava';
-import { DiscoveryItem } from '../src/core/definitions';
+import { DiscoveryItem } from '../src/definitions';
 import { getComponentCumulativeChangelog } from '../src/service-discovery';
 
 test('cumulative changelog', t => {

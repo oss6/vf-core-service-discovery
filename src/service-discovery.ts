@@ -1,24 +1,24 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
-import { ComponentConfig, DiscoveryItem, PackageJson } from './core/definitions';
+import { ChangelogItem, ComponentConfig, DiscoveryItem, PackageJson } from './definitions';
 import { FileNotFoundError, NoVfDependenciesFoundError } from './errors';
-import parseLockFile, { LockObject } from './core/parse-lock-file';
-import { getVfCoreRepository } from './core/app-config';
+import parseLockFile, { LockObject } from './parse-lock-file';
+import { getVfCoreRepository } from './app-config';
 import map from 'lodash/map';
+import { getLogger } from './logger';
 
 export interface ProcessingContext {
   rootDirectory: string;
   vfPackagePrefix: string;
 }
 
-export interface ChangelogItem {
-  version: string;
-  changes: string[];
-}
-
 export function getComponentsFromPackageJson(context: ProcessingContext): () => string[] {
   return () => {
+    const logger = getLogger();
+
+    logger.debug('Retrieving components from package.json');
+
     const packageJsonFile = path.join(context.rootDirectory, 'package.json');
 
     if (!fs.existsSync(packageJsonFile)) {
@@ -41,6 +41,10 @@ export function getComponentsFromPackageJson(context: ProcessingContext): () => 
 
 export function getComponentsExactVersion(context: ProcessingContext): (components: string[]) => DiscoveryItem[] {
   return (components: string[]): DiscoveryItem[] => {
+    const logger = getLogger();
+
+    logger.debug('Retrieving the exact versions for each component');
+
     const componentsMap: { [name: string]: string } = {};
     const lockObject: LockObject = parseLockFile(context.rootDirectory);
 
@@ -67,10 +71,16 @@ export function getComponentPackageJson(discoveryItem: DiscoveryItem): PackageJs
 }
 
 export function extendWithComponentPackageJson(): (ds: DiscoveryItem[]) => DiscoveryItem[] {
-  return (discoveryItems) => map(discoveryItems, (discoveryItem) => ({
-    ...discoveryItem,
-    packageJson: getComponentPackageJson(discoveryItem)
-  }));
+  return (discoveryItems) => {
+    const logger = getLogger();
+
+    logger.debug('Retrieving latest packages information');
+
+    return map(discoveryItems, (discoveryItem) => ({
+      ...discoveryItem,
+      packageJson: getComponentPackageJson(discoveryItem)
+    }));
+  };
 }
 
 export function getComponentConfig(discoveryItem: DiscoveryItem): ComponentConfig {
@@ -86,10 +96,16 @@ export function getComponentConfig(discoveryItem: DiscoveryItem): ComponentConfi
 }
 
 export function extendWithComponentConfig(): (ds: DiscoveryItem[]) => DiscoveryItem[] {
-  return (discoveryItems) => map(discoveryItems, (discoveryItem) => ({
-    ...discoveryItem,
-    config: getComponentConfig(discoveryItem)
-  }));
+  return (discoveryItems) => {
+    const logger = getLogger();
+
+    logger.debug('Retrieving lastest packages configuration');
+
+    return map(discoveryItems, (discoveryItem) => ({
+      ...discoveryItem,
+      config: getComponentConfig(discoveryItem)
+    }));
+  };
 }
 
 export function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): ChangelogItem[] {

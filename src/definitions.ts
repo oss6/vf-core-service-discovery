@@ -10,12 +10,17 @@ export interface ComponentConfig {
   status: string;
 }
 
+export interface ChangelogItem {
+  version: string;
+  changes: string[];
+}
+
 export interface DiscoveryItem {
   name: string;
   nameWithoutPrefix: string;
   version: string;
   packageJson: PackageJson;
   config: ComponentConfig;
-  changelog: any;
+  changelog: ChangelogItem[];
   dependents: string[];
 }

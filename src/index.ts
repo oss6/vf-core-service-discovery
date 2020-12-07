@@ -1,22 +1,30 @@
 import flow from 'lodash/flow';
-import { createAppDirectoryIfNotExistent, getAppDirectory, shouldInvalidate, updateLastInvalidation } from './core/app-config';
-import { DiscoveryItem } from './core/definitions';
-import { cloneRepository } from './core/git-client';
+import { createAppDirectoryIfNotExistent, getAppDirectory, shouldInvalidate, updateLastInvalidation } from './app-config';
+import { DiscoveryItem } from './definitions';
+import { cloneRepository } from './git-client';
+import { getLogger } from './logger';
 import { getComponentsFromPackageJson, getComponentsExactVersion, ProcessingContext, extendWithComponentPackageJson, extendWithComponentConfig, extendWithCumulativeChangelog } from './service-discovery';
 
 export async function discover(rootDirectory: string): Promise<DiscoveryItem[]> {
   const appConfig = createAppDirectoryIfNotExistent();
+  const logger = getLogger();
+
+  logger.debug('App configuration loaded successfully');
 
   if (shouldInvalidate(appConfig)) {
-    console.log('Cloning vf-core...');
+    logger.debug('Started invalidation');
 
     await cloneRepository('https://github.com/visual-framework/vf-core.git', getAppDirectory('vf-core'));
+
+    logger.debug('vf-core cloned successfully');
 
     updateLastInvalidation({
       ...appConfig,
       lastInvalidation: new Date()
     });
   }
+
+  logger.debug('Running service discovery');
 
   const context: ProcessingContext = {
     rootDirectory,
@@ -31,5 +39,7 @@ export async function discover(rootDirectory: string): Promise<DiscoveryItem[]> 
     extendWithCumulativeChangelog()
   );
 
-  return run();
+  const discoveryItems = run();
+
+  return discoveryItems;
 }

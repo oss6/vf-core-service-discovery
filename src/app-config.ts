@@ -33,11 +33,11 @@ export function createAppDirectoryIfNotExistent(): AppConfig {
 
   if (!fs.existsSync(appDirectory) && !fs.existsSync(appConfigFileName)) {
     console.log(`Creating app directory (${appDirectory})...`);
+
     fs.mkdirSync(appDirectory);
     fs.writeFileSync(appConfigFileName, JSON.stringify(appConfig));
   } else {
     appConfig = JSON.parse(fs.readFileSync(appConfigFileName, 'utf-8'));
-    console.log(appConfig);
   }
 
   return appConfig;
