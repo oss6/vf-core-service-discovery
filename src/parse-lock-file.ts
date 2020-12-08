@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import yaml from 'yaml';
+import { parse as parseYarnLockFile } from '@yarnpkg/lockfile';
 import { FileNotFoundError } from './errors';
 
 export interface LockItem {
@@ -28,7 +28,7 @@ export default function (rootDirectory: string): LockObject {
   const yarnLockFileName = path.join(rootDirectory, 'yarn.lock');
 
   if (fs.existsSync(yarnLockFileName)) {
-    const yarnLockFile: LockObject =  yaml.parse(fs.readFileSync(yarnLockFileName, 'utf-8'))
+    const yarnLockFile: LockObject = parseYarnLockFile(fs.readFileSync(yarnLockFileName, 'utf-8')).object;
 
     return yarnLockFile;
   }

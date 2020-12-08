@@ -47,10 +47,14 @@ export function getComponentsExactVersion(context: ProcessingContext): (componen
 
     const componentsMap: { [name: string]: string } = {};
     const lockObject: LockObject = parseLockFile(context.rootDirectory);
+    const processedLockObject: LockObject = Object.entries(lockObject).reduce((obj, [pkg, lockItem]) => ({
+      ...obj,
+      [pkg.split('@').slice(0, -1).join('@')]: lockItem
+    }), {});
 
     for (const component of components) {
-      if (lockObject[component]) {
-        componentsMap[component] = lockObject[component].version;
+      if (processedLockObject[component]) {
+        componentsMap[component] = processedLockObject[component].version;
       }
     }
 
