@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 import { compareAsc, format } from 'date-fns';
 import { parseRelativeTime } from './helpers';
+import { getLogger } from './logger';
 
 export interface AppConfig {
   cacheExpiry: string;
@@ -27,12 +28,13 @@ export function getVfCoreRepository(...segments: string[]): string {
 }
 
 export function createAppDirectoryIfNotExistent(): AppConfig {
+  const logger = getLogger();
   const appDirectory = getAppDirectory();
   const appConfigFileName = getAppConfigFileName();
   let appConfig: AppConfig = defaultAppConfig;
 
   if (!fs.existsSync(appDirectory) && !fs.existsSync(appConfigFileName)) {
-    console.log(`Creating app directory (${appDirectory})...`);
+    logger.debug(`Creating app directory (${appDirectory})...`);
 
     fs.mkdirSync(appDirectory);
     fs.writeFileSync(appConfigFileName, JSON.stringify(appConfig));

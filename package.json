@@ -2,7 +2,10 @@
   "name": "vf-core-service-discovery",
   "version": "0.1.0",
   "description": "Tool to analyse the usage of vf-core in your project",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "vf-core-service-discovery": "dist/cli.js"
+  },
   "scripts": {
     "start": "tsc --project ./ --watch",
     "build": "tsc --project ./",
