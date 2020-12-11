@@ -35,7 +35,8 @@ export function getComponentsFromPackageJson(context: ProcessingContext): () => 
       throw new NoVfDependenciesFoundError(packageJsonFile);
     }
 
-    return components;
+    // TODO: fix this once we know where vf-form is
+    return components.filter(c => !c.includes('vf-form'));
   }
 }
 
