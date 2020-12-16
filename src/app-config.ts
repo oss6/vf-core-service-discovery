@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { compareAsc, format } from 'date-fns';
+import { compareAsc, formatISO } from 'date-fns';
 import { parseRelativeTime } from './helpers';
 import { getLogger } from './logger';
 
@@ -39,7 +39,8 @@ export function createAppDirectoryIfNotExistent(): AppConfig {
     fs.mkdirSync(appDirectory);
     fs.writeFileSync(appConfigFileName, JSON.stringify(appConfig));
   } else {
-    appConfig = JSON.parse(fs.readFileSync(appConfigFileName, 'utf-8'));
+    const appConfigContents = fs.readFileSync(appConfigFileName, 'utf-8');
+    appConfig = deserializeAppConfig(appConfigContents);
   }
 
   return appConfig;
@@ -49,7 +50,7 @@ export function serializeAppConfig(appConfig: AppConfig): string {
   return JSON.stringify({
     ...appConfig,
     lastInvalidation: appConfig.lastInvalidation !== null
-      ? format(appConfig.lastInvalidation, 'yyyy-MM-ddTHH:mm:ss')
+      ? formatISO(appConfig.lastInvalidation)
       : null
   });
 }
@@ -69,7 +70,7 @@ export function shouldInvalidate(appConfig: AppConfig): boolean {
   const now = new Date();
 
   return appConfig.lastInvalidation === null
-    || compareAsc(now, parseRelativeTime(appConfig.cacheExpiry, appConfig.lastInvalidation)) < 0;
+    || compareAsc(now, parseRelativeTime(appConfig.cacheExpiry, appConfig.lastInvalidation)) === 1;
 }
 
 export function updateLastInvalidation(appConfig: AppConfig) {

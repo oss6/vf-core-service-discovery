@@ -5,7 +5,7 @@ import { cloneRepository } from './git-client';
 import { getLogger } from './logger';
 import { getComponentsFromPackageJson, getComponentsExactVersion, extendWithComponentPackageJson, extendWithComponentConfig, extendWithCumulativeChangelog, extendWithComponentsDependents } from './service-discovery';
 
-export async function discover(rootDirectory: string): Promise<DiscoveryItem[]> {
+export async function discover(): Promise<DiscoveryItem[]> {
   const appConfig = createAppDirectoryIfNotExistent();
   const logger = getLogger();
 

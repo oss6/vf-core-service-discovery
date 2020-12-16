@@ -16,9 +16,7 @@ async function run() {
 
   printMainHeading();
 
-  const rootDirectory = process.cwd();
-
-  const discoveryOutput = await discover(rootDirectory);
+  const discoveryOutput = await discover();
 
   report(discoveryOutput);
 }
