@@ -1,66 +1,61 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
+import glob from 'glob';
 import { ChangelogItem, ComponentConfig, DiscoveryItem, PackageJson } from './definitions';
-import { FileNotFoundError, NoVfDependenciesFoundError } from './errors';
+import { FileNotFoundError, InternalError, NoVfDependenciesFoundError } from './errors';
 import parseLockFile, { LockObject } from './parse-lock-file';
 import { getVfCoreRepository } from './app-config';
 import map from 'lodash/map';
 import { getLogger } from './logger';
+import getContext from './context';
 
-export interface ProcessingContext {
-  rootDirectory: string;
-  vfPackagePrefix: string;
+export function getComponentsFromPackageJson(): string[] {
+  const logger = getLogger();
+  const context = getContext();
+
+  logger.debug('Retrieving components from package.json');
+
+  const packageJsonFile = path.join(context.rootDirectory, 'package.json');
+
+  if (!fs.existsSync(packageJsonFile)) {
+    throw new FileNotFoundError(packageJsonFile);
+  }
+
+  const packageJson: PackageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));
+  const dependencies: string[] = Object.keys(packageJson.dependencies || {}).filter(dep => dep.startsWith(context.vfPackagePrefix));
+  const devDependencies: string[] = Object.keys(packageJson.devDependencies || {}).filter(dep => dep.startsWith(context.vfPackagePrefix));
+
+  const components: string[] = [...dependencies, ...devDependencies];
+
+  if (components.length === 0) {
+    throw new NoVfDependenciesFoundError(packageJsonFile);
+  }
+
+  // TODO: fix this once we know where vf-form is
+  return components.filter(c => !c.includes('vf-form'));
 }
 
-export function getComponentsFromPackageJson(context: ProcessingContext): () => string[] {
-  return () => {
-    const logger = getLogger();
+export function getComponentsExactVersion(components: string[]): DiscoveryItem[] {
+  const logger = getLogger();
+  const context = getContext();
 
-    logger.debug('Retrieving components from package.json');
+  logger.debug('Retrieving the exact versions for each component');
 
-    const packageJsonFile = path.join(context.rootDirectory, 'package.json');
+  const componentsMap: { [name: string]: string } = {};
+  const lockObject: LockObject = parseLockFile(context.rootDirectory);
 
-    if (!fs.existsSync(packageJsonFile)) {
-      throw new FileNotFoundError(packageJsonFile);
+  for (const component of components) {
+    if (lockObject[component]) {
+      componentsMap[component] = lockObject[component].version;
     }
-
-    const packageJson: PackageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));
-    const dependencies: string[] = Object.keys(packageJson.dependencies || {}).filter(dep => dep.startsWith(context.vfPackagePrefix));
-    const devDependencies: string[] = Object.keys(packageJson.devDependencies || {}).filter(dep => dep.startsWith(context.vfPackagePrefix));
-
-    const components: string[] = [...dependencies, ...devDependencies];
-
-    if (components.length === 0) {
-      throw new NoVfDependenciesFoundError(packageJsonFile);
-    }
-
-    // TODO: fix this once we know where vf-form is
-    return components.filter(c => !c.includes('vf-form'));
   }
-}
 
-export function getComponentsExactVersion(context: ProcessingContext): (components: string[]) => DiscoveryItem[] {
-  return (components: string[]): DiscoveryItem[] => {
-    const logger = getLogger();
-
-    logger.debug('Retrieving the exact versions for each component');
-
-    const componentsMap: { [name: string]: string } = {};
-    const lockObject: LockObject = parseLockFile(context.rootDirectory);
-
-    for (const component of components) {
-      if (lockObject[component]) {
-        componentsMap[component] = lockObject[component].version;
-      }
-    }
-
-    return Object.entries(componentsMap).map(([component, version]) => ({
-      name: component,
-      nameWithoutPrefix: component.replace(`${context.vfPackagePrefix}/`, ''),
-      version
-    } as DiscoveryItem));
-  }
+  return Object.entries(componentsMap).map(([component, version]) => ({
+    name: component,
+    nameWithoutPrefix: component.replace(`${context.vfPackagePrefix}/`, ''),
+    version
+  } as DiscoveryItem));
 }
 
 export function getComponentPackageJson(discoveryItem: DiscoveryItem): PackageJson {
@@ -152,4 +147,34 @@ export function extendWithCumulativeChangelog(): (ds: DiscoveryItem[]) => Discov
     ...discoveryItem,
     changelog: getComponentCumulativeChangelog(discoveryItem)
   }));
+}
+
+// TODO: should optimise (this is a very naive implementation to demonstrate the concept)
+export function extendWithComponentsDependents(ds: DiscoveryItem[]): Promise<DiscoveryItem[]> {
+  return new Promise((resolve, reject) => {
+    const discoveryItems = [...ds];
+    const context = getContext();
+
+    // TODO: consider other patterns (e.g. templates in .ts files in Angular)
+    glob(context.rootDirectory + '/**/*.html', { ignore: 'node_modules' }, (error, matches) => {
+      if (error) {
+        reject(new InternalError());
+        // throw new InternalError();
+      }
+
+      for (const filePath of matches) {
+        const html = fs.readFileSync(filePath, 'utf-8');
+
+        for (const discoveryItem of discoveryItems) {
+          const fileName = path.basename(filePath);
+
+          if (html.match(new RegExp(`${discoveryItem.nameWithoutPrefix}`, 'g'))) {
+            discoveryItem.dependents = discoveryItem.dependents ? [...discoveryItem.dependents, fileName] : [fileName];
+          }
+        }
+      }
+
+      resolve(discoveryItems);
+    });
+  });
 }

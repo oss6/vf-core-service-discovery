@@ -22,6 +22,12 @@ export function report(discoveryItems: DiscoveryItem[]) {
       console.log(`${discoveryItem.changelog.map(item => `\n\t\t\t${item.version}${item.changes.map(c => `\n\t\t\t  ${c}`).join('')}`).join('')}`);
     }
 
+    console.log(`  Dependents${!discoveryItem.dependents?.length ? `\t\t${chalk.red('None')}` : ''}`);
+
+    if (discoveryItem.dependents?.length > 0) {
+      console.log(`${discoveryItem.dependents.map(dep => `\n\t\t\t${dep}`).join('')}`);
+    }
+
     console.log(`\n\n`);
   }
 }

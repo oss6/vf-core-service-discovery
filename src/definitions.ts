@@ -24,3 +24,8 @@ export interface DiscoveryItem {
   changelog: ChangelogItem[];
   dependents: string[];
 }
+
+export interface ProcessingContext {
+  rootDirectory: string;
+  vfPackagePrefix: string;
+}

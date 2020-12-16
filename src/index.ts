@@ -3,7 +3,7 @@ import { createAppDirectoryIfNotExistent, getAppDirectory, shouldInvalidate, upd
 import { DiscoveryItem } from './definitions';
 import { cloneRepository } from './git-client';
 import { getLogger } from './logger';
-import { getComponentsFromPackageJson, getComponentsExactVersion, ProcessingContext, extendWithComponentPackageJson, extendWithComponentConfig, extendWithCumulativeChangelog } from './service-discovery';
+import { getComponentsFromPackageJson, getComponentsExactVersion, extendWithComponentPackageJson, extendWithComponentConfig, extendWithCumulativeChangelog, extendWithComponentsDependents } from './service-discovery';
 
 export async function discover(rootDirectory: string): Promise<DiscoveryItem[]> {
   const appConfig = createAppDirectoryIfNotExistent();
@@ -26,20 +26,17 @@ export async function discover(rootDirectory: string): Promise<DiscoveryItem[]> 
 
   logger.debug('Running service discovery');
 
-  const context: ProcessingContext = {
-    rootDirectory,
-    vfPackagePrefix: '@visual-framework'
-  };
-
   const run = flow(
-    getComponentsFromPackageJson(context),
-    getComponentsExactVersion(context),
+    getComponentsFromPackageJson,
+    getComponentsExactVersion,
     extendWithComponentPackageJson(),
     extendWithComponentConfig(),
     extendWithCumulativeChangelog()
   );
 
-  const discoveryItems = run();
+  let discoveryItems = run();
+
+  discoveryItems = await extendWithComponentsDependents(discoveryItems);
 
   return discoveryItems;
 }

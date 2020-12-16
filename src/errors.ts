@@ -11,3 +11,9 @@ export class NoVfDependenciesFoundError extends Error {
     this.name = 'NoVfDependenciesFoundError';
   }
 }
+
+export class InternalError extends Error {
+  constructor() {
+    super('Internal error.');
+  }
+}
