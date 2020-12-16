@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "description": "Tool to analyse the usage of vf-core in your project",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "vf-core-service-discovery": "dist/cli.js"
   },
   "scripts": {
-    "start": "tsc --project ./ --watch",
-    "build": "tsc --project ./",
+    "start": "yarn clean:dist && tsc --project ./ --watch",
+    "build": "yarn clean:dist && tsc --project ./",
+    "clean:dist": "rimraf dist",
     "test": "nyc ava"
   },
   "author": "Ossama Edbali <ossedb@gmail.com>",
@@ -21,6 +23,7 @@
     "@types/yarnpkg__lockfile": "^1.1.4",
     "ava": "^3.13.0",
     "nyc": "^15.1.0",
+    "rimraf": "^3.0.2",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.5"
   },
