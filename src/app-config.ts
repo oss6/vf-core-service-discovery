@@ -2,8 +2,12 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { compareAsc, formatISO } from 'date-fns';
+import rimraf from 'rimraf';
+import { promisify } from 'util';
 import { parseRelativeTime } from './helpers';
 import { getLogger } from './logger';
+
+const rimrafP = promisify(rimraf);
 
 export interface AppConfig {
   cacheExpiry: string;
@@ -27,11 +31,15 @@ export function getVfCoreRepository(...segments: string[]): string {
   return path.join(getAppDirectory(), 'vf-core', ...segments);
 }
 
-export function createAppDirectoryIfNotExistent(): AppConfig {
+export async function createAppDirectoryIfNotExistent(forceRun: boolean): Promise<AppConfig> {
   const logger = getLogger();
   const appDirectory = getAppDirectory();
   const appConfigFileName = getAppConfigFileName();
   let appConfig: AppConfig = defaultAppConfig;
+
+  if (forceRun) {
+    await rimrafP(appDirectory);
+  }
 
   if (!fs.existsSync(appDirectory) && !fs.existsSync(appConfigFileName)) {
     logger.debug(`Creating app directory (${appDirectory})...`);

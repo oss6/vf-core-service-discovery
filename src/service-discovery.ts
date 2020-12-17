@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'yaml';
 import glob from 'glob';
-import { ChangelogItem, ComponentConfig, DiscoveryItem, PackageJson } from './definitions';
+import { ChangelogItem, ComponentConfig, DiscoveryItem, PackageJson } from './types';
 import { FileNotFoundError, InternalError, NoVfDependenciesFoundError } from './errors';
 import parseLockFile, { LockObject } from './parse-lock-file';
 import { getVfCoreRepository } from './app-config';

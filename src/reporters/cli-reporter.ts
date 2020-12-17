@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import boxen from 'boxen';
-import { DiscoveryItem } from '../definitions';
+import { DiscoveryItem } from '../types';
 
 export function printMainHeading() {
   console.log('\n');

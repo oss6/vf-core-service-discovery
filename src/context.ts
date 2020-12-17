@@ -1,4 +1,4 @@
-import { ProcessingContext } from './definitions';
+import { ProcessingContext } from './types';
 
 export default function getContext(): ProcessingContext {
   return {

@@ -1,3 +1,7 @@
+export interface Options {
+  forceRun: boolean;
+}
+
 export interface PackageJson {
   version: string;
   dependencies?: { [key: string]: string };
