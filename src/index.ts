@@ -1,9 +1,10 @@
-import flow from 'lodash/flow';
+import fs from 'fs';
+import path from 'path';
 import { DiscoveryItem, Options } from './types';
 import { cloneRepository } from './git-client';
 import { getLogger } from './logger';
-import { getComponentsFromPackageJson, getComponentsExactVersion, extendWithComponentPackageJson, extendWithComponentConfig, extendWithCumulativeChangelog, extendWithComponentsDependents } from './service-discovery';
 import App from './app';
+import { asyncFlow } from './helpers';
 
 export async function discover(options: Options): Promise<DiscoveryItem[]> {
   const app = App.getInstance(options);
@@ -23,17 +24,11 @@ export async function discover(options: Options): Promise<DiscoveryItem[]> {
 
   logger.debug('Running service discovery');
 
-  const run = flow(
-    getComponentsFromPackageJson,
-    getComponentsExactVersion,
-    extendWithComponentPackageJson(),
-    extendWithComponentConfig(),
-    extendWithCumulativeChangelog()
-  );
+  const pipeline = await Promise.all(fs.readdirSync(path.join(__dirname, 'pipeline'))
+    .filter(f => f.endsWith('.js'))
+    .map(async (fileName) => (await import(`./pipeline/${fileName}`)).default));
 
-  let discoveryItems = run();
-
-  discoveryItems = await extendWithComponentsDependents(discoveryItems);
+  const discoveryItems = await asyncFlow(...pipeline) as DiscoveryItem[];
 
   return discoveryItems;
 }

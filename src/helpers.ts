@@ -1,5 +1,5 @@
-import fs from 'fs';
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears } from 'date-fns';
+import { PipelineItem } from './types';
 
 interface ParsedRelativeTime {
   years?: number;
@@ -66,4 +66,8 @@ export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {
   }
 
   return date;
+}
+
+export function asyncFlow(...fns: PipelineItem[]): Promise<any> {
+  return fns.reduce(async (previousPromise, fn) => fn(await previousPromise), Promise.resolve());
 }

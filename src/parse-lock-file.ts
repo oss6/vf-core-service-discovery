@@ -2,19 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { parse as parseYarnLockFile } from '@yarnpkg/lockfile';
 import { FileNotFoundError } from './errors';
-
-export interface LockItem {
-  version: string;
-  resolved: string;
-  integrity: string;
-  dev?: boolean;
-  dependencies?: object;
-  requires?: object;
-}
-
-export interface LockObject {
-  [pkg: string]: LockItem;
-}
+import { LockObject } from './types';
 
 export default function (rootDirectory: string): LockObject {
   const npmLockFileName = path.join(rootDirectory, 'package-lock.json');

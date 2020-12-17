@@ -38,3 +38,18 @@ export interface ProcessingContext {
   rootDirectory: string;
   vfPackagePrefix: string;
 }
+
+export interface LockItem {
+  version: string;
+  resolved: string;
+  integrity: string;
+  dev?: boolean;
+  dependencies?: object;
+  requires?: object;
+}
+
+export interface LockObject {
+  [pkg: string]: LockItem;
+}
+
+export type PipelineItem = (a: any) => Promise<any>;
