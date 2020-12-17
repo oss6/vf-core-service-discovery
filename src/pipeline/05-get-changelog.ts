@@ -31,7 +31,7 @@ function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): Changelo
 
       changelogItem = {
         version,
-        changes: []
+        changes: [],
       };
     } else if (line.startsWith('*') && changelogItem) {
       changelogItem.changes.push(line.replace(/^\*/, '').trim());
@@ -42,10 +42,10 @@ function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): Changelo
 }
 
 export default function extendWithCumulativeChangelog(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve, reject) => {
+  return new Promise<DiscoveryItem[]>((resolve) => {
     const processedDiscoveryItems = discoveryItems.map((discoveryItem) => ({
       ...discoveryItem,
-      changelog: getComponentCumulativeChangelog(discoveryItem)
+      changelog: getComponentCumulativeChangelog(discoveryItem),
     }));
 
     resolve(processedDiscoveryItems);

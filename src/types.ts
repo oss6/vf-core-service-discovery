@@ -10,7 +10,7 @@ export interface Options {
 export interface PackageJson {
   version: string;
   dependencies?: { [key: string]: string };
-  devDependencies?: { [key: string]: string }
+  devDependencies?: { [key: string]: string };
 }
 
 export interface ComponentConfig {
@@ -44,8 +44,8 @@ export interface LockItem {
   resolved: string;
   integrity: string;
   dev?: boolean;
-  dependencies?: object;
-  requires?: object;
+  dependencies?: Record<string, string>;
+  requires?: Record<string, string>;
 }
 
 export interface LockObject {

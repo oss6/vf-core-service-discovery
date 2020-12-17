@@ -18,14 +18,14 @@ function getComponentConfig(discoveryItem: DiscoveryItem): ComponentConfig {
 }
 
 export default function extendWithComponentConfig(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve, reject) => {
+  return new Promise<DiscoveryItem[]>((resolve) => {
     const logger = getLogger();
 
     logger.debug('Retrieving lastest packages configuration');
 
     const processedDiscoveryItems = discoveryItems.map((discoveryItem) => ({
       ...discoveryItem,
-      config: getComponentConfig(discoveryItem)
+      config: getComponentConfig(discoveryItem),
     }));
 
     resolve(processedDiscoveryItems);

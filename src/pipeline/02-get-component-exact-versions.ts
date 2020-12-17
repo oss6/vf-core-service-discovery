@@ -4,7 +4,7 @@ import parseLockFile from '../parse-lock-file';
 import { DiscoveryItem, LockObject } from '../types';
 
 export default function getComponentsExactVersion(components: string[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve, reject) => {
+  return new Promise<DiscoveryItem[]>((resolve) => {
     const logger = getLogger();
     const context = getContext();
 
@@ -19,11 +19,14 @@ export default function getComponentsExactVersion(components: string[]): Promise
       }
     }
 
-    const discoveryItems = Object.entries(componentsMap).map(([component, version]) => ({
-      name: component,
-      nameWithoutPrefix: component.replace(`${context.vfPackagePrefix}/`, ''),
-      version
-    } as DiscoveryItem));
+    const discoveryItems = Object.entries(componentsMap).map(
+      ([component, version]) =>
+        ({
+          name: component,
+          nameWithoutPrefix: component.replace(`${context.vfPackagePrefix}/`, ''),
+          version,
+        } as DiscoveryItem),
+    );
 
     resolve(discoveryItems);
   });

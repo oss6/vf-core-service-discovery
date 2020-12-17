@@ -55,7 +55,7 @@ export default class App {
     const appConfigFileName = this.getAppConfigFileName();
     const defaultAppConfig: AppConfig = {
       cacheExpiry: '5h',
-      lastInvalidation: null
+      lastInvalidation: null,
     };
 
     if (this.options.forceRun) {
@@ -79,14 +79,16 @@ export default class App {
   shouldInvalidate(): boolean {
     const now = new Date();
 
-    return this.appConfig.lastInvalidation === null
-      || compareAsc(now, parseRelativeTime(this.appConfig.cacheExpiry, this.appConfig.lastInvalidation)) === 1;
+    return (
+      this.appConfig.lastInvalidation === null ||
+      compareAsc(now, parseRelativeTime(this.appConfig.cacheExpiry, this.appConfig.lastInvalidation)) === 1
+    );
   }
 
-  updateLastInvalidation(lastInvalidation: Date) {
+  updateLastInvalidation(lastInvalidation: Date): void {
     this.appConfig = {
       ...this.appConfig,
-      lastInvalidation
+      lastInvalidation,
     };
 
     fs.writeFileSync(this.getAppConfigFileName(), this.serializeAppConfig());
@@ -95,9 +97,7 @@ export default class App {
   private serializeAppConfig(): string {
     return JSON.stringify({
       ...this.appConfig,
-      lastInvalidation: this.appConfig.lastInvalidation !== null
-        ? formatISO(this.appConfig.lastInvalidation)
-        : null
+      lastInvalidation: this.appConfig.lastInvalidation !== null ? formatISO(this.appConfig.lastInvalidation) : null,
     });
   }
 
@@ -106,9 +106,7 @@ export default class App {
 
     this.appConfig = {
       ...appConfigObject,
-      lastInvalidation: appConfigObject.lastInvalidation
-        ? new Date(appConfigObject.lastInvalidation)
-        : null
+      lastInvalidation: appConfigObject.lastInvalidation ? new Date(appConfigObject.lastInvalidation) : null,
     };
   }
 }

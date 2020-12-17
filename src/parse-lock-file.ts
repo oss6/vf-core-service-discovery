@@ -18,10 +18,13 @@ export default function (rootDirectory: string): LockObject {
   if (fs.existsSync(yarnLockFileName)) {
     const yarnLockFile: LockObject = parseYarnLockFile(fs.readFileSync(yarnLockFileName, 'utf-8')).object;
 
-    return Object.entries(yarnLockFile).reduce((obj, [pkg, lockItem]) => ({
-      ...obj,
-      [pkg.split('@').slice(0, -1).join('@')]: lockItem
-    }), {});
+    return Object.entries(yarnLockFile).reduce(
+      (obj, [pkg, lockItem]) => ({
+        ...obj,
+        [pkg.split('@').slice(0, -1).join('@')]: lockItem,
+      }),
+      {},
+    );
   }
 
   throw new FileNotFoundError(`${npmLockFileName} and ${yarnLockFileName}`);

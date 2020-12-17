@@ -12,14 +12,14 @@ async function run() {
       description: 'Whether to show debug information in the cli',
       type: 'boolean',
       default: false,
-      alias: 'v'
+      alias: 'v',
     },
     force: {
       description: 'By-pass the cache',
       type: 'boolean',
       default: false,
-      alias: 'f'
-    }
+      alias: 'f',
+    },
   }).argv;
 
   const loggingLevel = argv.verbose ? 'debug' : 'info';
@@ -29,7 +29,7 @@ async function run() {
   printMainHeading();
 
   const options: Options = {
-    forceRun: argv.force
+    forceRun: argv.force,
   };
 
   const discoveryOutput = await discover(options);

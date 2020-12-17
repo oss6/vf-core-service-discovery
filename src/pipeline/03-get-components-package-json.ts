@@ -13,14 +13,14 @@ function getComponentPackageJson(discoveryItem: DiscoveryItem): PackageJson {
 }
 
 export default function extendWithComponentPackageJson(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve, reject) => {
+  return new Promise<DiscoveryItem[]>((resolve) => {
     const logger = getLogger();
 
     logger.debug('Retrieving latest packages information');
 
     const processedDiscoveryItems = discoveryItems.map((discoveryItem) => ({
       ...discoveryItem,
-      packageJson: getComponentPackageJson(discoveryItem)
+      packageJson: getComponentPackageJson(discoveryItem),
     }));
 
     resolve(processedDiscoveryItems);

@@ -21,9 +21,13 @@ export default function getComponentsFromPackageJson(): Promise<string[]> {
 
     const packageJson: PackageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));
 
-    const dependencies: string[] = Object.keys(packageJson.dependencies || {}).filter(dep => dep.startsWith(context.vfPackagePrefix));
+    const dependencies: string[] = Object.keys(packageJson.dependencies || {}).filter((dep) =>
+      dep.startsWith(context.vfPackagePrefix),
+    );
 
-    const devDependencies: string[] = Object.keys(packageJson.devDependencies || {}).filter(dep => dep.startsWith(context.vfPackagePrefix));
+    const devDependencies: string[] = Object.keys(packageJson.devDependencies || {}).filter((dep) =>
+      dep.startsWith(context.vfPackagePrefix),
+    );
 
     const components: string[] = [...dependencies, ...devDependencies];
 
@@ -32,6 +36,6 @@ export default function getComponentsFromPackageJson(): Promise<string[]> {
     }
 
     // TODO: fix this once we know where vf-form is
-    resolve(components.filter(c => !c.includes('vf-form')));
+    resolve(components.filter((c) => !c.includes('vf-form')));
   });
 }

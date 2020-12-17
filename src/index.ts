@@ -24,11 +24,14 @@ export async function discover(options: Options): Promise<DiscoveryItem[]> {
 
   logger.debug('Running service discovery');
 
-  const pipeline = await Promise.all(fs.readdirSync(path.join(__dirname, 'pipeline'))
-    .filter(f => f.endsWith('.js'))
-    .map(async (fileName) => (await import(`./pipeline/${fileName}`)).default));
+  const pipeline = await Promise.all(
+    fs
+      .readdirSync(path.join(__dirname, 'pipeline'))
+      .filter((fileName) => fileName.endsWith('.js'))
+      .map(async (fileName) => (await import(`./pipeline/${fileName}`)).default),
+  );
 
-  const discoveryItems = await asyncFlow(...pipeline) as DiscoveryItem[];
+  const discoveryItems = (await asyncFlow(...pipeline)) as DiscoveryItem[];
 
   return discoveryItems;
 }

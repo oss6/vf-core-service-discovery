@@ -12,6 +12,7 @@
     "build": "yarn clean:dist && tsc --project ./",
     "clean:dist": "rimraf dist",
     "test": "nyc ava",
+    "lint": "eslint . --ext .ts",
     "prepublish": "yarn build"
   },
   "author": "Ossama Edbali <ossedb@gmail.com>",
@@ -26,8 +27,14 @@
     "@types/rimraf": "^3.0.0",
     "@types/yargs": "^15.0.11",
     "@types/yarnpkg__lockfile": "^1.1.4",
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
     "ava": "^3.13.0",
+    "eslint": "^7.15.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-prettier": "^3.3.0",
     "nyc": "^15.1.0",
+    "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.5"

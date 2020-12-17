@@ -1,7 +1,7 @@
 import test from 'ava';
 import { parseRelativeTime } from '../src/helpers';
 
-test('parseRelativeTime should return the correct values', t => {
+test('parseRelativeTime should return the correct values', (t) => {
   // arrange
   interface FixtureItem {
     relativeTime: string;
@@ -13,18 +13,18 @@ test('parseRelativeTime should return the correct values', t => {
     {
       relativeTime: '5h',
       fromDate: new Date(2020, 10, 5, 11, 5, 0),
-      expectedOutput: '2020-11-05T16:05:00'
+      expectedOutput: '2020-11-05T16:05:00',
     },
     {
       relativeTime: '1h 3m 10s',
       fromDate: new Date(2020, 10, 5, 11, 5, 0),
-      expectedOutput: '2020-11-05T12:08:10'
+      expectedOutput: '2020-11-05T12:08:10',
     },
     {
       relativeTime: '2D 3h',
       fromDate: new Date(2020, 10, 5, 11, 5, 0),
-      expectedOutput: '2020-11-07T14:05:00'
-    }
+      expectedOutput: '2020-11-07T14:05:00',
+    },
   ];
 
   // act & assert
