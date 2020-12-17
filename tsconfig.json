@@ -5,7 +5,8 @@
     "declaration": true,
     "outDir": "./dist",
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "strictPropertyInitialization": false
   },
   "include": [
     "src"

@@ -1,3 +1,8 @@
+export interface AppConfig {
+  cacheExpiry: string;
+  lastInvalidation: Date | null;
+}
+
 export interface Options {
   forceRun: boolean;
 }

@@ -5,10 +5,10 @@ import glob from 'glob';
 import { ChangelogItem, ComponentConfig, DiscoveryItem, PackageJson } from './types';
 import { FileNotFoundError, InternalError, NoVfDependenciesFoundError } from './errors';
 import parseLockFile, { LockObject } from './parse-lock-file';
-import { getVfCoreRepository } from './app-config';
 import map from 'lodash/map';
 import { getLogger } from './logger';
 import getContext from './context';
+import App from './app';
 
 export function getComponentsFromPackageJson(): string[] {
   const logger = getLogger();
@@ -60,8 +60,9 @@ export function getComponentsExactVersion(components: string[]): DiscoveryItem[]
 
 export function getComponentPackageJson(discoveryItem: DiscoveryItem): PackageJson {
   // TODO: validation - check existence
+  const app = App.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const packageJsonFileName = getVfCoreRepository('components', name, 'package.json');
+  const packageJsonFileName = app.getVfCoreRepository('components', name, 'package.json');
 
   return JSON.parse(fs.readFileSync(packageJsonFileName, 'utf-8'));
 }
@@ -80,14 +81,15 @@ export function extendWithComponentPackageJson(): (ds: DiscoveryItem[]) => Disco
 }
 
 export function getComponentConfig(discoveryItem: DiscoveryItem): ComponentConfig {
+  const app = App.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const yamlConfigFileName = getVfCoreRepository('components', name, `${name}.config.yml`);
+  const yamlConfigFileName = app.getVfCoreRepository('components', name, `${name}.config.yml`);
 
   if (fs.existsSync(yamlConfigFileName)) {
     return yaml.parse(fs.readFileSync(yamlConfigFileName, 'utf-8'));
   }
 
-  const moduleConfigFileName = getVfCoreRepository('components', name, `${name}.config.js`);
+  const moduleConfigFileName = app.getVfCoreRepository('components', name, `${name}.config.js`);
   return require(moduleConfigFileName);
 }
 
@@ -105,8 +107,9 @@ export function extendWithComponentConfig(): (ds: DiscoveryItem[]) => DiscoveryI
 }
 
 export function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): ChangelogItem[] {
+  const app = App.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const changelogFileName = getVfCoreRepository('components', name, 'CHANGELOG.md');
+  const changelogFileName = app.getVfCoreRepository('components', name, 'CHANGELOG.md');
   const changelogContents = fs.readFileSync(changelogFileName, 'utf-8');
   const lines = changelogContents.split('\n');
   const changelog: ChangelogItem[] = [];
