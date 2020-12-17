@@ -2,39 +2,47 @@
 
 import yargs from 'yargs';
 import { Options } from './types';
-import { discover } from './index';
-import { registerLogger } from './logger';
+import { getLogger, registerLogger } from './logger';
 import { printMainHeading, report } from './reporters/cli-reporter';
+import App from '.';
 
 async function run() {
-  const argv = yargs(process.argv.slice(2)).options({
-    verbose: {
-      description: 'Whether to show debug information in the cli',
-      type: 'boolean',
-      default: false,
-      alias: 'v',
-    },
-    force: {
-      description: 'By-pass the cache',
-      type: 'boolean',
-      default: false,
-      alias: 'f',
-    },
-  }).argv;
+  try {
+    const argv = yargs(process.argv.slice(2)).options({
+      verbose: {
+        description: 'Whether to show debug information in the cli',
+        type: 'boolean',
+        default: false,
+        alias: 'v',
+      },
+      force: {
+        description: 'By-pass the cache',
+        type: 'boolean',
+        default: false,
+        alias: 'f',
+      },
+    }).argv;
 
-  const loggingLevel = argv.verbose ? 'debug' : 'info';
+    const loggingLevel = argv.verbose ? 'debug' : 'info';
 
-  registerLogger(loggingLevel);
+    registerLogger(loggingLevel);
 
-  printMainHeading();
+    printMainHeading();
 
-  const options: Options = {
-    forceRun: argv.force,
-  };
+    const options: Options = {
+      forceRun: argv.force,
+    };
 
-  const discoveryOutput = await discover(options);
+    const app = App.getInstance(options);
 
-  report(discoveryOutput);
+    const discoveryOutput = await app.runServiceDiscovery();
+
+    report(discoveryOutput);
+  } catch (error) {
+    const logger = getLogger();
+
+    logger.error(error.message);
+  }
 }
 
 run();

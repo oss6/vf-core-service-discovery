@@ -1,11 +1,10 @@
 import fs from 'fs';
-import App from '../app';
+import { getVfCoreRepository } from '../helpers';
 import { ChangelogItem, DiscoveryItem } from '../types';
 
 function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): ChangelogItem[] {
-  const app = App.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const changelogFileName = app.getVfCoreRepository('components', name, 'CHANGELOG.md');
+  const changelogFileName = getVfCoreRepository('components', name, 'CHANGELOG.md');
   const changelogContents = fs.readFileSync(changelogFileName, 'utf-8');
   const lines = changelogContents.split('\n');
   const changelog: ChangelogItem[] = [];

@@ -53,3 +53,12 @@ export interface LockObject {
 }
 
 export type PipelineItem = (a: any) => Promise<any>;
+
+export interface ParsedRelativeTime {
+  years?: number;
+  months?: number;
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}

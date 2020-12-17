@@ -1,13 +1,18 @@
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears } from 'date-fns';
-import { PipelineItem } from './types';
+import path from 'path';
+import os from 'os';
+import { ParsedRelativeTime, PipelineItem } from './types';
 
-interface ParsedRelativeTime {
-  years?: number;
-  months?: number;
-  days?: number;
-  hours?: number;
-  minutes?: number;
-  seconds?: number;
+export function getAppDirectory(...segments: string[]): string {
+  return path.join(os.homedir(), '.vf-core-service-discovery', ...segments);
+}
+
+export function getAppConfigFileName(): string {
+  return path.join(getAppDirectory(), 'config.json');
+}
+
+export function getVfCoreRepository(...segments: string[]): string {
+  return path.join(getAppDirectory(), 'vf-core', ...segments);
 }
 
 export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {

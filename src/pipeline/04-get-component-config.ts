@@ -1,19 +1,18 @@
 import fs from 'fs';
 import yaml from 'yaml';
-import App from '../app';
+import { getVfCoreRepository } from '../helpers';
 import { getLogger } from '../logger';
 import { ComponentConfig, DiscoveryItem } from '../types';
 
 function getComponentConfig(discoveryItem: DiscoveryItem): ComponentConfig {
-  const app = App.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const yamlConfigFileName = app.getVfCoreRepository('components', name, `${name}.config.yml`);
+  const yamlConfigFileName = getVfCoreRepository('components', name, `${name}.config.yml`);
 
   if (fs.existsSync(yamlConfigFileName)) {
     return yaml.parse(fs.readFileSync(yamlConfigFileName, 'utf-8'));
   }
 
-  const moduleConfigFileName = app.getVfCoreRepository('components', name, `${name}.config.js`);
+  const moduleConfigFileName = getVfCoreRepository('components', name, `${name}.config.js`);
   return require(moduleConfigFileName);
 }
 

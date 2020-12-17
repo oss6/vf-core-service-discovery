@@ -2,7 +2,7 @@ import fs from 'fs';
 import { glob } from 'glob';
 import path from 'path';
 import getContext from '../context';
-import { InternalError } from '../errors';
+import { AppError } from '../errors';
 import { DiscoveryItem } from '../types';
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
@@ -14,8 +14,7 @@ export default function extendWithComponentsDependents(ds: DiscoveryItem[]): Pro
     // TODO: consider other patterns (e.g. templates in .ts files in Angular)
     glob(context.rootDirectory + '/**/*.html', { ignore: 'node_modules' }, (error, matches) => {
       if (error) {
-        reject(new InternalError());
-        // throw new InternalError();
+        reject(new AppError('An error has occurred when searching for dependents.'));
       }
 
       for (const filePath of matches) {

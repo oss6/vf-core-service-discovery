@@ -16,7 +16,7 @@ export default function getComponentsFromPackageJson(): Promise<string[]> {
 
     if (!fs.existsSync(packageJsonFile)) {
       reject(new FileNotFoundError(packageJsonFile));
-      // throw new FileNotFoundError(packageJsonFile);
+      return;
     }
 
     const packageJson: PackageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));

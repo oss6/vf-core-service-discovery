@@ -1,13 +1,11 @@
 import fs from 'fs';
-import App from '../app';
+import { getVfCoreRepository } from '../helpers';
 import { getLogger } from '../logger';
 import { DiscoveryItem, PackageJson } from '../types';
 
 function getComponentPackageJson(discoveryItem: DiscoveryItem): PackageJson {
-  // TODO: validation - check existence
-  const app = App.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const packageJsonFileName = app.getVfCoreRepository('components', name, 'package.json');
+  const packageJsonFileName = getVfCoreRepository('components', name, 'package.json');
 
   return JSON.parse(fs.readFileSync(packageJsonFileName, 'utf-8'));
 }
