@@ -3,6 +3,10 @@ import { getVfCoreRepository } from '../helpers';
 import { ChangelogItem, DiscoveryItem } from '../types';
 
 function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): ChangelogItem[] {
+  if (discoveryItem.version === discoveryItem.packageJson.version) {
+    return [];
+  }
+
   const name = discoveryItem.nameWithoutPrefix;
   const changelogFileName = getVfCoreRepository('components', name, 'CHANGELOG.md');
   const changelogContents = fs.readFileSync(changelogFileName, 'utf-8');
