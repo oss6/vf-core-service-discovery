@@ -4,7 +4,7 @@ import { DiscoveryItem } from '../definitions';
 
 export function printMainHeading() {
   console.log('\n');
-  console.log(chalk.bold(boxen('vf-core-service-discovery\n\nVersion 0.1.0', { padding: 1 })));
+  console.log(chalk.bold(boxen('vf-core-service-discovery\n\nVersion 0.1.0-alpha.0', { padding: 1 })));
   console.log('\n');
 }
 
