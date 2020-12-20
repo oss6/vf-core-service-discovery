@@ -4,7 +4,7 @@ import yargs from 'yargs';
 import { Options } from './types';
 import { getLogger, registerLogger } from './logger';
 import { printMainHeading, report } from './reporters/cli-reporter';
-import App from '.';
+import runServiceDiscovery from '.';
 
 async function run() {
   try {
@@ -33,9 +33,11 @@ async function run() {
       forceRun: argv.force,
     };
 
-    const app = App.getInstance(options);
+    // const app = App.getInstance(options);
 
-    const discoveryOutput = await app.runServiceDiscovery();
+    // const discoveryOutput = await app.runServiceDiscovery();
+
+    const discoveryOutput = await runServiceDiscovery(options);
 
     report(discoveryOutput);
   } catch (error) {

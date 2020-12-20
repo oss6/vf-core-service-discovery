@@ -1,26 +1,32 @@
-import fs from 'fs';
-import { getVfCoreRepository } from '../helpers';
+import { zipMap } from '../helpers';
 import { getLogger } from '../logger';
+import ApiService from '../services/api';
 import { DiscoveryItem, PackageJson } from '../types';
 
-function getComponentPackageJson(discoveryItem: DiscoveryItem): PackageJson {
+async function getComponentPackageJson(discoveryItem: DiscoveryItem): Promise<PackageJson> {
+  const apiService = ApiService.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const packageJsonFileName = getVfCoreRepository('components', name, 'package.json');
 
-  return JSON.parse(fs.readFileSync(packageJsonFileName, 'utf-8'));
+  return await apiService.getComponentPackageJson(name);
 }
 
-export default function extendWithComponentPackageJson(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve) => {
-    const logger = getLogger();
+export default async function extendWithComponentPackageJson(
+  discoveryItems: DiscoveryItem[],
+): Promise<DiscoveryItem[]> {
+  const logger = getLogger();
 
-    logger.debug('Retrieving latest packages information');
+  logger.debug('Retrieving latest packages information');
 
-    const processedDiscoveryItems = discoveryItems.map((discoveryItem) => ({
+  const packages = await Promise.all(discoveryItems.map(getComponentPackageJson));
+
+  const processedDiscoveryItems: DiscoveryItem[] = zipMap(
+    (discoveryItem, packageJson) => ({
       ...discoveryItem,
-      packageJson: getComponentPackageJson(discoveryItem),
-    }));
+      packageJson,
+    }),
+    discoveryItems,
+    packages,
+  );
 
-    resolve(processedDiscoveryItems);
-  });
+  return processedDiscoveryItems;
 }

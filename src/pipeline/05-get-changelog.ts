@@ -1,15 +1,15 @@
-import fs from 'fs';
-import { getVfCoreRepository } from '../helpers';
+import { zipMap } from '../helpers';
+import ApiService from '../services/api';
 import { ChangelogItem, DiscoveryItem } from '../types';
 
-function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): ChangelogItem[] {
+async function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): Promise<ChangelogItem[]> {
   if (discoveryItem.version === discoveryItem.packageJson.version) {
     return [];
   }
 
+  const apiService = ApiService.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
-  const changelogFileName = getVfCoreRepository('components', name, 'CHANGELOG.md');
-  const changelogContents = fs.readFileSync(changelogFileName, 'utf-8');
+  const changelogContents = await apiService.getComponentChangelog(name);
   const lines = changelogContents.split('\n');
   const changelog: ChangelogItem[] = [];
   let changelogItem: ChangelogItem | undefined = undefined;
@@ -44,13 +44,18 @@ function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): Changelo
   return changelog;
 }
 
-export default function extendWithCumulativeChangelog(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve) => {
-    const processedDiscoveryItems = discoveryItems.map((discoveryItem) => ({
-      ...discoveryItem,
-      changelog: getComponentCumulativeChangelog(discoveryItem),
-    }));
+export default async function extendWithCumulativeChangelog(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
+  const changelogs = await Promise.all(discoveryItems.map(getComponentCumulativeChangelog));
 
-    resolve(processedDiscoveryItems);
-  });
+  const processedDiscoveryItems: DiscoveryItem[] = zipMap(
+    (discoveryItem, changelog) =>
+      ({
+        ...discoveryItem,
+        changelog,
+      } as DiscoveryItem),
+    discoveryItems,
+    changelogs,
+  );
+
+  return processedDiscoveryItems;
 }

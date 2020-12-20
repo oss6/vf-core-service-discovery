@@ -11,8 +11,8 @@ export function getAppConfigFileName(): string {
   return path.join(getAppDirectory(), 'config.json');
 }
 
-export function getVfCoreRepository(...segments: string[]): string {
-  return path.join(getAppDirectory(), 'vf-core', ...segments);
+export function getCachedComponentsDirectory(...segments: string[]): string {
+  return path.join(getAppDirectory(), 'cached', ...segments);
 }
 
 export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {
@@ -75,4 +75,21 @@ export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {
 
 export function asyncFlow(...fns: PipelineItem[]): Promise<any> {
   return fns.reduce(async (previousPromise, fn) => fn(await previousPromise), Promise.resolve());
+}
+
+export function zipMap(mapper: (...args: any) => any, ...arrays: any[][]): any[] {
+  const shortestLength = Math.min(...arrays.map((a) => a.length));
+  const result = [];
+
+  for (let index = 0; index < shortestLength; index++) {
+    const mapperArgs = [];
+
+    for (const arr of arrays) {
+      mapperArgs.push(arr[index]);
+    }
+
+    result.push(mapper(...mapperArgs));
+  }
+
+  return result;
 }
