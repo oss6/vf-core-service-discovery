@@ -4,17 +4,17 @@ import rimraf from 'rimraf';
 import { promisify } from 'util';
 import { getAppConfigFileName, getAppDirectory, getCachedComponentsDirectory, parseRelativeTime } from '../helpers';
 import { AppConfig } from '../types';
-import { Logger } from 'winston';
-import { getLogger } from '../logger';
-import { OptionsService } from './options';
+import OptionsService from './options';
+import LoggerService from './logger';
 
 const rimrafP = promisify(rimraf);
 
 export default class ConfigurationService {
   static instance: ConfigurationService;
   private optionsService = OptionsService.getInstance();
+  private loggerService = LoggerService.getInstance();
   private configuration: AppConfig;
-  private logger: Logger = getLogger();
+  private logger = this.loggerService.getLogger();
 
   static getInstance(): ConfigurationService {
     if (ConfigurationService.instance) {

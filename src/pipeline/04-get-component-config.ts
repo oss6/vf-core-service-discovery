@@ -1,7 +1,7 @@
 import { zipMap } from '../helpers';
-import { getLogger } from '../logger';
 import { ComponentConfig, DiscoveryItem } from '../types';
 import ApiService from '../services/api';
+import LoggerService from '../services/logger';
 
 async function getComponentConfig(discoveryItem: DiscoveryItem): Promise<ComponentConfig> {
   const apiService = ApiService.getInstance();
@@ -11,7 +11,8 @@ async function getComponentConfig(discoveryItem: DiscoveryItem): Promise<Compone
 }
 
 export default async function extendWithComponentConfig(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
-  const logger = getLogger();
+  const loggerService = LoggerService.getInstance();
+  const logger = loggerService.getLogger();
 
   logger.debug('Retrieving lastest packages configuration');
 

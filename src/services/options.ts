@@ -1,11 +1,8 @@
-import { Logger } from 'winston';
-import { getLogger } from '../logger';
 import { Options } from '../types';
 
-export class OptionsService {
+export default class OptionsService {
   static instance: OptionsService;
   private options: Options;
-  private logger: Logger = getLogger();
 
   static getInstance(): OptionsService {
     if (OptionsService.instance) {

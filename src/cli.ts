@@ -2,11 +2,13 @@
 
 import yargs from 'yargs';
 import { Options } from './types';
-import { getLogger, registerLogger } from './logger';
 import { printMainHeading, report } from './reporters/cli-reporter';
 import runServiceDiscovery from '.';
+import LoggerService from './services/logger';
 
 async function run() {
+  const loggerService = LoggerService.getInstance();
+
   try {
     const argv = yargs(process.argv.slice(2)).options({
       verbose: {
@@ -25,7 +27,7 @@ async function run() {
 
     const loggingLevel = argv.verbose ? 'debug' : 'info';
 
-    registerLogger(loggingLevel);
+    loggerService.registerLogger(loggingLevel);
 
     printMainHeading();
 
@@ -41,7 +43,7 @@ async function run() {
 
     report(discoveryOutput);
   } catch (error) {
-    const logger = getLogger();
+    const logger = loggerService.getLogger();
 
     logger.error(error.message);
   }

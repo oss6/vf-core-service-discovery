@@ -1,19 +1,19 @@
+import 'isomorphic-fetch';
 import fs from 'fs';
-import fetch from 'node-fetch';
 import mkdirp from 'mkdirp';
 import yaml from 'yaml';
 import path from 'path';
-import { Logger } from 'winston';
-import { getLogger } from '../logger';
 import { ComponentConfig, PackageJson } from '../types';
 import { getCachedComponentsDirectory } from '../helpers';
-import { OptionsService } from './options';
+import OptionsService from './options';
+import LoggerService from './logger';
 
 export default class ApiService {
   static instance: ApiService;
   private optionsService = OptionsService.getInstance();
+  private loggerService = LoggerService.getInstance();
   private componentContentBaseUrl = 'https://raw.githubusercontent.com/visual-framework/vf-core/develop/components';
-  private logger: Logger = getLogger();
+  private logger = this.loggerService.getLogger();
 
   static getInstance(): ApiService {
     if (ApiService.instance) {

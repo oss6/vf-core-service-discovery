@@ -1,15 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 import { asyncFlow } from './helpers';
-import { getLogger } from './logger';
 import { DiscoveryItem, Options } from './types';
 import ConfigurationService from './services/configuration';
-import { OptionsService } from './services/options';
+import OptionsService from './services/options';
+import LoggerService from './services/logger';
 
 export default async function runServiceDiscovery(options: Options): Promise<DiscoveryItem[]> {
   const optionsService = OptionsService.getInstance();
   const configurationService = ConfigurationService.getInstance();
-  const logger = getLogger();
+  const loggerService = LoggerService.getInstance();
+  const logger = loggerService.getLogger();
 
   optionsService.setOptions(options);
   await configurationService.setup();

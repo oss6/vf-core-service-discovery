@@ -1,6 +1,6 @@
 import { zipMap } from '../helpers';
-import { getLogger } from '../logger';
 import ApiService from '../services/api';
+import LoggerService from '../services/logger';
 import { DiscoveryItem, PackageJson } from '../types';
 
 async function getComponentPackageJson(discoveryItem: DiscoveryItem): Promise<PackageJson> {
@@ -13,7 +13,8 @@ async function getComponentPackageJson(discoveryItem: DiscoveryItem): Promise<Pa
 export default async function extendWithComponentPackageJson(
   discoveryItems: DiscoveryItem[],
 ): Promise<DiscoveryItem[]> {
-  const logger = getLogger();
+  const loggerService = LoggerService.getInstance();
+  const logger = loggerService.getLogger();
 
   logger.debug('Retrieving latest packages information');
 

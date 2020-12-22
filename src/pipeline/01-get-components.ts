@@ -2,12 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import getContext from '../context';
 import { FileNotFoundError, NoVfDependenciesFoundError } from '../errors';
-import { getLogger } from '../logger';
+import LoggerService from '../services/logger';
 import { PackageJson } from '../types';
 
 export default function getComponentsFromPackageJson(): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
-    const logger = getLogger();
+    const loggerService = LoggerService.getInstance();
+    const logger = loggerService.getLogger();
     const context = getContext();
 
     logger.debug('Retrieving components from package.json');
