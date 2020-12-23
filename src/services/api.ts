@@ -1,18 +1,21 @@
 import 'isomorphic-fetch';
 import fs from 'fs';
+import semver from 'semver';
 import mkdirp from 'mkdirp';
 import yaml from 'yaml';
 import path from 'path';
-import { ComponentConfig, PackageJson } from '../types';
+import packageJson from 'package-json';
+import { ComponentConfig } from '../types';
 import { getCachedComponentsDirectory } from '../helpers';
 import OptionsService from './options';
 import LoggerService from './logger';
+import ConfigurationService from './configuration';
 
 export default class ApiService {
   static instance: ApiService;
   private optionsService = OptionsService.getInstance();
+  private configurationService = ConfigurationService.getInstance();
   private loggerService = LoggerService.getInstance();
-  private componentContentBaseUrl = 'https://raw.githubusercontent.com/visual-framework/vf-core/develop/components';
   private logger = this.loggerService.getLogger();
 
   static getInstance(): ApiService {
@@ -24,7 +27,21 @@ export default class ApiService {
     return ApiService.instance;
   }
 
-  async getComponentPackageJson(name: string): Promise<PackageJson> {
+  async getVfCoreLatestReleaseVersion(): Promise<string> {
+    const options = this.optionsService.getOptions();
+
+    if (!this.configurationService.config || options.forceRun) {
+      // TODO: handle error, authentication, and add typing
+      const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/tags');
+      const tags: any[] = await response.json();
+
+      this.configurationService.update('vfCoreVersion', tags[0].name);
+    }
+
+    return this.configurationService.config.vfCoreVersion;
+  }
+
+  async getComponentPackageJson(name: string): Promise<packageJson.AbbreviatedMetadata> {
     const options = this.optionsService.getOptions();
     const cachedContentFileName = getCachedComponentsDirectory(name, 'package.json');
 
@@ -37,16 +54,17 @@ export default class ApiService {
 
     this.logger.debug(`Retrieving ${name} package.json from remote`);
 
-    const response = await fetch(`${this.componentContentBaseUrl}/${name}/package.json`);
-    const content = await response.text();
+    const pkg = await packageJson(`@visual-framework/${name}`);
 
     await mkdirp(path.dirname(cachedContentFileName));
-    fs.writeFileSync(cachedContentFileName, content, 'utf-8');
+    fs.writeFileSync(cachedContentFileName, JSON.stringify(pkg), 'utf-8');
 
-    return JSON.parse(content);
+    return pkg;
   }
 
   async getComponentConfig(name: string): Promise<ComponentConfig> {
+    const vfCoreLatestReleaseVersion = await this.getVfCoreLatestReleaseVersion();
+
     // YAML configuration
     // ------------------
     const options = this.optionsService.getOptions();
@@ -61,7 +79,9 @@ export default class ApiService {
 
     this.logger.debug(`Attempting to retrieve ${name} YAML configuration`);
 
-    const yamlConfigResponse = await fetch(`${this.componentContentBaseUrl}/${name}/${name}.config.yml`);
+    const yamlConfigResponse = await fetch(
+      this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, `${name}.config.yml`),
+    );
 
     if (yamlConfigResponse.ok) {
       const content = await yamlConfigResponse.text();
@@ -84,7 +104,9 @@ export default class ApiService {
       return require(cachedContentFileName);
     }
 
-    const jsConfigResponse = await fetch(`${this.componentContentBaseUrl}/${name}/${name}.config.js`);
+    const jsConfigResponse = await fetch(
+      this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, `${name}.config.js`),
+    );
 
     if (jsConfigResponse.ok) {
       const content = await jsConfigResponse.text();
@@ -100,6 +122,7 @@ export default class ApiService {
   }
 
   async getComponentChangelog(name: string): Promise<string> {
+    const vfCoreLatestReleaseVersion = await this.getVfCoreLatestReleaseVersion();
     const options = this.optionsService.getOptions();
     const cachedContentFileName = getCachedComponentsDirectory(name, 'CHANGELOG.md');
 
@@ -112,12 +135,16 @@ export default class ApiService {
 
     this.logger.debug(`Retrieving ${name} package.json from remote`);
 
-    const response = await fetch(`${this.componentContentBaseUrl}/${name}/CHANGELOG.md`);
+    const response = await fetch(this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md'));
     const content = await response.text();
 
     await mkdirp(path.dirname(cachedContentFileName));
     fs.writeFileSync(cachedContentFileName, content, 'utf-8');
 
     return content;
+  }
+
+  private buildVfCoreContentUrl(version: string, component: string, resource: string): string {
+    return `https://raw.githubusercontent.com/visual-framework/vf-core/${version}/components/${component}/${resource}`;
   }
 }

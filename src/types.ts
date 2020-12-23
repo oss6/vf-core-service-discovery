@@ -1,4 +1,7 @@
+import packageJson from 'package-json';
+
 export interface AppConfig {
+  vfCoreVersion: string;
   cacheExpiry: string;
   lastInvalidation: Date | null;
 }
@@ -28,7 +31,7 @@ export interface DiscoveryItem {
   name: string;
   nameWithoutPrefix: string;
   version: string;
-  packageJson: PackageJson;
+  packageJson: packageJson.AbbreviatedMetadata;
   config: ComponentConfig;
   changelog: ChangelogItem[];
   dependents: string[];

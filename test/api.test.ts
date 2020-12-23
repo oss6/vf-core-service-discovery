@@ -7,6 +7,7 @@ import ApiService from '../src/services/api';
 import OptionsService from '../src/services/options';
 import { Options, PackageJson } from '../src/types';
 import LoggerService from '../src/services/logger';
+import packageJson from 'package-json';
 
 interface SystemUnderTestArguments<T> {
   component: string;
@@ -20,6 +21,7 @@ interface TestObject {
   fsExistsSyncStub: sinon.SinonStub;
   fsReadFileSyncStub: sinon.SinonStub;
   fsWriteFileSyncStub: sinon.SinonStub;
+  packageJsonStub: sinon.SinonStub;
 }
 
 function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
@@ -33,8 +35,10 @@ function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
 
   // set API service
   const mkdirpStub = sinon.stub();
+  const packageJsonStub = sinon.stub().returns({});
   const ApiServiceType = proxyquire('../src/services/api', {
     mkdirp: mkdirpStub,
+    packageJson: packageJsonStub,
   }).default;
 
   const apiService = ApiServiceType.getInstance();
@@ -55,6 +59,7 @@ function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
     fsExistsSyncStub,
     fsReadFileSyncStub,
     fsWriteFileSyncStub,
+    packageJsonStub,
   };
 }
 
@@ -65,10 +70,10 @@ test.afterEach(() => {
 
 test.serial('getComponentPackageJson should call the remote resource', async (t) => {
   // arrange
-  const expectedPackageJson: PackageJson = {
+  const expectedPackageJson: packageJson.AbbreviatedMetadata = {
     version: '0.1.0',
   };
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub, packageJsonStub } = setupApiService({
     component: 'vf-box',
     resource: expectedPackageJson,
     options: {
@@ -84,7 +89,7 @@ test.serial('getComponentPackageJson should call the remote resource', async (t)
   t.is(fsExistsSyncStub.callCount, 1);
   t.is(fsReadFileSyncStub.callCount, 0);
   t.is(fsWriteFileSyncStub.callCount, 1);
-  t.true(fetchMock.called());
+  t.is(packageJsonStub.callCount, 1);
   t.deepEqual(packageJson, expectedPackageJson);
 });
 
@@ -93,7 +98,7 @@ test.serial('getComponentPackageJson should use the cache if available', async (
   const expectedPackageJson: PackageJson = {
     version: '0.1.0',
   };
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub, packageJsonStub } = setupApiService({
     component: 'vf-box',
     resource: expectedPackageJson,
     options: {
@@ -109,6 +114,6 @@ test.serial('getComponentPackageJson should use the cache if available', async (
   t.is(fsExistsSyncStub.callCount, 1);
   t.is(fsReadFileSyncStub.callCount, 1);
   t.is(fsWriteFileSyncStub.callCount, 0);
-  t.false(fetchMock.called());
+  t.is(packageJsonStub.callCount, 0);
   t.deepEqual(packageJson, expectedPackageJson);
 });

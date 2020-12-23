@@ -25,13 +25,18 @@ export default class ConfigurationService {
     return ConfigurationService.instance;
   }
 
+  get config(): AppConfig {
+    return { ...this.configuration };
+  }
+
   async setup(): Promise<void> {
     const options = this.optionsService.getOptions();
     const appDirectory = getAppDirectory();
     const cachedComponentsDirectory = getCachedComponentsDirectory();
     const appConfigFileName = getAppConfigFileName();
     const defaultAppConfig: AppConfig = {
-      cacheExpiry: '5h',
+      vfCoreVersion: '',
+      cacheExpiry: '2d',
       lastInvalidation: null,
     };
 
@@ -73,6 +78,15 @@ export default class ConfigurationService {
 
   async deleteCachedComponents(): Promise<void> {
     await rimrafP(getCachedComponentsDirectory());
+  }
+
+  update<T>(key: keyof AppConfig, value: T): void {
+    this.configuration = {
+      ...this.configuration,
+      [key]: value,
+    };
+
+    fs.writeFileSync(getAppConfigFileName(), this.serialize());
   }
 
   updateLastInvalidation(lastInvalidation: Date): void {
