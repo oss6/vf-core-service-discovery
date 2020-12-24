@@ -1,119 +1,151 @@
-// import test from 'ava';
-// import proxyquire from 'proxyquire';
-// import sinon from 'sinon';
-// import fetchMock from 'fetch-mock';
-// import fs from 'fs';
-// import ApiService from '../src/services/api';
-// import OptionsService from '../src/services/options';
-// import { Options, PackageJson } from '../src/types';
-// import LoggerService from '../src/services/logger';
-// import packageJson from 'package-json';
+import test from 'ava';
+import proxyquire from 'proxyquire';
+import sinon from 'sinon';
+import fetchMock from 'fetch-mock';
+import fs from 'fs';
+import ApiService from '../src/services/api';
+import OptionsService from '../src/services/options';
+import { Options, PackageJson } from '../src/types';
+import LoggerService from '../src/services/logger';
+import ConfigurationService from '../src/services/configuration';
 
-// interface SystemUnderTestArguments<T> {
-//   component: string;
-//   resource?: T;
-//   options: Options;
-//   cached: boolean;
-// }
+interface SystemUnderTestArguments<T> {
+  resource?: T;
+  fetchUrl: string;
+  options: Options;
+  cached: boolean;
+}
 
-// interface TestObject {
-//   apiService: ApiService;
-//   fsExistsSyncStub: sinon.SinonStub;
-//   fsReadFileSyncStub: sinon.SinonStub;
-//   fsWriteFileSyncStub: sinon.SinonStub;
-//   packageJsonStub: sinon.SinonStub;
-// }
+interface TestObject {
+  apiService: ApiService;
+  fsExistsSyncStub: sinon.SinonStub;
+  fsReadFileSyncStub: sinon.SinonStub;
+  fsWriteFileSyncStub: sinon.SinonStub;
+}
 
-// function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
-//   // set logger
-//   const loggerService = LoggerService.getInstance();
-//   loggerService.registerLogger('debug', true);
+function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
+  // set logger
+  const loggerService = LoggerService.getInstance();
+  loggerService.registerLogger('debug', true);
 
-//   // set options
-//   const optionsService = OptionsService.getInstance();
-//   optionsService.setOptions(args.options);
+  // set configuration
+  const configurationService = ConfigurationService.getInstance();
+  configurationService.update('vfCoreVersion', '2.4.3', false);
 
-//   // set API service
-//   const mkdirpStub = sinon.stub();
-//   const packageJsonStub = sinon.stub().returns({});
-//   const ApiServiceType = proxyquire('../src/services/api', {
-//     mkdirp: mkdirpStub,
-//     packageJson: packageJsonStub,
-//   }).default;
+  // set options
+  const optionsService = OptionsService.getInstance();
+  optionsService.setOptions(args.options);
 
-//   const apiService = ApiServiceType.getInstance();
+  // set API service
+  const mkdirpStub = sinon.stub();
+  const ApiServiceType = proxyquire('../src/services/api', {
+    mkdirp: mkdirpStub,
+  }).default;
 
-//   // mock http request
-//   fetchMock.mock('begin:https://raw.githubusercontent.com/visual-framework/vf-core/develop/components', {
-//     body: args.resource,
-//     status: 200,
-//   });
+  const apiService = ApiServiceType.getInstance();
 
-//   // mock file system
-//   const fsExistsSyncStub = sinon.stub(fs, 'existsSync').returns(args.cached);
-//   const fsReadFileSyncStub = sinon.stub(fs, 'readFileSync').returns(JSON.stringify(args.resource));
-//   const fsWriteFileSyncStub = sinon.stub(fs, 'writeFileSync').returns();
+  // mock http request
+  fetchMock.mock(`begin:${args.fetchUrl}`, {
+    body: args.resource,
+    status: 200,
+  });
 
-//   return {
-//     apiService,
-//     fsExistsSyncStub,
-//     fsReadFileSyncStub,
-//     fsWriteFileSyncStub,
-//     packageJsonStub,
-//   };
-// }
+  // mock file system
+  const fsExistsSyncStub = sinon.stub(fs, 'existsSync').returns(args.cached);
+  const fsReadFileSyncStub = sinon.stub(fs, 'readFileSync').returns(JSON.stringify(args.resource));
+  const fsWriteFileSyncStub = sinon.stub(fs, 'writeFileSync').returns();
 
-// test.afterEach(() => {
-//   sinon.restore();
-//   fetchMock.restore();
-// });
+  return {
+    apiService,
+    fsExistsSyncStub,
+    fsReadFileSyncStub,
+    fsWriteFileSyncStub,
+  };
+}
 
-// test.serial('getComponentPackageJson should call the remote resource', async (t) => {
-//   // arrange
-//   const expectedPackageJson: packageJson.AbbreviatedMetadata = {
-//     version: '0.1.0',
-//   };
-//   const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub, packageJsonStub } = setupApiService({
-//     component: 'vf-box',
-//     resource: expectedPackageJson,
-//     options: {
-//       forceRun: false,
-//     },
-//     cached: false,
-//   });
+test.afterEach(() => {
+  sinon.restore();
+  fetchMock.restore();
+});
 
-//   // act
-//   const packageJson = await apiService.getComponentPackageJson('vf-box');
+test.serial('getVfCoreLatestReleaseVersion should return the correct vf-core version', async (t) => {
+  // arrange
+  const { apiService } = setupApiService({
+    fetchUrl: 'https://api.github.com/repos/visual-framework/vf-core/tags',
+    resource: [
+      {
+        name: 'v1.0.3',
+      },
+      {
+        name: 'v2.4.3',
+      },
+      {
+        name: 'v2.3.1',
+      },
+    ],
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+    },
+    cached: false,
+  });
 
-//   // assert
-//   t.is(fsExistsSyncStub.callCount, 1);
-//   t.is(fsReadFileSyncStub.callCount, 0);
-//   t.is(fsWriteFileSyncStub.callCount, 1);
-//   t.is(packageJsonStub.callCount, 1);
-//   t.deepEqual(packageJson, expectedPackageJson);
-// });
+  // act
+  const version = await apiService.getVfCoreLatestReleaseVersion();
 
-// test.serial('getComponentPackageJson should use the cache if available', async (t) => {
-//   // arrange
-//   const expectedPackageJson: PackageJson = {
-//     version: '0.1.0',
-//   };
-//   const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub, packageJsonStub } = setupApiService({
-//     component: 'vf-box',
-//     resource: expectedPackageJson,
-//     options: {
-//       forceRun: false,
-//     },
-//     cached: true,
-//   });
+  // assert
+  t.is(version, 'v2.4.3');
+  t.true(fetchMock.called());
+});
 
-//   // act
-//   const packageJson = await apiService.getComponentPackageJson('vf-box');
+test.serial('getComponentPackageJson should call the remote resource', async (t) => {
+  // arrange
+  const expectedPackageJson: PackageJson = {
+    version: '0.1.0',
+  };
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+    fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
+    resource: expectedPackageJson,
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+    },
+    cached: false,
+  });
 
-//   // assert
-//   t.is(fsExistsSyncStub.callCount, 1);
-//   t.is(fsReadFileSyncStub.callCount, 1);
-//   t.is(fsWriteFileSyncStub.callCount, 0);
-//   t.is(packageJsonStub.callCount, 0);
-//   t.deepEqual(packageJson, expectedPackageJson);
-// });
+  // act
+  const packageJson = await apiService.getComponentPackageJson('vf-box');
+
+  // assert
+  t.is(fsExistsSyncStub.callCount, 1);
+  t.is(fsReadFileSyncStub.callCount, 0);
+  t.is(fsWriteFileSyncStub.callCount, 1);
+  t.true(fetchMock.called());
+  t.deepEqual(packageJson, expectedPackageJson);
+});
+
+test.serial('getComponentPackageJson should use the cache if available', async (t) => {
+  // arrange
+  const expectedPackageJson: PackageJson = {
+    version: '0.1.0',
+  };
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+    fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
+    resource: expectedPackageJson,
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+    },
+    cached: true,
+  });
+
+  // act
+  const packageJson = await apiService.getComponentPackageJson('vf-box');
+
+  // assert
+  t.is(fsExistsSyncStub.callCount, 1);
+  t.is(fsReadFileSyncStub.callCount, 1);
+  t.is(fsWriteFileSyncStub.callCount, 0);
+  t.false(fetchMock.called());
+  t.deepEqual(packageJson, expectedPackageJson);
+});

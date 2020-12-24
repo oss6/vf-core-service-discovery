@@ -18,3 +18,18 @@ export class NoVfDependenciesFoundError extends AppError {
     this.name = 'NoVfDependenciesFoundError';
   }
 }
+
+export class GitHubAuthenticationError extends AppError {
+  constructor(message = '') {
+    super(message || 'An error has occurred while authenticating to GitHub.');
+    this.name = 'GitHubAuthenticationError';
+  }
+}
+
+export class MissingConfigurationError extends AppError {
+  constructor(keys: string[]) {
+    super(
+      `Configuration keys ${keys.join(', ')} have not been defined. Run \`vf-core-service-discovery --reset-config\`.`,
+    );
+  }
+}

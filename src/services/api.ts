@@ -10,6 +10,7 @@ import { getCachedComponentsDirectory, getSeconds, sleep } from '../helpers';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
+import { AppError, GitHubAuthenticationError, MissingConfigurationError } from '../errors';
 
 export default class ApiService {
   static instance: ApiService;
@@ -41,8 +42,9 @@ export default class ApiService {
     });
 
     if (!response.ok) {
-      // TODO: use app error
-      throw new Error('Authentication error.');
+      throw new GitHubAuthenticationError(
+        'User verification code request has failed. Check if the client_id parameter is set correctly.',
+      );
     }
 
     const { user_code, verification_uri, interval, device_code, expires_in } = await response.json();
@@ -98,25 +100,29 @@ export default class ApiService {
   }
 
   async getVfCoreLatestReleaseVersion(): Promise<string> {
-    // TODO: handle error and add typing
     const accessToken = this.configurationService.config.gitHubAccessToken;
+
     const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/tags', {
       headers: {
         Authorization: `token ${accessToken}`,
       },
     });
-    const tags: any[] = await response.json();
-    tags.sort(semver.compare);
 
-    return tags[0].name;
+    if (!response.ok) {
+      throw new AppError('Could not retrieve vf-core latest release version.');
+    }
+
+    const tags: string[] = (await response.json()).map((t: { name: string }) => t.name);
+    tags.sort((a, b) => semver.compare(b, a));
+
+    return tags[0];
   }
 
   async getComponentPackageJson(name: string): Promise<PackageJson> {
     const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
     if (!vfCoreLatestReleaseVersion) {
-      // TODO: define error
-      throw new Error('');
+      throw new MissingConfigurationError(['vfCoreVersion']);
     }
 
     const options = this.optionsService.getOptions();
@@ -144,8 +150,7 @@ export default class ApiService {
     const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
     if (!vfCoreLatestReleaseVersion) {
-      // TODO: define error
-      throw new Error('');
+      throw new MissingConfigurationError(['vfCoreVersion']);
     }
 
     // YAML configuration
@@ -200,16 +205,14 @@ export default class ApiService {
       return require(cachedContentFileName);
     }
 
-    // TODO: change Error type
-    throw new Error();
+    throw new AppError(`Could not find a configuration file for ${name}`);
   }
 
   async getComponentChangelog(name: string): Promise<string> {
     const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
     if (!vfCoreLatestReleaseVersion) {
-      // TODO: define error
-      throw new Error('');
+      throw new MissingConfigurationError(['vfCoreVersion']);
     }
 
     const options = this.optionsService.getOptions();

@@ -1,8 +1,11 @@
-import winston from 'winston';
+import chalk from 'chalk';
+import { Logger, createLogger, format, transports } from 'winston';
+
+const { printf } = format;
 
 export default class LoggerService {
   static instance: LoggerService;
-  private logger: winston.Logger;
+  private logger: Logger;
 
   static getInstance(): LoggerService {
     if (LoggerService.instance) {
@@ -14,18 +17,20 @@ export default class LoggerService {
   }
 
   registerLogger(level: string, silent?: boolean): void {
-    this.logger = winston.createLogger({
+    this.logger = createLogger({
       silent,
       level,
-      format: winston.format.simple(),
+      format: format.simple(),
       transports: [
-        new winston.transports.File({ filename: 'vf-core-service-discovery.log', level }),
-        new winston.transports.Console(),
+        new transports.File({ filename: 'vf-core-service-discovery.log', level }),
+        new transports.Console({
+          format: printf(({ level, message }) => `${level === 'error' ? chalk.red(message) : message}`),
+        }),
       ],
     });
   }
 
-  getLogger(): winston.Logger {
+  getLogger(): Logger {
     return this.logger;
   }
 }

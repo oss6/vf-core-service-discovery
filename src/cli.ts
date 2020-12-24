@@ -29,6 +29,8 @@ async function run() {
         default: false,
         alias: 'g',
       },
+      // TODO: add reset config
+      // TODO: add log-file
     }).argv;
 
     const loggingLevel = argv.verbose ? 'debug' : 'info';

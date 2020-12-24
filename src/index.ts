@@ -18,8 +18,6 @@ export default async function runServiceDiscovery(options: Options): Promise<Dis
   await configurationService.setup();
 
   if (options.forceRun || configurationService.shouldInvalidate()) {
-    logger.debug('Deleting cached components');
-
     await configurationService.deleteCachedComponents();
     configurationService.update('lastInvalidation', new Date());
   }

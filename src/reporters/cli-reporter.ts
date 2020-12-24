@@ -9,6 +9,8 @@ export function printMainHeading(): void {
 }
 
 export function report(discoveryItems: DiscoveryItem[]): void {
+  console.log('\n\n');
+
   for (const discoveryItem of discoveryItems) {
     const isOldVersion = discoveryItem.version !== discoveryItem.packageJson.version;
 

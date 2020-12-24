@@ -15,6 +15,10 @@ export default class ConfigurationService {
   private loggerService = LoggerService.getInstance();
   private configuration: AppConfig;
   private logger = this.loggerService.getLogger();
+  private defaultAppConfig: AppConfig = {
+    cacheExpiry: '8h',
+    lastInvalidation: null,
+  };
 
   static getInstance(): ConfigurationService {
     if (ConfigurationService.instance) {
@@ -34,10 +38,6 @@ export default class ConfigurationService {
     const appDirectory = getAppDirectory();
     const cachedComponentsDirectory = getCachedComponentsDirectory();
     const appConfigFileName = getAppConfigFileName();
-    const defaultAppConfig: AppConfig = {
-      cacheExpiry: '2d',
-      lastInvalidation: null,
-    };
 
     if (options.forceRun) {
       this.logger.debug(`Deleting app directory ${appDirectory}`);
@@ -52,7 +52,7 @@ export default class ConfigurationService {
     if (!fs.existsSync(appConfigFileName)) {
       this.logger.debug(`Creating app configuration file ${appConfigFileName}`);
 
-      this.configuration = defaultAppConfig;
+      this.configuration = { ...this.defaultAppConfig };
       fs.writeFileSync(appConfigFileName, this.serialize());
     } else {
       this.logger.debug('Using stored configuration');
@@ -79,16 +79,21 @@ export default class ConfigurationService {
   }
 
   async deleteCachedComponents(): Promise<void> {
-    await rimrafP(getCachedComponentsDirectory());
+    const cachedComponentsDirectory = getCachedComponentsDirectory();
+
+    this.logger.debug(`Deleting cache ${cachedComponentsDirectory}`);
+    await rimrafP(cachedComponentsDirectory);
   }
 
-  update<T>(key: keyof AppConfig, value: T): void {
+  update<T>(key: keyof AppConfig, value: T, persist = true): void {
     this.configuration = {
       ...this.configuration,
       [key]: value,
     };
 
-    fs.writeFileSync(getAppConfigFileName(), this.serialize());
+    if (persist) {
+      fs.writeFileSync(getAppConfigFileName(), this.serialize());
+    }
   }
 
   private serialize(): string {
