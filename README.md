@@ -1,4 +1,4 @@
-# vf-core-service-discovery
+# <img src="media/logo.png" title="vf-core-service-discovery" alt="vf-core-service-discovery logo" width="350">
 
 ![Build](https://github.com/oss6/vf-core-service-discovery/workflows/Build/badge.svg)
 
