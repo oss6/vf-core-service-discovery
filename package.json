@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "vf-core-service-discovery": "dist/cli.js"
+    "vf-core-service-discovery": "dist/cli/index.js"
   },
   "scripts": {
     "start": "yarn clean:dist && tsc --project ./ --watch",

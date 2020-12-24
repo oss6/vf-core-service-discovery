@@ -16,7 +16,7 @@ export default class LoggerService {
     return LoggerService.instance;
   }
 
-  registerLogger(level: string, logFile: string, silent?: boolean): void {
+  registerLogger(level: string, logFile: string, silent?: boolean): Logger {
     this.logger = createLogger({
       silent,
       level,
@@ -28,6 +28,8 @@ export default class LoggerService {
         }),
       ],
     });
+
+    return this.logger;
   }
 
   getLogger(): Logger {

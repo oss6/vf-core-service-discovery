@@ -6,19 +6,22 @@ import { getAppConfigFileName, getAppDirectory, getCachedComponentsDirectory, pa
 import { AppConfig } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';
+import { FileNotFoundError } from '../errors';
 
 const rimrafP = promisify(rimraf);
 
 export default class ConfigurationService {
+  static defaultAppConfig: AppConfig = {
+    gitHubAccessToken: undefined,
+    vfCoreVersion: undefined,
+    cacheExpiry: '8h',
+    lastInvalidation: null,
+  };
   static instance: ConfigurationService;
   private optionsService = OptionsService.getInstance();
   private loggerService = LoggerService.getInstance();
   private configuration: AppConfig;
   private logger = this.loggerService.getLogger();
-  private defaultAppConfig: AppConfig = {
-    cacheExpiry: '8h',
-    lastInvalidation: null,
-  };
 
   static getInstance(): ConfigurationService {
     if (ConfigurationService.instance) {
@@ -31,6 +34,28 @@ export default class ConfigurationService {
 
   get config(): AppConfig {
     return { ...this.configuration };
+  }
+
+  load(): void {
+    const appConfigFileName = getAppConfigFileName();
+
+    if (!fs.existsSync(appConfigFileName)) {
+      throw new FileNotFoundError(appConfigFileName);
+    }
+
+    const appConfigContents = fs.readFileSync(appConfigFileName, 'utf-8');
+    this.deserialize(appConfigContents);
+  }
+
+  reset(): void {
+    const appConfigFileName = getAppConfigFileName();
+
+    if (!fs.existsSync(appConfigFileName)) {
+      throw new FileNotFoundError(appConfigFileName);
+    }
+
+    this.configuration = { ...ConfigurationService.defaultAppConfig };
+    fs.writeFileSync(appConfigFileName, this.serialize());
   }
 
   async setup(): Promise<void> {
@@ -52,7 +77,7 @@ export default class ConfigurationService {
     if (!fs.existsSync(appConfigFileName)) {
       this.logger.debug(`Creating app configuration file ${appConfigFileName}`);
 
-      this.configuration = { ...this.defaultAppConfig };
+      this.configuration = { ...ConfigurationService.defaultAppConfig };
       fs.writeFileSync(appConfigFileName, this.serialize());
     } else {
       this.logger.debug('Using stored configuration');
