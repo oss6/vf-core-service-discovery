@@ -88,7 +88,6 @@ test.serial('getVfCoreLatestReleaseVersion should return the correct vf-core ver
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: false,
   });
@@ -112,7 +111,6 @@ test.serial('getComponentPackageJson should call the remote resource', async (t)
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: false,
   });
@@ -139,7 +137,6 @@ test.serial('getComponentPackageJson should use the cache if available', async (
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: true,
   });
@@ -168,7 +165,6 @@ test.serial('getComponentConfig should get the resource from remote', async (t) 
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: false,
   });
@@ -197,7 +193,6 @@ test.serial('getComponentConfig should use the cache if available', async (t) =>
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: true,
   });
@@ -222,7 +217,6 @@ test.serial('getComponentChangelog should get the resource from remote', async (
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: false,
   });
@@ -247,7 +241,6 @@ test.serial('getComponentChangelog should use the cache if available', async (t)
     options: {
       forceRun: false,
       forceGitHubAuth: false,
-      logFile: '',
     },
     cached: true,
   });
