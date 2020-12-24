@@ -16,13 +16,13 @@ export default class LoggerService {
     return LoggerService.instance;
   }
 
-  registerLogger(level: string, silent?: boolean): void {
+  registerLogger(level: string, logFile: string, silent?: boolean): void {
     this.logger = createLogger({
       silent,
       level,
       format: format.simple(),
       transports: [
-        new transports.File({ filename: 'vf-core-service-discovery.log', level }),
+        new transports.File({ filename: logFile, level }),
         new transports.Console({
           format: printf(({ level, message }) => `${level === 'error' ? chalk.red(message) : message}`),
         }),

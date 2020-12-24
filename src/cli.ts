@@ -29,20 +29,25 @@ async function run() {
         default: false,
         alias: 'g',
       },
+      'log-file': {
+        description: 'Specifies the log file location',
+        type: 'string',
+        default: 'vf-core-service-discovery.log',
+        alias: 'l',
+      },
       // TODO: add reset config
-      // TODO: add log-file
     }).argv;
-
-    const loggingLevel = argv.verbose ? 'debug' : 'info';
-
-    loggerService.registerLogger(loggingLevel);
-
-    printMainHeading();
 
     const options: Options = {
       forceRun: argv.force,
       forceGitHubAuth: argv['force-github-auth'],
+      logFile: argv['log-file'],
     };
+    const loggingLevel = argv.verbose ? 'debug' : 'info';
+
+    loggerService.registerLogger(loggingLevel, options.logFile);
+
+    printMainHeading();
 
     const discoveryOutput = await runServiceDiscovery(options);
 
