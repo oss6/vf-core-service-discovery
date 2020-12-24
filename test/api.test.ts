@@ -5,7 +5,7 @@ import fetchMock from 'fetch-mock';
 import fs from 'fs';
 import ApiService from '../src/services/api';
 import OptionsService from '../src/services/options';
-import { Options, PackageJson } from '../src/types';
+import { ComponentConfig, Options, PackageJson } from '../src/types';
 import LoggerService from '../src/services/logger';
 import ConfigurationService from '../src/services/configuration';
 
@@ -26,7 +26,7 @@ interface TestObject {
 function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
   // set logger
   const loggerService = LoggerService.getInstance();
-  loggerService.registerLogger('debug', true);
+  loggerService.registerLogger('debug', 'test.log', true);
 
   // set configuration
   const configurationService = ConfigurationService.getInstance();
@@ -52,7 +52,9 @@ function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
 
   // mock file system
   const fsExistsSyncStub = sinon.stub(fs, 'existsSync').returns(args.cached);
-  const fsReadFileSyncStub = sinon.stub(fs, 'readFileSync').returns(JSON.stringify(args.resource));
+  const fsReadFileSyncStub = sinon
+    .stub(fs, 'readFileSync')
+    .returns(typeof args.resource === 'string' ? args.resource : JSON.stringify(args.resource));
   const fsWriteFileSyncStub = sinon.stub(fs, 'writeFileSync').returns();
 
   return {
@@ -86,6 +88,7 @@ test.serial('getVfCoreLatestReleaseVersion should return the correct vf-core ver
     options: {
       forceRun: false,
       forceGitHubAuth: false,
+      logFile: '',
     },
     cached: false,
   });
@@ -109,6 +112,7 @@ test.serial('getComponentPackageJson should call the remote resource', async (t)
     options: {
       forceRun: false,
       forceGitHubAuth: false,
+      logFile: '',
     },
     cached: false,
   });
@@ -135,6 +139,7 @@ test.serial('getComponentPackageJson should use the cache if available', async (
     options: {
       forceRun: false,
       forceGitHubAuth: false,
+      logFile: '',
     },
     cached: true,
   });
@@ -148,4 +153,112 @@ test.serial('getComponentPackageJson should use the cache if available', async (
   t.is(fsWriteFileSyncStub.callCount, 0);
   t.false(fetchMock.called());
   t.deepEqual(packageJson, expectedPackageJson);
+});
+
+test.serial('getComponentConfig should get the resource from remote', async (t) => {
+  // arrange
+  const expectedComponentConfig: ComponentConfig = {
+    label: 'vf-box',
+    status: 'live',
+    title: 'Box',
+  };
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+    fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
+    resource: expectedComponentConfig,
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+      logFile: '',
+    },
+    cached: false,
+  });
+
+  // act
+  const componentConfig = await apiService.getComponentConfig('vf-box');
+
+  // assert
+  t.is(fsExistsSyncStub.callCount, 1);
+  t.is(fsReadFileSyncStub.callCount, 0);
+  t.is(fsWriteFileSyncStub.callCount, 1);
+  t.true(fetchMock.called());
+  t.deepEqual(componentConfig, expectedComponentConfig);
+});
+
+test.serial('getComponentConfig should use the cache if available', async (t) => {
+  // arrange
+  const expectedComponentConfig: ComponentConfig = {
+    label: 'vf-box',
+    status: 'live',
+    title: 'Box',
+  };
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+    fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
+    resource: expectedComponentConfig,
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+      logFile: '',
+    },
+    cached: true,
+  });
+
+  // act
+  const componentConfig = await apiService.getComponentConfig('vf-box');
+
+  // assert
+  t.is(fsExistsSyncStub.callCount, 1);
+  t.is(fsReadFileSyncStub.callCount, 1);
+  t.is(fsWriteFileSyncStub.callCount, 0);
+  t.false(fetchMock.called());
+  t.deepEqual(componentConfig, expectedComponentConfig);
+});
+
+test.serial('getComponentChangelog should get the resource from remote', async (t) => {
+  // arrange
+  const expectedChangelog = 'test';
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+    fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
+    resource: expectedChangelog,
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+      logFile: '',
+    },
+    cached: false,
+  });
+
+  // act
+  const componentChangelog = await apiService.getComponentChangelog('vf-box');
+
+  // assert
+  t.is(fsExistsSyncStub.callCount, 1);
+  t.is(fsReadFileSyncStub.callCount, 0);
+  t.is(fsWriteFileSyncStub.callCount, 1);
+  t.true(fetchMock.called());
+  t.deepEqual(componentChangelog, expectedChangelog);
+});
+
+test.serial('getComponentChangelog should use the cache if available', async (t) => {
+  // arrange
+  const expectedChangelog = 'test';
+  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+    fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
+    resource: expectedChangelog,
+    options: {
+      forceRun: false,
+      forceGitHubAuth: false,
+      logFile: '',
+    },
+    cached: true,
+  });
+
+  // act
+  const componentChangelog = await apiService.getComponentChangelog('vf-box');
+
+  // assert
+  t.is(fsExistsSyncStub.callCount, 1);
+  t.is(fsReadFileSyncStub.callCount, 1);
+  t.is(fsWriteFileSyncStub.callCount, 0);
+  t.false(fetchMock.called());
+  t.deepEqual(componentChangelog, expectedChangelog);
 });
