@@ -87,7 +87,7 @@ export default class ConfigurationService {
 
   update<T>(key: keyof AppConfig, value: T, persist = true): void {
     this.configuration = {
-      ...this.configuration,
+      ...(this.configuration || {}),
       [key]: value,
     };
 
