@@ -35,12 +35,12 @@ export default class ConfigurationService {
     const cachedComponentsDirectory = getCachedComponentsDirectory();
     const appConfigFileName = getAppConfigFileName();
     const defaultAppConfig: AppConfig = {
-      vfCoreVersion: '',
       cacheExpiry: '2d',
       lastInvalidation: null,
     };
 
     if (options.forceRun) {
+      this.logger.debug(`Deleting app directory ${appDirectory}`);
       await rimrafP(appDirectory);
     }
 
@@ -55,6 +55,8 @@ export default class ConfigurationService {
       this.configuration = defaultAppConfig;
       fs.writeFileSync(appConfigFileName, this.serialize());
     } else {
+      this.logger.debug('Using stored configuration');
+
       const appConfigContents = fs.readFileSync(appConfigFileName, 'utf-8');
       this.deserialize(appConfigContents);
     }
@@ -84,15 +86,6 @@ export default class ConfigurationService {
     this.configuration = {
       ...this.configuration,
       [key]: value,
-    };
-
-    fs.writeFileSync(getAppConfigFileName(), this.serialize());
-  }
-
-  updateLastInvalidation(lastInvalidation: Date): void {
-    this.configuration = {
-      ...this.configuration,
-      lastInvalidation,
     };
 
     fs.writeFileSync(getAppConfigFileName(), this.serialize());

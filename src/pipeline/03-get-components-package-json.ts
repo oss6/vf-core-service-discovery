@@ -1,10 +1,9 @@
-import packageJson from 'package-json';
 import { zipMap } from '../helpers';
 import ApiService from '../services/api';
 import LoggerService from '../services/logger';
-import { DiscoveryItem } from '../types';
+import { DiscoveryItem, PackageJson } from '../types';
 
-async function getComponentPackageJson(discoveryItem: DiscoveryItem): Promise<packageJson.AbbreviatedMetadata> {
+async function getComponentPackageJson(discoveryItem: DiscoveryItem): Promise<PackageJson> {
   const apiService = ApiService.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
 

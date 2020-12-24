@@ -23,6 +23,12 @@ async function run() {
         default: false,
         alias: 'f',
       },
+      'force-github-auth': {
+        description: 'Force GitHub authentication',
+        type: 'boolean',
+        default: false,
+        alias: 'g',
+      },
     }).argv;
 
     const loggingLevel = argv.verbose ? 'debug' : 'info';
@@ -33,11 +39,8 @@ async function run() {
 
     const options: Options = {
       forceRun: argv.force,
+      forceGitHubAuth: argv['force-github-auth'],
     };
-
-    // const app = App.getInstance(options);
-
-    // const discoveryOutput = await app.runServiceDiscovery();
 
     const discoveryOutput = await runServiceDiscovery(options);
 

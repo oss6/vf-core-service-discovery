@@ -1,13 +1,15 @@
 import packageJson from 'package-json';
 
 export interface AppConfig {
-  vfCoreVersion: string;
+  gitHubAccessToken?: string;
+  vfCoreVersion?: string;
   cacheExpiry: string;
   lastInvalidation: Date | null;
 }
 
 export interface Options {
   forceRun: boolean;
+  forceGitHubAuth: boolean;
 }
 
 export interface PackageJson {

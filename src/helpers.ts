@@ -93,3 +93,12 @@ export function zipMap(mapper: (...args: any) => any, ...arrays: any[][]): any[]
 
   return result;
 }
+
+export function getSeconds(): number {
+  const date = new Date();
+  return Math.round(date.getTime() / 1000);
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

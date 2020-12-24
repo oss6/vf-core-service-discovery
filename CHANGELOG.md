@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Force run option (cache invalidation).
+- Use GitHub API to retrieve vf-core latest release version.
 - `--no-logs` and `--log-file` options.
 
 ## 0.1.0-alpha.0
