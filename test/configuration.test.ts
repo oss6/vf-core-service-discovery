@@ -1,4 +1,4 @@
-import test, { ExecutionContext } from 'ava';
+import anyTest, { ExecutionContext, TestInterface } from 'ava';
 import proxyquire from 'proxyquire';
 import sinon from 'sinon';
 import fs from 'fs';
@@ -8,6 +8,11 @@ import OptionsService from '../src/services/options';
 import { AppConfig, Options } from '../src/types';
 import { getAppConfigFileName, getAppDirectory, getCachedComponentsDirectory } from '../src/helpers';
 import { shouldInvalidateFixture } from './fixture/configuration.fixture';
+import { FileNotFoundError } from '../src/errors';
+
+interface Context {
+  sinonSandbox: sinon.SinonSandbox;
+}
 
 interface SystemUnderTestArguments {
   options: Options;
@@ -24,7 +29,10 @@ interface TestObject {
   fsMkdirSyncStub: sinon.SinonStub;
 }
 
-function setupConfigurationService(args: SystemUnderTestArguments): TestObject {
+const test = anyTest as TestInterface<Context>;
+// const sinonSandbox = sinon.createSandbox();
+
+function setupConfigurationService(t: ExecutionContext<Context>, args: SystemUnderTestArguments): TestObject {
   // set logger
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
@@ -34,7 +42,7 @@ function setupConfigurationService(args: SystemUnderTestArguments): TestObject {
   optionsService.setOptions(args.options);
 
   // set configuration service
-  const rimrafStub = sinon.stub();
+  const rimrafStub = t.context.sinonSandbox.stub();
   const ConfigurationServiceType = proxyquire('../src/services/configuration', {
     rimraf: rimrafStub,
   }).default;
@@ -42,19 +50,19 @@ function setupConfigurationService(args: SystemUnderTestArguments): TestObject {
   const configurationService: ConfigurationService = ConfigurationServiceType.getInstance();
 
   // set file system
-  const fsExistsSyncStub = sinon.stub(fs, 'existsSync');
+  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync');
 
   fsExistsSyncStub.withArgs(getAppDirectory()).returns(args.appDirectoryExists);
   fsExistsSyncStub.withArgs(getAppConfigFileName()).returns(args.appConfigFileNameExists);
   fsExistsSyncStub.withArgs(getCachedComponentsDirectory()).returns(args.cachedComponentsDirectoryExists);
 
-  const fsReadFileSyncStub = sinon
+  const fsReadFileSyncStub = t.context.sinonSandbox
     .stub(fs, 'readFileSync')
     .returns(
       '{"cacheExpiry":"8h","lastInvalidation":"2020-12-24T15:45:08Z","gitHubAccessToken":"test","vfCoreVersion":"v2.4.3"}',
     );
-  const fsWriteFileSyncStub = sinon.stub(fs, 'writeFileSync').returns();
-  const fsMkdirSyncStub = sinon.stub(fs, 'mkdirSync');
+  const fsWriteFileSyncStub = t.context.sinonSandbox.stub(fs, 'writeFileSync').returns();
+  const fsMkdirSyncStub = t.context.sinonSandbox.stub(fs, 'mkdirSync');
 
   return {
     configurationService,
@@ -65,8 +73,87 @@ function setupConfigurationService(args: SystemUnderTestArguments): TestObject {
   };
 }
 
-test.afterEach(() => {
+test.serial.before((t) => {
+  t.context.sinonSandbox = sinon.createSandbox();
+});
+
+test.serial.afterEach((t) => {
+  t.context.sinonSandbox.restore();
   sinon.restore();
+});
+
+test.serial('load should throw FileNotFoundError if the app configuration is not present', (t) => {
+  // arrange
+  const appConfigFileName = getAppConfigFileName();
+  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(appConfigFileName).returns(false);
+  const fsReadFileSyncStub = t.context.sinonSandbox.stub(fs, 'readFileSync');
+  const configurationService = ConfigurationService.getInstance();
+
+  // act
+  const error = t.throws(
+    () => {
+      configurationService.load();
+    },
+    { instanceOf: FileNotFoundError },
+  );
+
+  // assert
+  t.true(fsExistsSyncStub.calledOnce);
+  t.true(fsReadFileSyncStub.notCalled);
+  t.true(error.message.includes('has not been found'));
+});
+
+test.serial('load should successfully load the configuration if present', (t) => {
+  // arrange
+  const appConfigFileName = getAppConfigFileName();
+  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(appConfigFileName).returns(true);
+  const fsReadFileSyncStub = t.context.sinonSandbox
+    .stub(fs, 'readFileSync')
+    .returns('{"vfCoreVersion": "v3.0.1", "lastInvalidation": null, "cacheExpiry": "8h"}');
+  const configurationService = ConfigurationService.getInstance();
+
+  // act
+  configurationService.load();
+
+  // assert
+  t.true(fsExistsSyncStub.calledOnce);
+  t.true(fsReadFileSyncStub.calledOnce);
+  t.deepEqual(configurationService.config, { vfCoreVersion: 'v3.0.1', lastInvalidation: null, cacheExpiry: '8h' });
+});
+
+test.serial('reset should throw FileNotFoundError if the app configuration is not present', (t) => {
+  // arrange
+  const appConfigFileName = getAppConfigFileName();
+  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(appConfigFileName).returns(false);
+  const configurationService = ConfigurationService.getInstance();
+
+  // act
+  const error = t.throws(
+    () => {
+      configurationService.reset();
+    },
+    { instanceOf: FileNotFoundError },
+  );
+
+  // assert
+  t.true(fsExistsSyncStub.calledOnce);
+  t.true(error.message.includes('has not been found'));
+});
+
+test.serial('reset should successfully reset the configuration if present', (t) => {
+  // arrange
+  const appConfigFileName = getAppConfigFileName();
+  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(appConfigFileName).returns(true);
+  const fsWriteFileSyncStub = t.context.sinonSandbox.stub(fs, 'writeFileSync');
+  const configurationService = ConfigurationService.getInstance();
+
+  // act
+  configurationService.reset();
+
+  // assert
+  t.true(fsExistsSyncStub.calledOnce);
+  t.true(fsWriteFileSyncStub.calledOnce);
+  t.deepEqual(configurationService.config, ConfigurationService.defaultAppConfig);
 });
 
 test.serial('setup should initialise the configuration if the directory is not existent', async (t) => {
@@ -77,7 +164,7 @@ test.serial('setup should initialise the configuration if the directory is not e
     fsMkdirSyncStub,
     fsReadFileSyncStub,
     fsWriteFileSyncStub,
-  } = setupConfigurationService({
+  } = setupConfigurationService(t, {
     options: {
       forceGitHubAuth: false,
       forceRun: false,
@@ -112,7 +199,7 @@ test.serial('setup should use the existing configuration', async (t) => {
     fsMkdirSyncStub,
     fsReadFileSyncStub,
     fsWriteFileSyncStub,
-  } = setupConfigurationService({
+  } = setupConfigurationService(t, {
     options: {
       forceGitHubAuth: false,
       forceRun: false,
