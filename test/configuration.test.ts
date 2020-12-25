@@ -30,7 +30,6 @@ interface TestObject {
 }
 
 const test = anyTest as TestInterface<Context>;
-// const sinonSandbox = sinon.createSandbox();
 
 function setupConfigurationService(t: ExecutionContext<Context>, args: SystemUnderTestArguments): TestObject {
   // set logger
