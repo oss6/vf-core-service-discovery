@@ -1,6 +1,6 @@
 {
   "name": "vf-core-service-discovery",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "A tool to analyse the usage of vf-core in your project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,8 @@
     "start": "yarn clean:dist && tsc --project ./ --watch",
     "build": "yarn clean:dist && tsc --project ./",
     "clean:dist": "rimraf dist",
-    "test": "nyc ava",
+    "test": "nyc --reporter=lcov ava",
+    "coverage": "codecov",
     "lint": "eslint . --ext .ts",
     "prepublish": "yarn build"
   },
@@ -35,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
     "ava": "^3.13.0",
+    "codecov": "^3.8.1",
     "eslint": "^7.15.0",
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-prettier": "^3.3.0",
