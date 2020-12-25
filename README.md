@@ -42,7 +42,7 @@ $ vf-core-service-discovery run
 
 An output example:
 
-<img src="./media/example-output.png" width="300" />
+<img src="./media/vf-core-service-discovery-demo.gif" width="550" />
 
 ## Features
 
