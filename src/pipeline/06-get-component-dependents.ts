@@ -8,7 +8,7 @@ import { DiscoveryItem, DiscoveryItemStep05 } from '../types';
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
 export default function extendWithComponentsDependents(ds: DiscoveryItemStep05[]): Promise<DiscoveryItem[]> {
   return new Promise((resolve, reject) => {
-    const discoveryItems = [...ds];
+    const discoveryItems: DiscoveryItem[] = ds.map((d) => ({ ...d, dependents: [] }));
     const context = getContext();
 
     // TODO: consider other patterns (e.g. templates in .ts files in Angular)
@@ -29,7 +29,7 @@ export default function extendWithComponentsDependents(ds: DiscoveryItemStep05[]
         }
       }
 
-      resolve(discoveryItems as DiscoveryItem[]);
+      resolve(discoveryItems);
     });
   });
 }
