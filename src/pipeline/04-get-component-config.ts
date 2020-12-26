@@ -1,16 +1,18 @@
 import { zipMap } from '../helpers';
-import { ComponentConfig, DiscoveryItem } from '../types';
+import { ComponentConfig, DiscoveryItemStep03, DiscoveryItemStep04 } from '../types';
 import ApiService from '../services/api';
 import LoggerService from '../services/logger';
 
-async function getComponentConfig(discoveryItem: DiscoveryItem): Promise<ComponentConfig> {
+async function getComponentConfig(discoveryItem: DiscoveryItemStep03): Promise<ComponentConfig> {
   const apiService = ApiService.getInstance();
   const name = discoveryItem.nameWithoutPrefix;
 
   return await apiService.getComponentConfig(name);
 }
 
-export default async function extendWithComponentConfig(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
+export default async function extendWithComponentConfig(
+  discoveryItems: DiscoveryItemStep03[],
+): Promise<DiscoveryItemStep04[]> {
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.getLogger();
 
@@ -18,12 +20,12 @@ export default async function extendWithComponentConfig(discoveryItems: Discover
 
   const configs = await Promise.all(discoveryItems.map(getComponentConfig));
 
-  const processedDiscoveryItems: DiscoveryItem[] = zipMap(
+  const processedDiscoveryItems: DiscoveryItemStep04[] = zipMap(
     (discoveryItem, config) =>
       ({
         ...discoveryItem,
         config,
-      } as DiscoveryItem),
+      } as DiscoveryItemStep04),
     discoveryItems,
     configs,
   );

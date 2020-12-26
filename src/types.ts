@@ -1,5 +1,3 @@
-import packageJson from 'package-json';
-
 export interface AppConfig {
   gitHubAccessToken?: string;
   vfCoreVersion?: string;
@@ -33,11 +31,16 @@ export interface DiscoveryItem {
   name: string;
   nameWithoutPrefix: string;
   version: string;
-  packageJson: packageJson.AbbreviatedMetadata;
+  packageJson: PackageJson;
   config: ComponentConfig;
   changelog: ChangelogItem[];
   dependents: string[];
 }
+
+export type DiscoveryItemStep02 = Pick<DiscoveryItem, 'name' | 'nameWithoutPrefix' | 'version'>;
+export type DiscoveryItemStep03 = Pick<DiscoveryItem, 'name' | 'nameWithoutPrefix' | 'version' | 'packageJson'>;
+export type DiscoveryItemStep04 = Omit<DiscoveryItem, 'changelog' | 'dependents'>;
+export type DiscoveryItemStep05 = Omit<DiscoveryItem, 'changelog'>;
 
 export interface ProcessingContext {
   rootDirectory: string;

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { parse as parseYarnLockFile } from '@yarnpkg/lockfile';
 import getContext from '../context';
-import { DiscoveryItem, LockObject } from '../types';
+import { DiscoveryItemStep02, LockObject } from '../types';
 import { FileNotFoundError } from '../errors';
 import LoggerService from '../services/logger';
 
@@ -32,8 +32,8 @@ export function parseLockFile(rootDirectory: string): LockObject {
   throw new FileNotFoundError(`${npmLockFileName} and ${yarnLockFileName}`);
 }
 
-export default function getComponentsExactVersion(components: string[]): Promise<DiscoveryItem[]> {
-  return new Promise<DiscoveryItem[]>((resolve) => {
+export default function getComponentsExactVersion(components: string[]): Promise<DiscoveryItemStep02[]> {
+  return new Promise<DiscoveryItemStep02[]>((resolve) => {
     const loggerService = LoggerService.getInstance();
     const logger = loggerService.getLogger();
     const context = getContext();
@@ -55,7 +55,7 @@ export default function getComponentsExactVersion(components: string[]): Promise
           name: component,
           nameWithoutPrefix: component.replace(`${context.vfPackagePrefix}/`, ''),
           version,
-        } as DiscoveryItem),
+        } as DiscoveryItemStep02),
     );
 
     resolve(discoveryItems);

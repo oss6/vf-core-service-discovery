@@ -1,8 +1,8 @@
 import { zipMap } from '../helpers';
 import ApiService from '../services/api';
-import { ChangelogItem, DiscoveryItem } from '../types';
+import { ChangelogItem, DiscoveryItemStep04, DiscoveryItemStep05 } from '../types';
 
-async function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): Promise<ChangelogItem[]> {
+async function getComponentCumulativeChangelog(discoveryItem: DiscoveryItemStep04): Promise<ChangelogItem[]> {
   if (discoveryItem.version === discoveryItem.packageJson.version) {
     return [];
   }
@@ -44,15 +44,17 @@ async function getComponentCumulativeChangelog(discoveryItem: DiscoveryItem): Pr
   return changelog;
 }
 
-export default async function extendWithCumulativeChangelog(discoveryItems: DiscoveryItem[]): Promise<DiscoveryItem[]> {
+export default async function extendWithCumulativeChangelog(
+  discoveryItems: DiscoveryItemStep04[],
+): Promise<DiscoveryItemStep05[]> {
   const changelogs = await Promise.all(discoveryItems.map(getComponentCumulativeChangelog));
 
-  const processedDiscoveryItems: DiscoveryItem[] = zipMap(
+  const processedDiscoveryItems: DiscoveryItemStep05[] = zipMap(
     (discoveryItem, changelog) =>
       ({
         ...discoveryItem,
         changelog,
-      } as DiscoveryItem),
+      } as DiscoveryItemStep05),
     discoveryItems,
     changelogs,
   );

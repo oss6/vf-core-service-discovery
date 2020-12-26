@@ -3,10 +3,10 @@ import { glob } from 'glob';
 import path from 'path';
 import getContext from '../context';
 import { AppError } from '../errors';
-import { DiscoveryItem } from '../types';
+import { DiscoveryItem, DiscoveryItemStep05 } from '../types';
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
-export default function extendWithComponentsDependents(ds: DiscoveryItem[]): Promise<DiscoveryItem[]> {
+export default function extendWithComponentsDependents(ds: DiscoveryItemStep05[]): Promise<DiscoveryItem[]> {
   return new Promise((resolve, reject) => {
     const discoveryItems = [...ds];
     const context = getContext();
@@ -29,7 +29,7 @@ export default function extendWithComponentsDependents(ds: DiscoveryItem[]): Pro
         }
       }
 
-      resolve(discoveryItems);
+      resolve(discoveryItems as DiscoveryItem[]);
     });
   });
 }
