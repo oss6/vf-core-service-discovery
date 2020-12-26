@@ -52,9 +52,10 @@ An output example:
 
 ## What's next
 
-- Find dependents in different types of projects (for a start Angular and React).
-- Better user experience and interface.
-- API documentation.
+1. Find dependents in different types of projects (for a start Angular and React).
+2. API documentation.
+3. Parallelise processing.
+4. Better user experience and interface.
 
 ## Contributing
 
