@@ -40,7 +40,7 @@ export interface DiscoveryItem {
 export type DiscoveryItemStep02 = Pick<DiscoveryItem, 'name' | 'nameWithoutPrefix' | 'version'>;
 export type DiscoveryItemStep03 = Pick<DiscoveryItem, 'name' | 'nameWithoutPrefix' | 'version' | 'packageJson'>;
 export type DiscoveryItemStep04 = Omit<DiscoveryItem, 'changelog' | 'dependents'>;
-export type DiscoveryItemStep05 = Omit<DiscoveryItem, 'changelog'>;
+export type DiscoveryItemStep05 = Omit<DiscoveryItem, 'dependents'>;
 
 export interface ProcessingContext {
   rootDirectory: string;

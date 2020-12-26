@@ -1,3 +1,4 @@
+import semver from 'semver';
 import { zipMap } from '../helpers';
 import ApiService from '../services/api';
 import { ChangelogItem, DiscoveryItemStep04, DiscoveryItemStep05 } from '../types';
@@ -28,10 +29,6 @@ async function getComponentCumulativeChangelog(discoveryItem: DiscoveryItemStep0
         changelog.push(changelogItem);
       }
 
-      if (version === discoveryItem.version) {
-        break;
-      }
-
       changelogItem = {
         version,
         changes: [],
@@ -41,7 +38,9 @@ async function getComponentCumulativeChangelog(discoveryItem: DiscoveryItemStep0
     }
   }
 
-  return changelog;
+  return changelog
+    .sort((a, b) => semver.compare(b.version, a.version))
+    .filter((changelogItem) => semver.gt(changelogItem.version, discoveryItem.version));
 }
 
 export default async function extendWithCumulativeChangelog(
