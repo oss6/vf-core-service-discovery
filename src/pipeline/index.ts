@@ -1,5 +1,13 @@
 import getContext from '../context';
 import { DiscoveryItem, PipelineStep } from '../types';
+import getComponents from './steps/00-get-components';
+import getExactVersion from './steps/01-get-exact-version';
+import getPackageJson from './steps/02-get-package-json';
+import getConfig from './steps/03-get-config';
+import getChangelog from './steps/04-get-changelog';
+import getDependents from './steps/05-get-dependents';
+
+export { getComponents, getExactVersion, getPackageJson, getConfig, getChangelog, getDependents };
 
 export class Pipeline {
   static instance: Pipeline;

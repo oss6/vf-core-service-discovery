@@ -3,13 +3,9 @@ import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
 import ApiService from './services/api';
-import { Pipeline } from './pipeline';
-import getComponents from './pipeline/steps/00-get-components';
-import getExactVersion from './pipeline/steps/01-get-exact-version';
-import getPackageJson from './pipeline/steps/02-get-package-json';
-import getConfig from './pipeline/steps/03-get-config';
-import getChangelog from './pipeline/steps/04-get-changelog';
-import getDependents from './pipeline/steps/05-get-dependents';
+import * as pipeline from './pipeline';
+
+export { pipeline };
 
 export default async function runServiceDiscovery(options: Options): Promise<Partial<DiscoveryItem>[]> {
   const optionsService = OptionsService.getInstance();
@@ -38,13 +34,13 @@ export default async function runServiceDiscovery(options: Options): Promise<Par
 
   logger.debug('Running service discovery');
 
-  const components = await getComponents();
+  const components = await pipeline.getComponents();
 
-  return Pipeline.getInstance()
-    .addStep(getExactVersion)
-    .addStep(getPackageJson)
-    .addStep(getConfig)
-    .addStep(getChangelog)
-    .addStep(getDependents)
+  return pipeline.Pipeline.getInstance()
+    .addStep(pipeline.getExactVersion)
+    .addStep(pipeline.getPackageJson)
+    .addStep(pipeline.getConfig)
+    .addStep(pipeline.getChangelog)
+    .addStep(pipeline.getDependents)
     .run(components);
 }
