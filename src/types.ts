@@ -37,10 +37,7 @@ export interface DiscoveryItem {
   dependents: string[];
 }
 
-export type DiscoveryItemStep02 = Pick<DiscoveryItem, 'name' | 'nameWithoutPrefix' | 'version'>;
-export type DiscoveryItemStep03 = Pick<DiscoveryItem, 'name' | 'nameWithoutPrefix' | 'version' | 'packageJson'>;
-export type DiscoveryItemStep04 = Omit<DiscoveryItem, 'changelog' | 'dependents'>;
-export type DiscoveryItemStep05 = Omit<DiscoveryItem, 'dependents'>;
+export type PipelineStep = (source: Partial<DiscoveryItem>) => Promise<Partial<DiscoveryItem>>;
 
 export interface ProcessingContext {
   rootDirectory: string;
@@ -59,8 +56,6 @@ export interface LockItem {
 export interface LockObject {
   [pkg: string]: LockItem;
 }
-
-export type PipelineItem = (a: any) => Promise<any>;
 
 export interface ParsedRelativeTime {
   years?: number;

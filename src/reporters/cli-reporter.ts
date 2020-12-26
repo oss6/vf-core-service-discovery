@@ -23,7 +23,7 @@ export function report(discoveryItems: DiscoveryItem[]): void {
     );
     console.log(`  Status\t\t${discoveryItem.config.status}`);
 
-    if (discoveryItem.changelog.length > 0) {
+    if (discoveryItem.changelog?.length > 0) {
       console.log(`  Changelog`);
       console.log(
         `${discoveryItem.changelog

@@ -1,7 +1,7 @@
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears } from 'date-fns';
 import path from 'path';
 import os from 'os';
-import { ParsedRelativeTime, PipelineItem } from './types';
+import { ParsedRelativeTime } from './types';
 
 export function getAppDirectory(...segments: string[]): string {
   return path.join(os.homedir(), '.vf-core-service-discovery', ...segments);
@@ -71,27 +71,6 @@ export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {
   }
 
   return date;
-}
-
-export function asyncFlow(...fns: PipelineItem[]): Promise<any> {
-  return fns.reduce(async (previousPromise, fn) => fn(await previousPromise), Promise.resolve());
-}
-
-export function zipMap(mapper: (...args: any) => any, ...arrays: any[][]): any[] {
-  const shortestLength = Math.min(...arrays.map((a) => a.length));
-  const result = [];
-
-  for (let index = 0; index < shortestLength; index++) {
-    const mapperArgs = [];
-
-    for (const arr of arrays) {
-      mapperArgs.push(arr[index]);
-    }
-
-    result.push(mapper(...mapperArgs));
-  }
-
-  return result;
 }
 
 export function getSeconds(): number {

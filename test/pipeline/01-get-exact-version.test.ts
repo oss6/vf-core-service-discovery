@@ -2,7 +2,7 @@ import anyTest, { TestInterface } from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
 import path from 'path';
-import getComponentsExactVersion, { parseLockFile } from '../../src/pipeline/02-get-component-exact-versions';
+import getExactVersion, { parseLockFile } from '../../src/pipeline/steps/01-get-exact-version';
 import { DiscoveryItem, LockObject } from '../../src/types';
 import LoggerService from '../../src/services/logger';
 import { FileNotFoundError } from '../../src/errors';
@@ -135,7 +135,7 @@ test.serial('parseLockFile should throw an error if no lock file has been found'
   t.is(error.name, 'FileNotFoundError');
 });
 
-test.serial('getComponentsExactVersion should return the exact versions of the input components', async (t) => {
+test.serial('getExactVersion should return the exact version of the input component', async (t) => {
   // arrange
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
@@ -175,30 +175,17 @@ test.serial('getComponentsExactVersion should return the exact versions of the i
   t.context.sinonSandbox.stub(process, 'cwd').returns(rootDirectory);
 
   // act
-  const discoveryItems: Partial<DiscoveryItem>[] = await getComponentsExactVersion([
-    '@visual-framework/vf-box',
-    '@visual-framework/vf-footer',
-    '@visual-framework/vf-grid',
-  ]);
+  const discoveryItem: Partial<DiscoveryItem> = await getExactVersion({
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+  });
 
   // assert
-  t.deepEqual(discoveryItems, [
-    {
-      name: '@visual-framework/vf-box',
-      nameWithoutPrefix: 'vf-box',
-      version: '2.2.0',
-    },
-    {
-      name: '@visual-framework/vf-footer',
-      nameWithoutPrefix: 'vf-footer',
-      version: '1.1.0',
-    },
-    {
-      name: '@visual-framework/vf-grid',
-      nameWithoutPrefix: 'vf-grid',
-      version: '1.0.3',
-    },
-  ]);
+  t.deepEqual(discoveryItem, {
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+    version: '2.2.0',
+  });
   t.true(fsExistsSyncStub.calledOnce);
   t.true(fsReadFileSyncStub.calledOnce);
 });

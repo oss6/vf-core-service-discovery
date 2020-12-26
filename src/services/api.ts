@@ -129,13 +129,13 @@ export default class ApiService {
     const cachedContentFileName = getCachedComponentsDirectory(name, 'package.json');
 
     if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`Retrieving ${name} package.json from cache`);
+      this.logger.debug(`${name} - retrieving package.json from cache`);
 
       const cachedContent = JSON.parse(fs.readFileSync(cachedContentFileName, 'utf-8'));
       return cachedContent;
     }
 
-    this.logger.debug(`Retrieving ${name} package.json from remote`);
+    this.logger.debug(`${name} - retrieving package.json from remote`);
 
     const response = await fetch(this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, 'package.json'));
     const packageJson: PackageJson = await response.json();
@@ -159,13 +159,13 @@ export default class ApiService {
     let cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.yml`);
 
     if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`Retrieving ${name} configuration from cache`);
+      this.logger.debug(`${name} - retrieving configuration from cache`);
 
       const cachedContent = fs.readFileSync(cachedContentFileName, 'utf-8');
       return yaml.parse(cachedContent);
     }
 
-    this.logger.debug(`Attempting to retrieve ${name} YAML configuration`);
+    this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
 
     const yamlConfigResponse = await fetch(
       this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, `${name}.config.yml`),
@@ -182,12 +182,12 @@ export default class ApiService {
 
     // JS configuration
     // ----------------
-    this.logger.debug(`Attempting to retrieve ${name} JS configuration`);
+    this.logger.debug(`${name} - attempting to retrieve JS configuration`);
 
     cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.js`);
 
     if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`Retrieving ${name} configuration from cache`);
+      this.logger.debug(`${name} - retrieving configuration from cache`);
 
       return require(cachedContentFileName);
     }
@@ -219,13 +219,13 @@ export default class ApiService {
     const cachedContentFileName = getCachedComponentsDirectory(name, 'CHANGELOG.md');
 
     if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`Retrieving ${name} changelog from cache`);
+      this.logger.debug(`${name} - retrieving changelog from cache`);
 
       const cachedContent = fs.readFileSync(cachedContentFileName, 'utf-8');
       return cachedContent;
     }
 
-    this.logger.debug(`Retrieving ${name} package.json from remote`);
+    this.logger.debug(`${name} - retrieving changelog from remote`);
 
     const response = await fetch(this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md'));
     const content = await response.text();

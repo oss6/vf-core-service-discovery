@@ -1,7 +1,7 @@
 import runServiceDiscovery from '..';
 import { printMainHeading, report } from '../reporters/cli-reporter';
 import LoggerService from '../services/logger';
-import { Options } from '../types';
+import { DiscoveryItem, Options } from '../types';
 
 interface Arguments {
   verbose: boolean;
@@ -43,7 +43,7 @@ export async function handler(argv: Arguments): Promise<void> {
 
     const discoveryOutput = await runServiceDiscovery(options);
 
-    report(discoveryOutput);
+    report(discoveryOutput as DiscoveryItem[]);
   } catch (error) {
     logger.error(error.message);
   }

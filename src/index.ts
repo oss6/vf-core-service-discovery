@@ -1,13 +1,17 @@
-import fs from 'fs';
-import path from 'path';
-import { asyncFlow } from './helpers';
 import { DiscoveryItem, Options } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
 import ApiService from './services/api';
+import { Pipeline } from './pipeline';
+import getComponents from './pipeline/steps/00-get-components';
+import getExactVersion from './pipeline/steps/01-get-exact-version';
+import getPackageJson from './pipeline/steps/02-get-package-json';
+import getConfig from './pipeline/steps/03-get-config';
+import getChangelog from './pipeline/steps/04-get-changelog';
+import getDependents from './pipeline/steps/05-get-dependents';
 
-export default async function runServiceDiscovery(options: Options): Promise<DiscoveryItem[]> {
+export default async function runServiceDiscovery(options: Options): Promise<Partial<DiscoveryItem>[]> {
   const optionsService = OptionsService.getInstance();
   const configurationService = ConfigurationService.getInstance();
   const loggerService = LoggerService.getInstance();
@@ -34,14 +38,13 @@ export default async function runServiceDiscovery(options: Options): Promise<Dis
 
   logger.debug('Running service discovery');
 
-  const pipeline = await Promise.all(
-    fs
-      .readdirSync(path.join(__dirname, 'pipeline'))
-      .filter((fileName) => fileName.endsWith('.js'))
-      .map(async (fileName) => (await import(`./pipeline/${fileName}`)).default),
-  );
+  const components = await getComponents();
 
-  const discoveryItems = (await asyncFlow(...pipeline)) as DiscoveryItem[];
-
-  return discoveryItems;
+  return Pipeline.getInstance()
+    .addStep(getExactVersion)
+    .addStep(getPackageJson)
+    .addStep(getConfig)
+    .addStep(getChangelog)
+    .addStep(getDependents)
+    .run(components);
 }

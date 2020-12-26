@@ -23,7 +23,7 @@ test.serial.afterEach((t) => {
   sinon.restore();
 });
 
-test.serial('getComponentsFromPackageJson should throw an error if package.json is not found', async (t) => {
+test.serial('getComponents should throw an error if package.json is not found', async (t) => {
   // arrange
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
@@ -34,20 +34,20 @@ test.serial('getComponentsFromPackageJson should throw an error if package.json 
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const getContextStub = t.context.sinonSandbox.stub().returns(context);
-  const getComponentsFromPackageJson = proxyquire('../../src/pipeline/01-get-components', {
-    '../context': getContextStub,
+  const getComponents = proxyquire('../../src/pipeline/steps/00-get-components', {
+    '../../context': getContextStub,
   }).default;
   const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(false);
 
   // act
-  const error = await t.throwsAsync(getComponentsFromPackageJson);
+  const error = await t.throwsAsync(getComponents);
 
   // assert
   t.true(error.message.includes('has not been found'));
   t.true(fsExistsSyncStub.calledOnce);
 });
 
-test.serial('getComponentsFromPackageJson should throw an error if no vf-core dependencies are found', async (t) => {
+test.serial('getComponents should throw an error if no vf-core dependencies are found', async (t) => {
   // arrange
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
@@ -58,8 +58,8 @@ test.serial('getComponentsFromPackageJson should throw an error if no vf-core de
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const getContextStub = t.context.sinonSandbox.stub().returns(context);
-  const getComponentsFromPackageJson = proxyquire('../../src/pipeline/01-get-components', {
-    '../context': getContextStub,
+  const getComponents = proxyquire('../../src/pipeline/steps/00-get-components', {
+    '../../context': getContextStub,
   }).default;
   const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(true);
   const fsReadFileSyncStub = t.context.sinonSandbox
@@ -68,7 +68,7 @@ test.serial('getComponentsFromPackageJson should throw an error if no vf-core de
     .returns('{}');
 
   // act
-  const error = await t.throwsAsync(getComponentsFromPackageJson);
+  const error = await t.throwsAsync(getComponents);
 
   // assert
   t.is(error.name, 'NoVfDependenciesFoundError');
@@ -76,7 +76,7 @@ test.serial('getComponentsFromPackageJson should throw an error if no vf-core de
   t.true(fsReadFileSyncStub.calledOnce);
 });
 
-test.serial('getComponentsFromPackageJson should return the installed components', async (t) => {
+test.serial('getComponents should return the installed components', async (t) => {
   // arrange
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
@@ -88,8 +88,8 @@ test.serial('getComponentsFromPackageJson should return the installed components
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
 
   const getContextStub = t.context.sinonSandbox.stub().returns(context);
-  const getComponentsFromPackageJson = proxyquire('../../src/pipeline/01-get-components', {
-    '../context': getContextStub,
+  const getComponents = proxyquire('../../src/pipeline/steps/00-get-components', {
+    '../../context': getContextStub,
   }).default;
 
   const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(true);
@@ -111,7 +111,7 @@ test.serial('getComponentsFromPackageJson should return the installed components
     .returns(JSON.stringify(packageJson));
 
   // act
-  const components: string[] = await getComponentsFromPackageJson();
+  const components: string[] = await getComponents();
 
   // assert
   t.true(fsExistsSyncStub.calledOnce);
