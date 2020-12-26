@@ -167,6 +167,9 @@ test.serial('setup should initialise the configuration if the directory is not e
     options: {
       forceGitHubAuth: false,
       forceRun: false,
+      logFile: '',
+      loggingEnabled: false,
+      verbose: false,
     },
     appDirectoryExists: false,
     appConfigFileNameExists: false,
@@ -202,6 +205,9 @@ test.serial('setup should use the existing configuration', async (t) => {
     options: {
       forceGitHubAuth: false,
       forceRun: false,
+      logFile: '',
+      loggingEnabled: false,
+      verbose: false,
     },
     appDirectoryExists: true,
     appConfigFileNameExists: true,

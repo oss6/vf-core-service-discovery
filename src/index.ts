@@ -8,39 +8,49 @@ import * as pipeline from './pipeline';
 export { pipeline };
 
 export default async function runServiceDiscovery(options: Options): Promise<Partial<DiscoveryItem>[]> {
-  const optionsService = OptionsService.getInstance();
-  const configurationService = ConfigurationService.getInstance();
   const loggerService = LoggerService.getInstance();
-  const apiService = ApiService.getInstance();
-  const logger = loggerService.getLogger();
+  const logger = loggerService.registerLogger(
+    options.verbose ? 'debug' : 'info',
+    options.logFile,
+    !options.loggingEnabled,
+  );
 
-  optionsService.setOptions(options);
-  await configurationService.setup();
+  try {
+    const optionsService = OptionsService.getInstance();
+    const configurationService = ConfigurationService.getInstance();
+    const apiService = ApiService.getInstance();
 
-  if (options.forceRun || configurationService.shouldInvalidate()) {
-    await configurationService.deleteCachedComponents();
-    configurationService.update('lastInvalidation', new Date());
+    optionsService.setOptions(options);
+    await configurationService.setup();
+
+    if (options.forceRun || configurationService.shouldInvalidate()) {
+      await configurationService.deleteCachedComponents();
+      configurationService.update('lastInvalidation', new Date());
+    }
+
+    if (!configurationService.config.gitHubAccessToken || options.forceGitHubAuth) {
+      const gitHubAccessToken = await apiService.authenticateGitHub();
+      configurationService.update('gitHubAccessToken', gitHubAccessToken);
+    }
+
+    if (!configurationService.config.vfCoreVersion || options.forceRun) {
+      const vfCoreVersion = await apiService.getVfCoreLatestReleaseVersion();
+      configurationService.update('vfCoreVersion', vfCoreVersion);
+    }
+
+    logger.debug('Running service discovery');
+
+    const components = await pipeline.getComponents();
+
+    return pipeline.Pipeline.getInstance()
+      .addStep(pipeline.getExactVersion)
+      .addStep(pipeline.getPackageJson)
+      .addStep(pipeline.getConfig)
+      .addStep(pipeline.getChangelog)
+      .addStep(pipeline.getDependents)
+      .run(components);
+  } catch (error) {
+    logger.error(error.message);
+    throw error;
   }
-
-  if (!configurationService.config.gitHubAccessToken || options.forceGitHubAuth) {
-    const gitHubAccessToken = await apiService.authenticateGitHub();
-    configurationService.update('gitHubAccessToken', gitHubAccessToken);
-  }
-
-  if (!configurationService.config.vfCoreVersion || options.forceRun) {
-    const vfCoreVersion = await apiService.getVfCoreLatestReleaseVersion();
-    configurationService.update('vfCoreVersion', vfCoreVersion);
-  }
-
-  logger.debug('Running service discovery');
-
-  const components = await pipeline.getComponents();
-
-  return pipeline.Pipeline.getInstance()
-    .addStep(pipeline.getExactVersion)
-    .addStep(pipeline.getPackageJson)
-    .addStep(pipeline.getConfig)
-    .addStep(pipeline.getChangelog)
-    .addStep(pipeline.getDependents)
-    .run(components);
 }

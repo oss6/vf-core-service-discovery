@@ -1,7 +1,6 @@
 import runServiceDiscovery from '..';
 import { printMainHeading, report } from '../reporters/cli-reporter';
-import LoggerService from '../services/logger';
-import { DiscoveryItem, Options } from '../types';
+import { DiscoveryItem } from '../types';
 
 interface Arguments {
   verbose: boolean;
@@ -30,21 +29,19 @@ export const builder = {
 };
 
 export async function handler(argv: Arguments): Promise<void> {
-  const loggerService = LoggerService.getInstance();
-  const logger = loggerService.registerLogger(argv.verbose ? 'debug' : 'info', argv['log-file']);
-
   try {
-    const options: Options = {
-      forceRun: argv.force,
-      forceGitHubAuth: argv['force-github-auth'],
-    };
-
     printMainHeading();
 
-    const discoveryOutput = await runServiceDiscovery(options);
+    const discoveryOutput = await runServiceDiscovery({
+      forceRun: argv.force,
+      forceGitHubAuth: argv['force-github-auth'],
+      verbose: argv.verbose,
+      logFile: argv['log-file'],
+      loggingEnabled: true,
+    });
 
     report(discoveryOutput as DiscoveryItem[]);
   } catch (error) {
-    logger.error(error.message);
+    process.exit(1);
   }
 }

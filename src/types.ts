@@ -8,6 +8,9 @@ export interface AppConfig {
 export interface Options {
   forceRun: boolean;
   forceGitHubAuth: boolean;
+  verbose: boolean;
+  loggingEnabled: boolean;
+  logFile: string;
 }
 
 export interface PackageJson {
