@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import fs from 'fs';
 import path from 'path';
 import getExactVersion, { parseLockFile } from '../../src/pipeline/steps/01-get-exact-version';
-import { DiscoveryItem, LockObject, PipelineContext } from '../../src/types';
+import { LockObject, PDiscoveryItem, PipelineContext } from '../../src/types';
 import LoggerService from '../../src/services/logger';
 import { FileNotFoundError } from '../../src/errors';
 
@@ -170,7 +170,7 @@ test.serial('getExactVersion should return the exact version of the input compon
     .stub(fs, 'readFileSync')
     .withArgs(lockFileName, 'utf-8')
     .returns(JSON.stringify(lockFile));
-  const inputDiscoveryItem: Partial<DiscoveryItem> = {
+  const inputDiscoveryItem: PDiscoveryItem = {
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
   };
@@ -183,7 +183,7 @@ test.serial('getExactVersion should return the exact version of the input compon
   t.context.sinonSandbox.stub(process, 'cwd').returns(rootDirectory);
 
   // act
-  const discoveryItem: Partial<DiscoveryItem> = await getExactVersion(inputDiscoveryItem, context);
+  const discoveryItem: PDiscoveryItem = await getExactVersion(inputDiscoveryItem, context);
 
   // assert
   t.deepEqual(discoveryItem, {

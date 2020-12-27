@@ -59,7 +59,7 @@ export default class ApiService {
     let done = false;
     let lastTimestamp = getSeconds();
     let accessTokenResponse: Response | null = null;
-    let accessTokenData: any;
+    let accessTokenData: { access_token?: string; error?: string; error_description?: string } = {};
 
     while (!done) {
       const currentTimestamp = getSeconds();
@@ -96,7 +96,7 @@ export default class ApiService {
       }
     }
 
-    return accessTokenData?.access_token;
+    return accessTokenData?.access_token as string;
   }
 
   async getVfCoreLatestReleaseVersion(): Promise<string> {

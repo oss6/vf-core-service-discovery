@@ -1,9 +1,9 @@
-import { DiscoveryItem } from '../../types';
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import { AppError } from '../../errors';
+import { PDiscoveryItem } from '../../types';
 
-export default async function getConfig(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>> {
+export default async function getConfig(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem> {
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get component config.');
   }

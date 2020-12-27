@@ -1,4 +1,4 @@
-import { DiscoveryItem, PipelineContext, PipelineStep } from '../types';
+import { PDiscoveryItem, PipelineContext, PipelineStep } from '../types';
 import getComponents from './steps/00-get-components';
 import getExactVersion from './steps/01-get-exact-version';
 import getPackageJson from './steps/02-get-package-json';
@@ -30,8 +30,8 @@ export class Pipeline {
     return this;
   }
 
-  async run(source: string[], context: PipelineContext): Promise<Partial<DiscoveryItem>[]> {
-    const discoveryItems: Partial<DiscoveryItem>[] = source.map((sourceItem) => ({
+  async run(source: string[], context: PipelineContext): Promise<PDiscoveryItem[]> {
+    const discoveryItems: PDiscoveryItem[] = source.map((sourceItem) => ({
       name: sourceItem,
       nameWithoutPrefix: sourceItem.replace('@visual-framework/', ''),
     }));

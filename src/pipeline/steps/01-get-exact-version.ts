@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { parse as parseYarnLockFile } from '@yarnpkg/lockfile';
-import { DiscoveryItem, LockObject, PipelineContext } from '../../types';
+import { LockObject, PDiscoveryItem, PipelineContext } from '../../types';
 import { AppError, FileNotFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
 
@@ -32,9 +32,9 @@ export function parseLockFile(rootDirectory: string): LockObject {
 }
 
 export default function getExactVersion(
-  discoveryItem: Partial<DiscoveryItem>,
+  discoveryItem: PDiscoveryItem,
   context: PipelineContext,
-): Promise<Partial<DiscoveryItem>> {
+): Promise<PDiscoveryItem> {
   if (!discoveryItem.name || !discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get exact version.');
   }

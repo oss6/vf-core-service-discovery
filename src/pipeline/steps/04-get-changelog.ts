@@ -2,9 +2,9 @@ import semver from 'semver';
 import { AppError } from '../../errors';
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
-import { ChangelogItem, DiscoveryItem } from '../../types';
+import { ChangelogItem, PDiscoveryItem } from '../../types';
 
-export default async function getChangelog(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>> {
+export default async function getChangelog(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem> {
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.getLogger();
   const apiService = ApiService.getInstance();

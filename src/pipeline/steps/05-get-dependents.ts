@@ -3,16 +3,16 @@ import { glob } from 'glob';
 import path from 'path';
 import { promisify } from 'util';
 import { AppError } from '../../errors';
-import { DiscoveryItem, PipelineContext } from '../../types';
+import { PDiscoveryItem, PipelineContext } from '../../types';
 
 const globP = promisify(glob);
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
 export default async function getDependents(
-  discoveryItem: Partial<DiscoveryItem>,
+  discoveryItem: PDiscoveryItem,
   context: PipelineContext,
-): Promise<Partial<DiscoveryItem>> {
-  const processedDiscoveryItem: Partial<DiscoveryItem> = { ...discoveryItem, dependents: [] };
+): Promise<PDiscoveryItem> {
+  const processedDiscoveryItem: PDiscoveryItem = { ...discoveryItem, dependents: [] };
 
   // TODO: consider other patterns (e.g. templates in .ts files in Angular)
   try {

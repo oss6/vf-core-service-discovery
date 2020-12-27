@@ -1,4 +1,4 @@
-import { DiscoveryItem, Options, PipelineContext } from './types';
+import { Options, PDiscoveryItem, PipelineContext } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
@@ -7,7 +7,7 @@ import * as pipeline from './pipeline';
 
 export { pipeline };
 
-export default async function runServiceDiscovery(options: Options): Promise<Partial<DiscoveryItem>[]> {
+export default async function runServiceDiscovery(options: Options): Promise<PDiscoveryItem[]> {
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.registerLogger(
     options.verbose ? 'debug' : 'info',

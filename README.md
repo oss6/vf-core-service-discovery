@@ -131,7 +131,7 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 # Module documentation
 
-## `runServiceDiscovery(options: Options): Promise<Partial<DiscoveryItem>[]>`
+## `runServiceDiscovery(options: Options): Promise<PDiscoveryItem[]>`
 
 ```ts
 interface Options {
@@ -168,10 +168,10 @@ Gets the `Pipeline` singleton.
 Adds a step to the pipeline.
 
 ```ts
-type PipelineStep = (source: Partial<DiscoveryItem>) => Promise<Partial<DiscoveryItem>>;
+type PipelineStep = (source: PDiscoveryItem) => Promise<PDiscoveryItem>;
 ```
 
-### `run(source: string[], context: PipelineContext): Promise<Partial<DiscoveryItem>[]>`
+### `run(source: string[], context: PipelineContext): Promise<PDiscoveryItem[]>`
 
 Runs the pipeline given a source and a context.
 
@@ -182,29 +182,152 @@ interface PipelineContext {
 }
 ```
 
-## `pipeline.getComponents(context: PipelineContext): Promise<string[]>`
+## Pipeline steps
+
+Each pipeline step extends from the previous step.
+Each component item (discovery item) goes through these steps.
+
+These are imported as follows
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+```
+
+### `getComponents(context: PipelineContext): Promise<string[]>`
 
 Gets the installed components in the current project.
 
-## `pipeline.getExactVersion(discoveryItem: Partial<DiscoveryItem>, context: PipelineContext): Promise<Partial<DiscoveryItem>>`
+Example:
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+(async () => {
+  const components = await pipeline.getComponents({
+    rootDirectory: process.cwd()',
+    vfPackagePrefix: '@visual-framework',
+  });
+
+  console.log(components);
+})();
+```
+
+### `getExactVersion(discoveryItem: PDiscoveryItem, context: PipelineContext): Promise<PDiscoveryItem>`
 
 Extends the discovery item with the exact version of the installed component from the local lock file.
 
-## `pipeline.getPackageJson(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
+Example:
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+(async () => {
+  const discoveryItem = await pipeline.getExactVersion({
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+  });
+
+  console.log(discoveryItem.version);
+})();
+```
+
+### `getPackageJson(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem>`
 
 Extends the discovery item with the latest package.json of the installed component.
 
-## `pipeline.getConfig(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
+Example:
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+(async () => {
+  const discoveryItem = await pipeline.getPackageJson({
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+    version: '1.2.3',
+  });
+
+  console.log(discoveryItem.packageJson);
+})();
+```
+
+### `getConfig(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem>`
 
 Extends the discovery item with the latest component configuration file (YAML or JS).
 
-## `pipeline.getChangelog(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
+Example:
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+(async () => {
+  const discoveryItem = await pipeline.getConfig({
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+    version: '1.2.3',
+    packageJson: {
+      version: '1.3.0',
+    }
+  });
+
+  console.log(discoveryItem.config);
+})();
+```
+
+### `getChangelog(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem>`
 
 Extends the discovery item with the changelog between the installed and the latest version.
 
-## `pipeline.getDependents(discoveryItem: Partial<DiscoveryItem>, context: PipelineContext): Promise<Partial<DiscoveryItem>>`
+Example:
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+(async () => {
+  const discoveryItem = await pipeline.getChangelog({
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+    version: '1.2.3',
+    packageJson: {
+      version: '1.3.0',
+    },
+    config: {
+      title: 'Box',
+      label: 'vf-box',
+      status: 'live',
+    }
+  });
+
+  console.log(discoveryItem.changelog);
+})();
+```
+
+### `getDependents(discoveryItem: PDiscoveryItem, context: PipelineContext): Promise<PDiscoveryItem>`
 
 Extends the discovery item with the dependents of the component.
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+(async () => {
+  const discoveryItem = await pipeline.getDependents({
+    name: '@visual-framework/vf-box',
+    nameWithoutPrefix: 'vf-box',
+    version: '1.2.3',
+    packageJson: {
+      version: '1.3.0',
+    },
+    config: {
+      title: 'Box',
+      label: 'vf-box',
+      status: 'live',
+    },
+    changelog: []
+  });
+
+  console.log(discoveryItem.dependents);
+})();
+```
 
 # What's next
 
