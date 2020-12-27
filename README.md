@@ -88,7 +88,7 @@ run();
 - Get changelog if current and latest versions are mismatched.
 - For each installed component get the dependent files (for now only `.html` files).
 
-# CLI documentation
+# CLI documentation
 
 | Synopsis             | Description               |
 |----------------------|---------------------------|
@@ -182,27 +182,27 @@ interface PipelineContext {
 }
 ```
 
-## `pipeline.getComponents(context: PipelineContext): Promise<string[]>`
+## `pipeline.getComponents(context: PipelineContext): Promise<string[]>`
 
 Gets the installed components in the current project.
 
-## `pipeline.getExactVersion(discoveryItem: Partial<DiscoveryItem>, context: PipelineContext): Promise<Partial<DiscoveryItem>>`
+## `pipeline.getExactVersion(discoveryItem: Partial<DiscoveryItem>, context: PipelineContext): Promise<Partial<DiscoveryItem>>`
 
 Extends the discovery item with the exact version of the installed component from the local lock file.
 
-## `pipeline.getPackageJson(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
+## `pipeline.getPackageJson(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
 
 Extends the discovery item with the latest package.json of the installed component.
 
-## `pipeline.getConfig(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
+## `pipeline.getConfig(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
 
 Extends the discovery item with the latest component configuration file (YAML or JS).
 
-## `pipeline.getChangelog(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
+## `pipeline.getChangelog(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>>`
 
 Extends the discovery item with the changelog between the installed and the latest version.
 
-## `pipeline.getDependents(discoveryItem: Partial<DiscoveryItem>, context: PipelineContext): Promise<Partial<DiscoveryItem>>`
+## `pipeline.getDependents(discoveryItem: Partial<DiscoveryItem>, context: PipelineContext): Promise<Partial<DiscoveryItem>>`
 
 Extends the discovery item with the dependents of the component.
 
