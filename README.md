@@ -131,7 +131,13 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 # Module documentation
 
-## `runServiceDiscovery(options: Options): Promise<PDiscoveryItem[]>`
+## Types
+
+Throughout the documentation you'll come across these types which define the inputs and outputs of the API.
+
+### `Options`
+
+The options to the service discovery runner.
 
 ```ts
 interface Options {
@@ -142,6 +148,10 @@ interface Options {
   logFile: string;
 }
 ```
+
+### `DiscoveryItem`
+
+Defines a discovery item, which is a component under analysis (e.g. `vf-box`).
 
 ```ts
 interface DiscoveryItem {
@@ -155,31 +165,126 @@ interface DiscoveryItem {
 }
 ```
 
-## `pipeline.Pipeline`
+### `PDiscoveryItem`
 
-Defines a pipeline processing discovery items.
+An alias for `Partial<DiscoveryItem>`
 
-### `Pipeline.getInstance()`
+`PipelineStep`
 
-Gets the `Pipeline` singleton.
-
-### `addStep(step: PipelineStep): Pipeline`
-
-Adds a step to the pipeline.
+A pipeline step is a function that takes a source discovery item and a processing/pipeline context and returns the processed/extended discovery item.
 
 ```ts
-type PipelineStep = (source: PDiscoveryItem) => Promise<PDiscoveryItem>;
+export type PipelineStep = (source: PDiscoveryItem, context: PipelineContext) => Promise<PDiscoveryItem>;
 ```
 
-### `run(source: string[], context: PipelineContext): Promise<PDiscoveryItem[]>`
+### `PipelineContext`
 
-Runs the pipeline given a source and a context.
+Defines a context that is global to the pipeline.
 
 ```ts
 interface PipelineContext {
   rootDirectory: string;    // Root directory to analyse
   vfPackagePrefix: string;  // '@visual-framework'
 }
+```
+
+## `runServiceDiscovery`
+
+Runs the service discovery.
+
+### Parameters
+
+- `options: Options`
+
+### Returns
+
+`Promise<PDiscoveryItem[]>`
+
+### Example
+
+```ts
+import runServiceDiscovery from 'vf-core-service-discovery';
+
+(async () => {
+  const discoveryItems = await runServiceDiscovery({
+    forceRun: false;
+    forceGitHubAuth: false;
+    verbose: true;
+    loggingEnabled: true;
+    logFile: 'vf-core-service-discovery.log';
+  });
+
+  console.log(discoveryItems);
+})();
+```
+
+## `pipeline.Pipeline`
+
+Class that defines a pipeline which processes discovery items.
+
+### `Pipeline.getInstance`
+
+Gets the `Pipeline` singleton.
+
+### `addStep`
+
+Adds a step to the pipeline.
+
+#### Parameters
+
+- `step: PipelineStep`
+
+#### Returns
+
+`Pipeline` - for chaining
+
+#### Example
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+const vfPipeline = pipeline.getInstance();
+
+vfPipeline
+  .addStep(step1)
+  .addStep(step2)
+  .addStep(step3);
+```
+
+### `run`
+
+Runs the pipeline given a source and a context.
+
+#### Parameters
+
+- `source: string[]`
+- `context: PipelineContext`
+
+#### Returns
+
+`Promise<PDiscoveryItem[]>`
+
+#### Example
+
+```ts
+import { pipeline } from 'vf-core-service-discovery';
+
+const vfPipeline = pipeline.getInstance();
+const source = ['vf-box', 'vf-footer'];
+const context: PipelineContext = {
+  rootDirectory: '/test',
+  vfPackagePrefix: '@visual-framework',
+};
+
+(async () => {
+  const discoveryItems = vfPipeline
+    .addStep(step1)
+    .addStep(step2)
+    .addStep(step3)
+    .run(source, context);
+
+  console.log(discoveryItems);
+})();
 ```
 
 ## Pipeline steps
@@ -193,11 +298,19 @@ These are imported as follows
 import { pipeline } from 'vf-core-service-discovery';
 ```
 
-### `getComponents(context: PipelineContext): Promise<string[]>`
+### `getComponents`
 
 Gets the installed components in the current project.
 
-Example:
+#### Parameters
+
+- `context: PipelineContext`
+
+#### Returns
+
+- `Promise<string[]>`
+
+#### Example
 
 ```ts
 import { pipeline } from 'vf-core-service-discovery';
@@ -212,11 +325,20 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getExactVersion(discoveryItem: PDiscoveryItem, context: PipelineContext): Promise<PDiscoveryItem>`
+### `getExactVersion`
 
 Extends the discovery item with the exact version of the installed component from the local lock file.
 
-Example:
+#### Parameters
+
+- `discoveryItem: PDiscoveryItem`
+- `context: PipelineContext`
+
+#### Returns
+
+`Promise<PDiscoveryItem>`
+
+#### Example
 
 ```ts
 import { pipeline } from 'vf-core-service-discovery';
@@ -231,11 +353,19 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getPackageJson(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem>`
+### `getPackageJson`
 
 Extends the discovery item with the latest package.json of the installed component.
 
-Example:
+#### Parameters
+
+- `discoveryItem: PDiscoveryItem`
+
+#### Returns
+
+`Promise<PDiscoveryItem>`
+
+#### Example
 
 ```ts
 import { pipeline } from 'vf-core-service-discovery';
@@ -251,11 +381,19 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getConfig(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem>`
+### `getConfig`
 
 Extends the discovery item with the latest component configuration file (YAML or JS).
 
-Example:
+#### Parameters
+
+- `discoveryItem: PDiscoveryItem`
+
+#### Returns
+
+`Promise<PDiscoveryItem>`
+
+#### Example
 
 ```ts
 import { pipeline } from 'vf-core-service-discovery';
@@ -274,11 +412,19 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getChangelog(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem>`
+### `getChangelog`
 
 Extends the discovery item with the changelog between the installed and the latest version.
 
-Example:
+#### Parameters
+
+- `discoveryItem: PDiscoveryItem`
+
+#### Returns
+
+`Promise<PDiscoveryItem>`
+
+#### Example
 
 ```ts
 import { pipeline } from 'vf-core-service-discovery';
@@ -302,9 +448,20 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getDependents(discoveryItem: PDiscoveryItem, context: PipelineContext): Promise<PDiscoveryItem>`
+### `getDependents`
 
 Extends the discovery item with the dependents of the component.
+
+#### Parameters
+
+- `discoveryItem: PDiscoveryItem`
+- `context: PipelineContext`
+
+#### Returns
+
+`Promise<PDiscoveryItem>`
+
+#### Example
 
 ```ts
 import { pipeline } from 'vf-core-service-discovery';
