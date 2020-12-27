@@ -165,7 +165,7 @@ interface DiscoveryItem {
 }
 ```
 
-### `PDiscoveryItem`
+### `PDiscoveryItem`
 
 An alias for `Partial<DiscoveryItem>`
 
@@ -177,7 +177,7 @@ A pipeline step is a function that takes a source discovery item and a processin
 export type PipelineStep = (source: PDiscoveryItem, context: PipelineContext) => Promise<PDiscoveryItem>;
 ```
 
-### `PipelineContext`
+### `PipelineContext`
 
 Defines a context that is global to the pipeline.
 
