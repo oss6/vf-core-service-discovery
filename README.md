@@ -15,11 +15,33 @@
 - [Table of contents](#table-of-contents)
 - [Install](#install)
 - [Basic usage](#basic-usage)
-  * [CLI](#cli)
-  * [Module](#module)
+  * [CLI](#basic-usage-cli)
+  * [Module](#basic-usage-module)
 - [Features](#features)
 - [CLI documentation](#cli-documentation)
+  * [`run`](#cli-documentation-run)
+    - [Options](#cli-documentation-run-options)
+  * [`config`](#cli-documentation-config)
+    - [Configuration items](#cli-documentation-config-configuration-items)
+    - [Options](#cli-documentation-config-options)
 - [Module documentation](#module-documentation)
+  * [Types](#module-documentation-types)
+    - [`Options`](#module-documentation-types-options)
+    - [`DiscoveryItem`](#module-documentation-types-discovery-item)
+    - [`PDiscoveryItem`](#module-documentation-types-pdiscovery-item)
+    - [`PipelineContext`](#module-documentation-types-pipeline-context)
+  * [`runServiceDiscovery`](#module-documentation-run-service-discovery)
+  * [`pipeline.Pipeline`](#module-documentation-pipeline)
+    - [`getInstance`](#module-documentation-pipeline-get-instance)
+    - [`addStep`](#module-documentation-pipeline-add-step)
+    - [`run`](#module-documentation-pipeline-run)
+  * [Pipeline steps](#module-documentation-pipeline-steps)
+    - [`getComponents`](#module-documentation-pipeline-steps-get-components)
+    - [`getExactVersion`](#module-documentation-pipeline-steps-get-exact-version)
+    - [`getPackageJson`](#module-documentation-pipeline-steps-get-package-json)
+    - [`getConfig`](#module-documentation-pipeline-steps-get-config)
+    - [`getChangelog`](#module-documentation-pipeline-steps-get-changelog)
+    - [`getDependents`](#module-documentation-pipeline-steps-get-dependents)
 - [What's next](#whats-next)
 - [Contributing](#contributing)
 
@@ -47,7 +69,7 @@ $ yarn global add vf-core-service-discovery
 
 # Basic usage
 
-## CLI
+## <a name="basic-usage-cli"></a>CLI
 
 The main usage of `vf-core-service-discovery` is through a CLI.
 A simple run of the following command will gather the usage of `vf-core` in the project:
@@ -60,7 +82,7 @@ An output example:
 
 <img src="./media/vf-core-service-discovery-demo.gif" width="550" />
 
-## Module
+## <a name="basic-usage-module"></a>Module
 
 `vf-core-service-discovery` can also be used as a module. A use case for this is if you want to have more control on the process.
 
@@ -95,11 +117,11 @@ run();
 | `run`                  | Run the service discovery |
 | `config [key] [value]` | Manage the configuration  |
 
-## `run`
+## <a name="cli-documentation-run"></a>`run`
 
 Synopsis: `vf-core-service-discovery run [options]`
 
-### Options
+### <a name="cli-documentation-run-options"></a> Options
 
 | Option                  | Type    | Default                         | Description                 |
 |-------------------------|---------|---------------------------------|-----------------------------|
@@ -108,11 +130,11 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-f`, `--force`             | boolean | false                           | By-pass the cache           |
 | `-g`, `--force-github-auth` | boolean | false                           | Force GitHub authentication |
 
-## `config`
+## <a name="cli-documentation-config"></a>`config`
 
 Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
-### Configuration items
+### <a name="cli-documentation-config-configuration-items"></a>Configuration items
 
 | Key                 | Value  | Default | Description                              |
 |---------------------|--------|---------|------------------------------------------|
@@ -121,7 +143,7 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 | `gitHubAccessToken` | string | ''      | GitHub access token                      |
 | `vfCoreVersion`     | string | ''      | Latest vf-core release version           |
 
-### Options
+### <a name="cli-documentation-config-options"></a>Options
 
 | Option             | Type    | Default                         | Description                     |
 |--------------------|---------|---------------------------------|---------------------------------|
@@ -131,11 +153,11 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 # Module documentation
 
-## Types
+## <a name="module-documentation-types"></a>Types
 
 Throughout the documentation you'll come across these types which define the inputs and outputs of the API.
 
-### `Options`
+### <a name="module-documentation-types-options"></a>`Options`
 
 The options to the service discovery runner.
 
@@ -149,7 +171,7 @@ interface Options {
 }
 ```
 
-### `DiscoveryItem`
+### <a name="module-documentation-types-discovery-item"></a>`DiscoveryItem`
 
 Defines a discovery item, which is a component under analysis (e.g. `vf-box`).
 
@@ -165,7 +187,7 @@ interface DiscoveryItem {
 }
 ```
 
-### `PDiscoveryItem`
+### <a name="module-documentation-types-pdiscovery-item"></a>`PDiscoveryItem`
 
 An alias for `Partial<DiscoveryItem>`
 
@@ -177,7 +199,7 @@ A pipeline step is a function that takes a source discovery item and a processin
 export type PipelineStep = (source: PDiscoveryItem, context: PipelineContext) => Promise<PDiscoveryItem>;
 ```
 
-### `PipelineContext`
+### <a name="module-documentation-types-pipeline-context"></a>`PipelineContext`
 
 Defines a context that is global to the pipeline.
 
@@ -188,7 +210,7 @@ interface PipelineContext {
 }
 ```
 
-## `runServiceDiscovery`
+## <a name="module-documentation-run-service-discovery"></a>`runServiceDiscovery`
 
 Runs the service discovery.
 
@@ -218,11 +240,11 @@ import runServiceDiscovery from 'vf-core-service-discovery';
 })();
 ```
 
-## `pipeline.Pipeline`
+## <a name="module-documentation-pipeline"></a>`pipeline.Pipeline`
 
 Class that defines a pipeline which processes discovery items.
 
-### `Pipeline.getInstance`
+### <a name="module-documentation-pipeline-get-instance"></a>`Pipeline.getInstance`
 
 Static method that gets the `Pipeline` singleton.
 
@@ -230,7 +252,7 @@ Static method that gets the `Pipeline` singleton.
 
 `Pipeline`
 
-### `addStep`
+### <a name="module-documentation-pipeline-add-step"></a>`addStep`
 
 Adds a step to the pipeline.
 
@@ -255,7 +277,7 @@ vfPipeline
   .addStep(step3);
 ```
 
-### `run`
+### <a name="module-documentation-pipeline-run"></a>`run`
 
 Runs the pipeline given a source and a context.
 
@@ -291,12 +313,12 @@ const context: PipelineContext = {
 })();
 ```
 
-## Pipeline steps
+## <a name="module-documentation-pipeline-steps"></a>Pipeline steps
 
 Each pipeline step extends from the previous step.
 Each component item (discovery item) goes through these steps.
 
-### `getComponents`
+### <a name="module-documentation-pipeline-steps-get-components"></a>`getComponents`
 
 Gets the installed components in the current project.
 
@@ -323,7 +345,7 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getExactVersion`
+### <a name="module-documentation-pipeline-steps-get-exact-version"></a>`getExactVersion`
 
 Extends the discovery item with the exact version of the installed component from the local lock file.
 
@@ -351,7 +373,7 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getPackageJson`
+### <a name="module-documentation-pipeline-steps-get-package-json"></a>`getPackageJson`
 
 Extends the discovery item with the latest package.json of the installed component.
 
@@ -379,7 +401,7 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getConfig`
+### <a name="module-documentation-pipeline-steps-get-config"></a>`getConfig`
 
 Extends the discovery item with the latest component configuration file (YAML or JS).
 
@@ -410,7 +432,7 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getChangelog`
+### <a name="module-documentation-pipeline-steps-get-changelog"></a>`getChangelog`
 
 Extends the discovery item with the changelog between the installed and the latest version.
 
@@ -446,7 +468,7 @@ import { pipeline } from 'vf-core-service-discovery';
 })();
 ```
 
-### `getDependents`
+### <a name="module-documentation-pipeline-steps-get-dependents"></a>`getDependents`
 
 Extends the discovery item with the dependents of the component.
 
