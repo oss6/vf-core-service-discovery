@@ -1,4 +1,4 @@
-import { DiscoveryItem, Options } from './types';
+import { DiscoveryItem, Options, PipelineContext } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
@@ -40,7 +40,11 @@ export default async function runServiceDiscovery(options: Options): Promise<Par
 
     logger.debug('Running service discovery');
 
-    const components = await pipeline.getComponents();
+    const context: PipelineContext = {
+      rootDirectory: process.cwd(),
+      vfPackagePrefix: '@visual-framework',
+    };
+    const components = await pipeline.getComponents(context);
 
     return pipeline.Pipeline.getInstance()
       .addStep(pipeline.getExactVersion)
@@ -48,7 +52,7 @@ export default async function runServiceDiscovery(options: Options): Promise<Par
       .addStep(pipeline.getConfig)
       .addStep(pipeline.getChangelog)
       .addStep(pipeline.getDependents)
-      .run(components);
+      .run(components, context);
   } catch (error) {
     logger.error(error.message);
     throw error;

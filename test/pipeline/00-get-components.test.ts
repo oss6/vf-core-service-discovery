@@ -1,12 +1,10 @@
 import anyTest, { TestInterface } from 'ava';
-import _proxyquire from 'proxyquire';
 import sinon from 'sinon';
 import fs from 'fs';
 import path from 'path';
-import { PackageJson, ProcessingContext } from '../../src/types';
+import { PackageJson, PipelineContext } from '../../src/types';
 import LoggerService from '../../src/services/logger';
-
-const proxyquire = _proxyquire.noPreserveCache().noCallThru();
+import getComponents from '../../src/pipeline/steps/00-get-components';
 
 interface Context {
   sinonSandbox: sinon.SinonSandbox;
@@ -28,19 +26,15 @@ test.serial('getComponents should throw an error if package.json is not found', 
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
 
-  const context: ProcessingContext = {
+  const context: PipelineContext = {
     rootDirectory: '/test',
     vfPackagePrefix: '@visual-framework',
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
-  const getContextStub = t.context.sinonSandbox.stub().returns(context);
-  const getComponents = proxyquire('../../src/pipeline/steps/00-get-components', {
-    '../../context': getContextStub,
-  }).default;
   const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(false);
 
   // act
-  const error = await t.throwsAsync(getComponents);
+  const error = await t.throwsAsync(getComponents(context));
 
   // assert
   t.true(error.message.includes('has not been found'));
@@ -52,15 +46,11 @@ test.serial('getComponents should throw an error if no vf-core dependencies are 
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
 
-  const context: ProcessingContext = {
+  const context: PipelineContext = {
     rootDirectory: '/test',
     vfPackagePrefix: '@visual-framework',
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
-  const getContextStub = t.context.sinonSandbox.stub().returns(context);
-  const getComponents = proxyquire('../../src/pipeline/steps/00-get-components', {
-    '../../context': getContextStub,
-  }).default;
   const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(true);
   const fsReadFileSyncStub = t.context.sinonSandbox
     .stub(fs, 'readFileSync')
@@ -68,7 +58,7 @@ test.serial('getComponents should throw an error if no vf-core dependencies are 
     .returns('{}');
 
   // act
-  const error = await t.throwsAsync(getComponents);
+  const error = await t.throwsAsync(getComponents(context));
 
   // assert
   t.is(error.name, 'NoVfDependenciesFoundError');
@@ -81,16 +71,11 @@ test.serial('getComponents should return the installed components', async (t) =>
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
 
-  const context: ProcessingContext = {
+  const context: PipelineContext = {
     rootDirectory: '/test',
     vfPackagePrefix: '@visual-framework',
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
-
-  const getContextStub = t.context.sinonSandbox.stub().returns(context);
-  const getComponents = proxyquire('../../src/pipeline/steps/00-get-components', {
-    '../../context': getContextStub,
-  }).default;
 
   const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(true);
 
@@ -111,7 +96,7 @@ test.serial('getComponents should return the installed components', async (t) =>
     .returns(JSON.stringify(packageJson));
 
   // act
-  const components: string[] = await getComponents();
+  const components: string[] = await getComponents(context);
 
   // assert
   t.true(fsExistsSyncStub.calledOnce);

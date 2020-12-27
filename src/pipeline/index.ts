@@ -1,5 +1,4 @@
-import getContext from '../context';
-import { DiscoveryItem, PipelineStep } from '../types';
+import { DiscoveryItem, PipelineContext, PipelineStep } from '../types';
 import getComponents from './steps/00-get-components';
 import getExactVersion from './steps/01-get-exact-version';
 import getPackageJson from './steps/02-get-package-json';
@@ -31,15 +30,17 @@ export class Pipeline {
     return this;
   }
 
-  async run(source: string[]): Promise<Partial<DiscoveryItem>[]> {
-    const context = getContext();
+  async run(source: string[], context: PipelineContext): Promise<Partial<DiscoveryItem>[]> {
     const discoveryItems: Partial<DiscoveryItem>[] = source.map((sourceItem) => ({
       name: sourceItem,
-      nameWithoutPrefix: sourceItem.replace(`${context.vfPackagePrefix}/`, ''),
+      nameWithoutPrefix: sourceItem.replace('@visual-framework/', ''),
     }));
 
     const processes = discoveryItems.map((discoveryItem) =>
-      this.steps.reduce(async (previousPromise, fn) => fn(await previousPromise), Promise.resolve(discoveryItem)),
+      this.steps.reduce(
+        async (previousPromise, fn) => fn(await previousPromise, context),
+        Promise.resolve(discoveryItem),
+      ),
     );
 
     return await Promise.all(processes);

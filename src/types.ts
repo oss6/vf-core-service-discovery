@@ -40,9 +40,12 @@ export interface DiscoveryItem {
   dependents: string[];
 }
 
-export type PipelineStep = (source: Partial<DiscoveryItem>) => Promise<Partial<DiscoveryItem>>;
+export type PipelineStep = (
+  source: Partial<DiscoveryItem>,
+  context: PipelineContext,
+) => Promise<Partial<DiscoveryItem>>;
 
-export interface ProcessingContext {
+export interface PipelineContext {
   rootDirectory: string;
   vfPackagePrefix: string;
 }

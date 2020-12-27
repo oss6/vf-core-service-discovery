@@ -2,17 +2,17 @@ import fs from 'fs';
 import { glob } from 'glob';
 import path from 'path';
 import { promisify } from 'util';
-import getContext from '../../context';
 import { AppError } from '../../errors';
-import { DiscoveryItem } from '../../types';
+import { DiscoveryItem, PipelineContext } from '../../types';
 
 const globP = promisify(glob);
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
-export default async function getDependents(discoveryItem: Partial<DiscoveryItem>): Promise<Partial<DiscoveryItem>> {
-  // const discoveryItems: DiscoveryItem[] = ds.map((d) => ({ ...d, dependents: [] }));
+export default async function getDependents(
+  discoveryItem: Partial<DiscoveryItem>,
+  context: PipelineContext,
+): Promise<Partial<DiscoveryItem>> {
   const processedDiscoveryItem: Partial<DiscoveryItem> = { ...discoveryItem, dependents: [] };
-  const context = getContext();
 
   // TODO: consider other patterns (e.g. templates in .ts files in Angular)
   try {
