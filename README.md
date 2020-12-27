@@ -224,7 +224,11 @@ Class that defines a pipeline which processes discovery items.
 
 ### `Pipeline.getInstance`
 
-Gets the `Pipeline` singleton.
+Static method that gets the `Pipeline` singleton.
+
+#### Returns
+
+`Pipeline`
 
 ### `addStep`
 
@@ -291,12 +295,6 @@ const context: PipelineContext = {
 
 Each pipeline step extends from the previous step.
 Each component item (discovery item) goes through these steps.
-
-These are imported as follows
-
-```ts
-import { pipeline } from 'vf-core-service-discovery';
-```
 
 ### `getComponents`
 
