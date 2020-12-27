@@ -52,7 +52,6 @@
 
 # Install
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Install the package using `npm` or `yarn` as follows:
 
@@ -76,12 +75,10 @@ $ yarn global add vf-core-service-discovery
 
 # Basic usage
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 
 ## <a name="basic-usage-cli"></a>CLI
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 
 The main usage of `vf-core-service-discovery` is through a CLI.
@@ -97,7 +94,6 @@ An output example:
 
 ## <a name="basic-usage-module"></a>Module
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 `vf-core-service-discovery` can also be used as a module. A use case for this is if you want to have more control on the process.
 
@@ -121,7 +117,6 @@ run();
 
 # Features
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 - Get package information such as current version, latest version, and component status.
 - Get changelog if current and latest versions are mismatched.
@@ -129,7 +124,6 @@ run();
 
 # CLI documentation
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 | Synopsis             | Description               |
 |----------------------|---------------------------|
@@ -138,13 +132,9 @@ run();
 
 ## <a name="cli-documentation-run"></a>`run`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
-
 Synopsis: `vf-core-service-discovery run [options]`
 
 ### <a name="cli-documentation-run-options"></a> Options
-
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 | Option                  | Type    | Default                         | Description                 |
 |-------------------------|---------|---------------------------------|-----------------------------|
@@ -155,13 +145,9 @@ Synopsis: `vf-core-service-discovery run [options]`
 
 ## <a name="cli-documentation-config"></a>`config`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
-
 Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 ### <a name="cli-documentation-config-configuration-items"></a>Configuration items
-
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 | Key                 | Value  | Default | Description                              |
 |---------------------|--------|---------|------------------------------------------|
@@ -172,8 +158,6 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 ### <a name="cli-documentation-config-options"></a>Options
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
-
 | Option             | Type    | Default                         | Description                     |
 |--------------------|---------|---------------------------------|---------------------------------|
 | `-v`, `--verbose`  | boolean | false                           | Show debug information          |
@@ -182,17 +166,11 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 # Module documentation
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
-
 ## <a name="module-documentation-types"></a>Types
-
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Throughout the documentation you'll come across these types which define the inputs and outputs of the API.
 
 ### <a name="module-documentation-types-options"></a>`Options`
-
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 The options to the service discovery runner.
 
@@ -207,8 +185,6 @@ interface Options {
 ```
 
 ### <a name="module-documentation-types-discovery-item"></a>`DiscoveryItem`
-
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Defines a discovery item, which is a component under analysis (e.g. `vf-box`).
 
@@ -226,8 +202,6 @@ interface DiscoveryItem {
 
 ### <a name="module-documentation-types-pdiscovery-item"></a>`PDiscoveryItem`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
-
 An alias for `Partial<DiscoveryItem>`
 
 `PipelineStep`
@@ -240,8 +214,6 @@ export type PipelineStep = (source: PDiscoveryItem, context: PipelineContext) =>
 
 ### <a name="module-documentation-types-pipeline-context"></a>`PipelineContext`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
-
 Defines a context that is global to the pipeline.
 
 ```ts
@@ -253,7 +225,6 @@ interface PipelineContext {
 
 ## <a name="module-documentation-run-service-discovery"></a>`runServiceDiscovery`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Runs the service discovery.
 
@@ -285,13 +256,11 @@ import runServiceDiscovery from 'vf-core-service-discovery';
 
 ## <a name="module-documentation-pipeline"></a>`pipeline.Pipeline`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Class that defines a pipeline which processes discovery items.
 
 ### <a name="module-documentation-pipeline-get-instance"></a>`Pipeline.getInstance`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Static method that gets the `Pipeline` singleton.
 
@@ -301,7 +270,6 @@ Static method that gets the `Pipeline` singleton.
 
 ### <a name="module-documentation-pipeline-add-step"></a>`addStep`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Adds a step to the pipeline.
 
@@ -328,7 +296,6 @@ vfPipeline
 
 ### <a name="module-documentation-pipeline-run"></a>`run`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Runs the pipeline given a source and a context.
 
@@ -366,14 +333,12 @@ const context: PipelineContext = {
 
 ## <a name="module-documentation-pipeline-steps"></a>Pipeline steps
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Each pipeline step extends from the previous step.
 Each component item (discovery item) goes through these steps.
 
 ### <a name="module-documentation-pipeline-steps-get-components"></a>`getComponents`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Gets the installed components in the current project.
 
@@ -402,7 +367,6 @@ import { pipeline } from 'vf-core-service-discovery';
 
 ### <a name="module-documentation-pipeline-steps-get-exact-version"></a>`getExactVersion`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Extends the discovery item with the exact version of the installed component from the local lock file.
 
@@ -432,7 +396,6 @@ import { pipeline } from 'vf-core-service-discovery';
 
 ### <a name="module-documentation-pipeline-steps-get-package-json"></a>`getPackageJson`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Extends the discovery item with the latest package.json of the installed component.
 
@@ -462,7 +425,6 @@ import { pipeline } from 'vf-core-service-discovery';
 
 ### <a name="module-documentation-pipeline-steps-get-config"></a>`getConfig`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Extends the discovery item with the latest component configuration file (YAML or JS).
 
@@ -495,7 +457,6 @@ import { pipeline } from 'vf-core-service-discovery';
 
 ### <a name="module-documentation-pipeline-steps-get-changelog"></a>`getChangelog`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Extends the discovery item with the changelog between the installed and the latest version.
 
@@ -533,7 +494,6 @@ import { pipeline } from 'vf-core-service-discovery';
 
 ### <a name="module-documentation-pipeline-steps-get-dependents"></a>`getDependents`
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 Extends the discovery item with the dependents of the component.
 
@@ -573,7 +533,6 @@ import { pipeline } from 'vf-core-service-discovery';
 
 # What's next
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 1. Find dependents in different types of projects (for a start Angular and React).
 2. API documentation.
@@ -582,6 +541,5 @@ import { pipeline } from 'vf-core-service-discovery';
 
 # Contributing
 
-<div style="text-align: right"><i><a href="#table-of-contents">go to top</a></i></div>
 
 We welcome contributors and maintainers! To contribute please check the [contributing page](CONTRIBUTING.md) out.
