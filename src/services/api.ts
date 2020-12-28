@@ -66,8 +66,6 @@ export default class ApiService {
       const currentTimestamp = getSeconds();
 
       if (currentTimestamp - lastTimestamp >= loginData.interval + 1) {
-        // this.logger.debug('Making an access token request');
-
         accessTokenResponse = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
           body: JSON.stringify({
@@ -87,8 +85,7 @@ export default class ApiService {
           this.logger.info('Authentication completed');
           done = true;
         } else if (accessTokenData.error === 'access_denied' || accessTokenData.error === 'expired_token') {
-          this.logger.error(accessTokenData.error_description);
-          done = true;
+          throw new GitHubAuthenticationError(accessTokenData.error_description);
         } else if (accessTokenData.error === 'authorization_pending') {
           this.logger.debug(accessTokenData.error_description);
         }

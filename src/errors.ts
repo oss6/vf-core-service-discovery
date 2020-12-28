@@ -31,5 +31,6 @@ export class MissingConfigurationError extends AppError {
     super(
       `Configuration keys ${keys.join(', ')} have not been defined. Run \`vf-core-service-discovery --reset-config\`.`,
     );
+    this.name = 'MissingConfigurationError';
   }
 }
