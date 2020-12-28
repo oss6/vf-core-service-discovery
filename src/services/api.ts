@@ -1,12 +1,11 @@
 import 'isomorphic-fetch';
 import fs from 'fs';
 import semver from 'semver';
-import open from 'open';
 import mkdirp from 'mkdirp';
 import yaml from 'yaml';
 import path from 'path';
-import { ComponentConfig, PackageJson } from '../types';
-import { getCachedComponentsDirectory, getSeconds, sleep } from '../helpers';
+import { ComponentConfig, GitHubDeviceLogin, PackageJson } from '../types';
+import { getCachedComponentsDirectory, getSeconds } from '../helpers';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
@@ -28,8 +27,7 @@ export default class ApiService {
     return ApiService.instance;
   }
 
-  async authenticateGitHub(): Promise<string> {
-    // (1) get device and user code
+  async getGitHubDeviceAndUserCode(): Promise<GitHubDeviceLogin> {
     const response = await fetch('https://github.com/login/device/code', {
       method: 'POST',
       body: JSON.stringify({
@@ -48,14 +46,17 @@ export default class ApiService {
     }
 
     const { user_code, verification_uri, interval, device_code, expires_in } = await response.json();
-    const expiry = Math.floor(expires_in / 60);
 
-    // (2) get access token
-    this.logger.info(`Please enter the code ${user_code} at ${verification_uri}. This expires in ${expiry} minutes.`);
+    return {
+      userCode: user_code,
+      verificationUri: verification_uri,
+      interval,
+      deviceCode: device_code,
+      expiresIn: expires_in,
+    };
+  }
 
-    await sleep(1500);
-    await open(verification_uri);
-
+  async getGitHubAccessToken(loginData: GitHubDeviceLogin): Promise<string> {
     let done = false;
     let lastTimestamp = getSeconds();
     let accessTokenResponse: Response | null = null;
@@ -64,14 +65,14 @@ export default class ApiService {
     while (!done) {
       const currentTimestamp = getSeconds();
 
-      if (currentTimestamp - lastTimestamp >= interval + 1) {
+      if (currentTimestamp - lastTimestamp >= loginData.interval + 1) {
         // this.logger.debug('Making an access token request');
 
         accessTokenResponse = await fetch('https://github.com/login/oauth/access_token', {
           method: 'POST',
           body: JSON.stringify({
             client_id: 'd7d227d46d4ee4e5991a',
-            device_code: device_code,
+            device_code: loginData.deviceCode,
             grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
           }),
           headers: {

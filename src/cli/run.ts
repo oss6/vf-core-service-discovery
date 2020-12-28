@@ -1,6 +1,8 @@
-import runServiceDiscovery from '..';
+import open from 'open';
+import ServiceDiscovery from '..';
+import { sleep } from '../helpers';
 import { printMainHeading, report } from '../reporters/cli-reporter';
-import { DiscoveryItem } from '../types';
+import { DiscoveryItem, GitHubDeviceLogin } from '../types';
 
 interface Arguments {
   verbose: boolean;
@@ -32,7 +34,9 @@ export async function handler(argv: Arguments): Promise<void> {
   try {
     printMainHeading();
 
-    const discoveryOutput = await runServiceDiscovery({
+    const serviceDiscovery = ServiceDiscovery.getInstance();
+
+    const setupGenerator = serviceDiscovery.setup({
       forceRun: argv.force,
       forceGitHubAuth: argv['force-github-auth'],
       verbose: argv.verbose,
@@ -40,7 +44,23 @@ export async function handler(argv: Arguments): Promise<void> {
       loggingEnabled: true,
     });
 
-    report(discoveryOutput as DiscoveryItem[]);
+    let setupResult = await setupGenerator.next();
+
+    if (!setupResult.done) {
+      const { expiresIn, userCode, verificationUri } = setupResult.value as GitHubDeviceLogin;
+      const expiry = Math.floor(expiresIn / 60);
+
+      console.log(`Please enter the code ${userCode} at ${verificationUri}. This expires in ${expiry} minutes.`);
+
+      await sleep(2000);
+      await open(verificationUri);
+
+      setupResult = await setupGenerator.next();
+    }
+
+    const discoveryItems = await serviceDiscovery.run();
+
+    report(discoveryItems as DiscoveryItem[]);
   } catch (error) {
     process.exit(1);
   }

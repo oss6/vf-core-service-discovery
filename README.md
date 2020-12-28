@@ -33,7 +33,10 @@
     - [`DiscoveryItem`](#module-documentation-types-discovery-item)
     - [`PDiscoveryItem`](#module-documentation-types-pdiscovery-item)
     - [`PipelineContext`](#module-documentation-types-pipeline-context)
-  * [`runServiceDiscovery`](#module-documentation-run-service-discovery)
+    - [`GitHubDeviceLogin`](#module-documentation-types-github-device-login)
+  * [`ServiceDiscovery`](#module-documentation-service-discovery)
+    - [`setup`](#module-documentation-service-discovery-setup)
+    - [`run`](#module-documentation-service-discovery-run)
   * [`pipeline.Pipeline`](#module-documentation-pipeline)
     - [`getInstance`](#module-documentation-pipeline-get-instance)
     - [`addStep`](#module-documentation-pipeline-add-step)
@@ -223,32 +226,102 @@ interface PipelineContext {
 }
 ```
 
-## <a name="module-documentation-run-service-discovery"></a>`runServiceDiscovery`
+### <a name="module-documentation-types-github-device-login"></a>`GitHubDeviceLogin`
 
+Defines the response from `POST https://github.com/login/device/code`.
 
-Runs the service discovery.
+```ts
+export interface GitHubDeviceLogin {
+  userCode: string;
+  verificationUri: string;
+  interval: number;
+  deviceCode: string;
+  expiresIn: number;
+}
+```
 
-### Parameters
+## <a name="module-documentation-service-discovery"></a>`ServiceDiscovery`
+
+Class that defines a service discovery session/run.
+
+### <a name="module-documentation-service-discovery-get-instance"></a>`ServiceDiscovery.getInstance`
+
+Static method that gets the `ServiceDiscovery` singleton.
+
+#### Returns
+
+`ServiceDiscovery`
+
+### <a name="module-documentation-service-discovery-setup"></a>`setup`
+
+Sets up the service discovery runner.
+
+It returns an `AsyncGenerator` because in the case of GitHub authentication the first `next()` returns the `GitHubDeviceLogin`,
+then the setup resumes.
+
+- Sets the options
+- Prepares the configuration
+- Check whether to invalidate
+
+#### Parameters
 
 - `options: Options`
 
-### Returns
+#### Returns
+
+`AsyncGenerator<GitHubDeviceLogin, void, unknown>`
+
+#### Example
+
+```ts
+import ServiceDiscovery from 'vf-core-service-discovery';
+
+(async () => {
+  const serviceDiscovery = ServiceDiscovery.getInstance();
+
+  const setupGenerator = serviceDiscovery.setup({
+    forceRun: false,
+    forceGitHubAuth: true,
+    verbose: true,
+    logFile: 'vf-core-service-discovery.log',
+    loggingEnabled: true,
+  });
+
+  let setupResult = await setupGenerator.next();
+
+  if (!setupResult.done) {
+    const { expiresIn, userCode, verificationUri } = setupResult.value as GitHubDeviceLogin;
+    const expiry = Math.floor(expiresIn / 60);
+
+    console.log(`Please enter the code ${userCode} at ${verificationUri}. This expires in ${expiry} minutes.`);
+
+    await sleep(2000);
+    await open(verificationUri);
+
+    setupResult = await setupGenerator.next();
+  }
+})();
+```
+
+### <a name="module-documentation-service-discovery-run"></a>`run`
+
+Runs the service discovery.
+
+#### Returns
 
 `Promise<PDiscoveryItem[]>`
 
-### Example
+#### Example
 
 ```ts
-import runServiceDiscovery from 'vf-core-service-discovery';
+import ServiceDiscovery from 'vf-core-service-discovery';
 
 (async () => {
-  const discoveryItems = await runServiceDiscovery({
-    forceRun: false;
-    forceGitHubAuth: false;
-    verbose: true;
-    loggingEnabled: true;
-    logFile: 'vf-core-service-discovery.log';
-  });
+  const serviceDiscovery = ServiceDiscovery.getInstance();
+
+  // complete setup (see above)...
+
+  const discoveryItems = await serviceDiscovery.run();
 
   console.log(discoveryItems);
 })();

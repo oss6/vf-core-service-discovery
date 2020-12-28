@@ -70,3 +70,11 @@ export interface ParsedRelativeTime {
   minutes?: number;
   seconds?: number;
 }
+
+export interface GitHubDeviceLogin {
+  userCode: string;
+  verificationUri: string;
+  interval: number;
+  deviceCode: string;
+  expiresIn: number;
+}
