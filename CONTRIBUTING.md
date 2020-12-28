@@ -25,7 +25,13 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 
 ## Code style
 
-TODO.
+The project uses ESLint with the following plugins:
+
+- `@typescript-eslint/eslint-recommended`
+- `@typescript-eslint/recommended`
+- `prettier/recommended`
+
+If you're using VS Code please install the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
 
 ## License
 

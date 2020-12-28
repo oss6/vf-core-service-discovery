@@ -1,6 +1,6 @@
 {
   "name": "vf-core-service-discovery",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-beta.0",
   "description": "A tool to analyse the usage of vf-core in your project",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
