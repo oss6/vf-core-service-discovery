@@ -135,7 +135,7 @@ export default class ApiService {
 
     this.logger.debug(`${name} - retrieving package.json from remote`);
 
-    const response = await fetch(this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, 'package.json'));
+    const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'package.json');
     const packageJson: PackageJson = await response.json();
 
     await mkdirp(path.dirname(cachedContentFileName));
@@ -165,17 +165,17 @@ export default class ApiService {
 
     this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
 
-    const yamlConfigResponse = await fetch(
-      this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, `${name}.config.yml`),
-    );
+    try {
+      const yamlConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.yml`);
 
-    if (yamlConfigResponse.ok) {
       const content = await yamlConfigResponse.text();
 
       await mkdirp(path.dirname(cachedContentFileName));
       fs.writeFileSync(cachedContentFileName, content, 'utf-8');
 
       return yaml.parse(content);
+    } catch (error) {
+      this.logger.debug(`${name} - YAML configuration not found`);
     }
 
     // JS configuration
@@ -190,20 +190,18 @@ export default class ApiService {
       return require(cachedContentFileName);
     }
 
-    const jsConfigResponse = await fetch(
-      this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, `${name}.config.js`),
-    );
+    try {
+      const jsConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.js`);
 
-    if (jsConfigResponse.ok) {
       const content = await jsConfigResponse.text();
 
       await mkdirp(path.dirname(cachedContentFileName));
       fs.writeFileSync(cachedContentFileName, content, 'utf-8');
 
       return require(cachedContentFileName);
+    } catch (error) {
+      throw new AppError(`${name} - could not find a configuration file`);
     }
-
-    throw new AppError(`Could not find a configuration file for ${name}`);
   }
 
   async getComponentChangelog(name: string): Promise<string> {
@@ -225,7 +223,7 @@ export default class ApiService {
 
     this.logger.debug(`${name} - retrieving changelog from remote`);
 
-    const response = await fetch(this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md'));
+    const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md');
     const content = await response.text();
 
     await mkdirp(path.dirname(cachedContentFileName));
@@ -234,7 +232,28 @@ export default class ApiService {
     return content;
   }
 
-  private buildVfCoreContentUrl(version: string, component: string, resource: string): string {
-    return `https://raw.githubusercontent.com/visual-framework/vf-core/${version}/components/${component}/${resource}`;
+  private async attemptFetch(
+    vfCoreLatestReleaseVersion: string,
+    componentName: string,
+    resource: string,
+  ): Promise<Response> {
+    const urls = [
+      this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, 'components', componentName, resource),
+      this.buildVfCoreContentUrl(vfCoreLatestReleaseVersion, 'tools', componentName, resource),
+    ];
+
+    for (const url of urls) {
+      const response = await fetch(url);
+
+      if (response.ok) {
+        return response;
+      }
+    }
+
+    throw new AppError(`${componentName} - could not fetch ${resource}`);
+  }
+
+  private buildVfCoreContentUrl(version: string, directory: string, component: string, resource: string): string {
+    return `https://raw.githubusercontent.com/visual-framework/vf-core/${version}/${directory}/${component}/${resource}`;
   }
 }

@@ -14,14 +14,21 @@ export function report(discoveryItems: DiscoveryItem[]): void {
   for (const discoveryItem of discoveryItems) {
     const isOldVersion = discoveryItem.version !== discoveryItem.packageJson.version;
 
-    console.log(chalk.bold(`${discoveryItem.nameWithoutPrefix} (${discoveryItem.config.title})\n`));
+    console.log(
+      chalk.bold(
+        `${discoveryItem.nameWithoutPrefix}${discoveryItem.config ? `(${discoveryItem.config?.title})` : ''}\n`,
+      ),
+    );
     console.log(`  Used version\t\t${isOldVersion ? chalk.red(discoveryItem.version) : discoveryItem.version}`);
     console.log(
       `  Latest version\t${
         isOldVersion ? chalk.green(discoveryItem.packageJson.version) : discoveryItem.packageJson.version
       }`,
     );
-    console.log(`  Status\t\t${discoveryItem.config.status}`);
+
+    if (discoveryItem.config) {
+      console.log(`  Status\t\t${discoveryItem.config.status}`);
+    }
 
     if (discoveryItem.changelog?.length > 0) {
       console.log(`  Changelog`);

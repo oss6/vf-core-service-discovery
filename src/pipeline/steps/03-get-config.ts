@@ -14,10 +14,14 @@ export default async function getConfig(discoveryItem: PDiscoveryItem): Promise<
 
   logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving package configuration`);
 
-  const config = await apiService.getComponentConfig(discoveryItem.nameWithoutPrefix);
+  try {
+    const config = await apiService.getComponentConfig(discoveryItem.nameWithoutPrefix);
 
-  return {
-    ...discoveryItem,
-    config,
-  };
+    return {
+      ...discoveryItem,
+      config,
+    };
+  } catch (error) {
+    return discoveryItem;
+  }
 }

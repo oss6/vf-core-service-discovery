@@ -62,6 +62,7 @@ export async function handler(argv: Arguments): Promise<void> {
 
     report(discoveryItems as DiscoveryItem[]);
   } catch (error) {
+    console.log(error);
     process.exit(1);
   }
 }

@@ -93,6 +93,8 @@ export default class ServiceDiscovery {
         .run(components, context);
     } catch (error) {
       this.hasBeenSetUp = false;
+      console.log('wow');
+      console.log(error.message);
       this.logger.error(error.message);
       throw error;
     }
