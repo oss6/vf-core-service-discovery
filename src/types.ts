@@ -1,5 +1,5 @@
 export interface AppConfig {
-  gitHubAccessToken?: string;
+  // gitHubAccessToken?: string;
   vfCoreVersion?: string;
   cacheExpiry: string;
   lastInvalidation: Date | null;
@@ -7,7 +7,7 @@ export interface AppConfig {
 
 export interface Options {
   forceRun: boolean;
-  forceGitHubAuth: boolean;
+  // forceGitHubAuth: boolean;
   verbose: boolean;
   loggingEnabled: boolean;
   logFile: string;

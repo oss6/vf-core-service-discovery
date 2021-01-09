@@ -36,27 +36,27 @@ export async function handler(argv: Arguments): Promise<void> {
 
     const serviceDiscovery = ServiceDiscovery.getInstance();
 
-    const setupGenerator = serviceDiscovery.setup({
+    serviceDiscovery.setup({
       forceRun: argv.force,
-      forceGitHubAuth: argv['force-github-auth'],
+      // forceGitHubAuth: argv['force-github-auth'],
       verbose: argv.verbose,
       logFile: argv['log-file'],
       loggingEnabled: true,
     });
 
-    let setupResult = await setupGenerator.next();
+    // let setupResult = await setupGenerator.next();
 
-    if (!setupResult.done) {
-      const { expiresIn, userCode, verificationUri } = setupResult.value as GitHubDeviceLogin;
-      const expiry = Math.floor(expiresIn / 60);
+    // if (!setupResult.done) {
+    //   const { expiresIn, userCode, verificationUri } = setupResult.value as GitHubDeviceLogin;
+    //   const expiry = Math.floor(expiresIn / 60);
 
-      console.log(`Please enter the code ${userCode} at ${verificationUri}. This expires in ${expiry} minutes.`);
+    //   console.log(`Please enter the code ${userCode} at ${verificationUri}. This expires in ${expiry} minutes.`);
 
-      await sleep(2000);
-      await open(verificationUri);
+    //   await sleep(2000);
+    //   await open(verificationUri);
 
-      setupResult = await setupGenerator.next();
-    }
+    //   setupResult = await setupGenerator.next();
+    // }
 
     const discoveryItems = await serviceDiscovery.run();
 

@@ -9,7 +9,8 @@ import { getCachedComponentsDirectory, getSeconds } from '../helpers';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
-import { AppError, GitHubAuthenticationError, MissingConfigurationError } from '../errors';
+import { AppError, MissingConfigurationError } from '../errors';
+import packageJson from 'package-json';
 
 export default class ApiService {
   static instance: ApiService;
@@ -27,93 +28,9 @@ export default class ApiService {
     return ApiService.instance;
   }
 
-  async getGitHubDeviceAndUserCode(): Promise<GitHubDeviceLogin> {
-    const response = await fetch('https://github.com/login/device/code', {
-      method: 'POST',
-      body: JSON.stringify({
-        client_id: 'd7d227d46d4ee4e5991a',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new GitHubAuthenticationError(
-        'User verification code request has failed. Check if the client_id parameter is set correctly.',
-      );
-    }
-
-    const { user_code, verification_uri, interval, device_code, expires_in } = await response.json();
-
-    return {
-      userCode: user_code,
-      verificationUri: verification_uri,
-      interval,
-      deviceCode: device_code,
-      expiresIn: expires_in,
-    };
-  }
-
-  async getGitHubAccessToken(loginData: GitHubDeviceLogin): Promise<string> {
-    let done = false;
-    let lastTimestamp = getSeconds();
-    let accessTokenResponse: Response | null = null;
-    let accessTokenData: { access_token?: string; error?: string; error_description?: string } = {};
-
-    while (!done) {
-      const currentTimestamp = getSeconds();
-
-      if (currentTimestamp - lastTimestamp >= loginData.interval + 1) {
-        accessTokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-          method: 'POST',
-          body: JSON.stringify({
-            client_id: 'd7d227d46d4ee4e5991a',
-            device_code: loginData.deviceCode,
-            grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-          }),
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
-
-        accessTokenData = await accessTokenResponse.json();
-
-        if (accessTokenResponse.ok && !accessTokenData.error) {
-          this.logger.info('Authentication completed');
-          done = true;
-        } else if (accessTokenData.error === 'access_denied' || accessTokenData.error === 'expired_token') {
-          throw new GitHubAuthenticationError(accessTokenData.error_description);
-        } else if (accessTokenData.error === 'authorization_pending') {
-          this.logger.debug(accessTokenData.error_description);
-        }
-
-        lastTimestamp = getSeconds();
-      }
-    }
-
-    return accessTokenData?.access_token as string;
-  }
-
   async getVfCoreLatestReleaseVersion(): Promise<string> {
-    const accessToken = this.configurationService.config.gitHubAccessToken;
-
-    const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/tags', {
-      headers: {
-        Authorization: `token ${accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new AppError('Could not retrieve vf-core latest release version.');
-    }
-
-    const tags: string[] = (await response.json()).map((t: { name: string }) => t.name);
-    tags.sort((a, b) => semver.compare(b, a));
-
-    return tags[0];
+    const vfCore = await packageJson('@visual-framework/vf-core');
+    return vfCore.version as string;
   }
 
   async getComponentPackageJson(name: string): Promise<PackageJson> {

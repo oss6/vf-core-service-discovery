@@ -27,7 +27,7 @@ export default class ServiceDiscovery {
     return ServiceDiscovery.instance;
   }
 
-  async *setup(options: Options): AsyncGenerator<GitHubDeviceLogin, void, unknown> {
+  async setup(options: Options): Promise<void> {
     this.logger = this.loggerService.registerLogger(
       options.verbose ? 'debug' : 'info',
       options.logFile,
@@ -47,14 +47,14 @@ export default class ServiceDiscovery {
         this.configurationService.update('lastInvalidation', new Date());
       }
 
-      if (!this.configurationService.config.gitHubAccessToken || options.forceGitHubAuth) {
-        const loginData = await this.apiService.getGitHubDeviceAndUserCode();
+      // if (!this.configurationService.config.gitHubAccessToken || options.forceGitHubAuth) {
+      //   const loginData = await this.apiService.getGitHubDeviceAndUserCode();
 
-        yield loginData;
+      //   yield loginData;
 
-        const gitHubAccessToken = await this.apiService.getGitHubAccessToken(loginData);
-        this.configurationService.update('gitHubAccessToken', gitHubAccessToken);
-      }
+      //   const gitHubAccessToken = await this.apiService.getGitHubAccessToken(loginData);
+      //   this.configurationService.update('gitHubAccessToken', gitHubAccessToken);
+      // }
 
       if (!this.configurationService.config.vfCoreVersion || options.forceRun) {
         const vfCoreVersion = await this.apiService.getVfCoreLatestReleaseVersion();
