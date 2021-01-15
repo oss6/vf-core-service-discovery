@@ -57,9 +57,7 @@ function setupConfigurationService(t: ExecutionContext<Context>, args: SystemUnd
 
   const fsReadFileSyncStub = t.context.sinonSandbox
     .stub(fs, 'readFileSync')
-    .returns(
-      '{"cacheExpiry":"8h","lastInvalidation":"2020-12-24T15:45:08Z","gitHubAccessToken":"test","vfCoreVersion":"v2.4.3"}',
-    );
+    .returns('{"cacheExpiry":"8h","lastInvalidation":"2020-12-24T15:45:08Z","vfCoreVersion":"v2.4.3"}');
   const fsWriteFileSyncStub = t.context.sinonSandbox.stub(fs, 'writeFileSync').returns();
   const fsMkdirSyncStub = t.context.sinonSandbox.stub(fs, 'mkdirSync');
 
@@ -165,7 +163,6 @@ test.serial('setup should initialise the configuration if the directory is not e
     fsWriteFileSyncStub,
   } = setupConfigurationService(t, {
     options: {
-      forceGitHubAuth: false,
       forceRun: false,
       logFile: '',
       loggingEnabled: false,
@@ -203,7 +200,6 @@ test.serial('setup should use the existing configuration', async (t) => {
     fsWriteFileSyncStub,
   } = setupConfigurationService(t, {
     options: {
-      forceGitHubAuth: false,
       forceRun: false,
       logFile: '',
       loggingEnabled: false,
@@ -231,7 +227,6 @@ test.serial('setup should use the existing configuration', async (t) => {
   t.deepEqual(configurationService.config, {
     cacheExpiry: '8h',
     lastInvalidation: new Date('2020-12-24T15:45:08Z'),
-    gitHubAccessToken: 'test',
     vfCoreVersion: 'v2.4.3',
   });
 });
@@ -240,7 +235,6 @@ function shouldInvalidateMacro(t: ExecutionContext, input: AppConfig, expected: 
   // arrange
   const configurationService = ConfigurationService.getInstance();
   configurationService.update('cacheExpiry', input.cacheExpiry, false);
-  configurationService.update('gitHubAccessToken', input.gitHubAccessToken, false);
   configurationService.update('lastInvalidation', input.lastInvalidation, false);
   configurationService.update('vfCoreVersion', input.vfCoreVersion, false);
 

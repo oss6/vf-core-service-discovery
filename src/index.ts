@@ -1,4 +1,4 @@
-import { GitHubDeviceLogin, Options, PDiscoveryItem, PipelineContext } from './types';
+import { Options, PDiscoveryItem, PipelineContext } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
@@ -46,15 +46,6 @@ export default class ServiceDiscovery {
         await this.configurationService.deleteCachedComponents();
         this.configurationService.update('lastInvalidation', new Date());
       }
-
-      // if (!this.configurationService.config.gitHubAccessToken || options.forceGitHubAuth) {
-      //   const loginData = await this.apiService.getGitHubDeviceAndUserCode();
-
-      //   yield loginData;
-
-      //   const gitHubAccessToken = await this.apiService.getGitHubAccessToken(loginData);
-      //   this.configurationService.update('gitHubAccessToken', gitHubAccessToken);
-      // }
 
       if (!this.configurationService.config.vfCoreVersion || options.forceRun) {
         const vfCoreVersion = await this.apiService.getVfCoreLatestReleaseVersion();

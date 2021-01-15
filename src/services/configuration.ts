@@ -12,9 +12,8 @@ const rimrafP = promisify(rimraf);
 
 export default class ConfigurationService {
   static defaultAppConfig: AppConfig = {
-    gitHubAccessToken: undefined,
     vfCoreVersion: undefined,
-    cacheExpiry: '8h',
+    cacheExpiry: '12h',
     lastInvalidation: null,
   };
   static instance: ConfigurationService;

@@ -11,7 +11,6 @@ export const shouldInvalidateFixture: ShouldInvalidateFixtureItem[] = [
     input: {
       cacheExpiry: '5h',
       lastInvalidation: null,
-      gitHubAccessToken: 'test',
       vfCoreVersion: 'v2.1.2',
     },
     expected: true,
@@ -20,7 +19,6 @@ export const shouldInvalidateFixture: ShouldInvalidateFixtureItem[] = [
     input: {
       cacheExpiry: '3h',
       lastInvalidation: sub(new Date(), { hours: 5 }),
-      gitHubAccessToken: 'test',
       vfCoreVersion: 'v2.1.2',
     },
     expected: true,
@@ -29,7 +27,6 @@ export const shouldInvalidateFixture: ShouldInvalidateFixtureItem[] = [
     input: {
       cacheExpiry: '3h',
       lastInvalidation: sub(new Date(), { hours: 1 }),
-      gitHubAccessToken: 'test',
       vfCoreVersion: 'v2.1.2',
     },
     expected: false,

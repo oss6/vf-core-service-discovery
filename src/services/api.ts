@@ -1,16 +1,14 @@
 import 'isomorphic-fetch';
 import fs from 'fs';
-import semver from 'semver';
 import mkdirp from 'mkdirp';
 import yaml from 'yaml';
 import path from 'path';
-import { ComponentConfig, GitHubDeviceLogin, PackageJson } from '../types';
-import { getCachedComponentsDirectory, getSeconds } from '../helpers';
+import { ComponentConfig, PackageJson } from '../types';
+import { getCachedComponentsDirectory } from '../helpers';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
 import { AppError, MissingConfigurationError } from '../errors';
-import packageJson from 'package-json';
 
 export default class ApiService {
   static instance: ApiService;
@@ -29,8 +27,16 @@ export default class ApiService {
   }
 
   async getVfCoreLatestReleaseVersion(): Promise<string> {
-    const vfCore = await packageJson('@visual-framework/vf-core');
-    return vfCore.version as string;
+    const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/releases/latest');
+
+    if (!response.ok) {
+      return 'develop';
+    }
+
+    const content = await response.json();
+    const latestReleaseVersion: string = content.tag_name;
+
+    return latestReleaseVersion;
   }
 
   async getComponentPackageJson(name: string): Promise<PackageJson> {

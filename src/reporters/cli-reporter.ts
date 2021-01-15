@@ -16,7 +16,7 @@ export function report(discoveryItems: DiscoveryItem[]): void {
 
     console.log(
       chalk.bold(
-        `${discoveryItem.nameWithoutPrefix}${discoveryItem.config ? `(${discoveryItem.config?.title})` : ''}\n`,
+        `${discoveryItem.nameWithoutPrefix}${discoveryItem.config ? ` (${discoveryItem.config?.title})` : ''}\n`,
       ),
     );
     console.log(`  Used version\t\t${isOldVersion ? chalk.red(discoveryItem.version) : discoveryItem.version}`);

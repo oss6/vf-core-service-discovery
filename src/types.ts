@@ -1,5 +1,4 @@
 export interface AppConfig {
-  // gitHubAccessToken?: string;
   vfCoreVersion?: string;
   cacheExpiry: string;
   lastInvalidation: Date | null;
@@ -7,7 +6,6 @@ export interface AppConfig {
 
 export interface Options {
   forceRun: boolean;
-  // forceGitHubAuth: boolean;
   verbose: boolean;
   loggingEnabled: boolean;
   logFile: string;
@@ -69,12 +67,4 @@ export interface ParsedRelativeTime {
   hours?: number;
   minutes?: number;
   seconds?: number;
-}
-
-export interface GitHubDeviceLogin {
-  userCode: string;
-  verificationUri: string;
-  interval: number;
-  deviceCode: string;
-  expiresIn: number;
 }
