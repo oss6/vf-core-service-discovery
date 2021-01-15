@@ -58,7 +58,6 @@
     "isomorphic-fetch": "^3.0.0",
     "mkdirp": "^1.0.4",
     "open": "^7.3.0",
-    "package-json": "^6.5.0",
     "rimraf": "^3.0.2",
     "semver": "^7.3.4",
     "winston": "^3.3.3",
