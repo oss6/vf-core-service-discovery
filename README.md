@@ -1,10 +1,10 @@
 # <img src="media/logo.png" title="vf-core-service-discovery" alt="vf-core-service-discovery logo" width="350">
 
-![Build](https://github.com/oss6/vf-core-service-discovery/workflows/Build/badge.svg)
-![Codecov](https://img.shields.io/codecov/c/github/oss6/vf-core-service-discovery)
-![David](https://img.shields.io/david/oss6/vf-core-service-discovery)
-![npm](https://img.shields.io/npm/v/vf-core-service-discovery)
-![NPM](https://img.shields.io/npm/l/vf-core-service-discovery)
+[![Build](https://github.com/oss6/vf-core-service-discovery/workflows/Build/badge.svg)](https://github.com/oss6/vf-core-service-discovery/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/oss6/vf-core-service-discovery)](https://codecov.io/github/oss6/vf-core-service-discovery)
+[![David](https://img.shields.io/david/oss6/vf-core-service-discovery)](https://david-dm.org/oss6/vf-core-service-discovery)
+[![npm](https://img.shields.io/npm/v/vf-core-service-discovery)](https://www.npmjs.com/package/vf-core-service-discovery)
+[![license](https://img.shields.io/npm/l/vf-core-service-discovery)](https://github.com/oss6/vf-core-service-discovery/blob/master/LICENSE)
 
 > :warning: This project is currently in active development; use with caution. Thanks!
 
