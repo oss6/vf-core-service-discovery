@@ -18,16 +18,11 @@ interface SystemUnderTestArguments<T> {
 
 interface TestObject {
   apiService: ApiService;
-  fsExistsSyncStub: sinon.SinonStub;
-  fsReadFileSyncStub: sinon.SinonStub;
-  fsWriteFileSyncStub: sinon.SinonStub;
+  fsReadFileStub: sinon.SinonStub;
+  fsWriteFileStub: sinon.SinonStub;
 }
 
 function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
-  // set logger
-  // const loggerService = LoggerService.getInstance();
-  // loggerService.registerLogger('debug', 'test.log', true);
-
   // set configuration
   const configurationService = ConfigurationService.getInstance();
   configurationService.update('vfCoreVersion', '2.4.3', false);
@@ -51,17 +46,21 @@ function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
   });
 
   // mock file system
-  const fsExistsSyncStub = sinon.stub(fs, 'existsSync').returns(args.cached);
-  const fsReadFileSyncStub = sinon
-    .stub(fs, 'readFileSync')
-    .returns(typeof args.resource === 'string' ? args.resource : JSON.stringify(args.resource));
-  const fsWriteFileSyncStub = sinon.stub(fs, 'writeFileSync').returns();
+  const resource = typeof args.resource === 'string' ? args.resource : JSON.stringify(args.resource);
+  const fsReadFileStub = sinon.stub(fs.promises, 'readFile');
+  // .resolves(args.cached ? null : { code: 'ENOENT' }, resource);
+  const fsWriteFileStub = sinon.stub(fs.promises, 'writeFile');
+
+  if (args.cached) {
+    fsReadFileStub.resolves(resource);
+  } else {
+    fsReadFileStub.rejects({ code: 'ENOENT' });
+  }
 
   return {
     apiService,
-    fsExistsSyncStub,
-    fsReadFileSyncStub,
-    fsWriteFileSyncStub,
+    fsReadFileStub,
+    fsWriteFileStub,
   };
 }
 
@@ -123,7 +122,7 @@ test.serial('getComponentPackageJson should call the remote resource', async (t)
   const expectedPackageJson: PackageJson = {
     version: '0.1.0',
   };
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsReadFileStub, fsWriteFileStub } = setupApiService({
     fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
     resource: expectedPackageJson,
     options: {
@@ -139,9 +138,8 @@ test.serial('getComponentPackageJson should call the remote resource', async (t)
   const packageJson = await apiService.getComponentPackageJson('vf-box');
 
   // assert
-  t.is(fsExistsSyncStub.callCount, 1);
-  t.is(fsReadFileSyncStub.callCount, 0);
-  t.is(fsWriteFileSyncStub.callCount, 1);
+  t.is(fsReadFileStub.callCount, 1);
+  t.is(fsWriteFileStub.callCount, 1);
   t.true(fetchMock.called());
   t.deepEqual(packageJson, expectedPackageJson);
 });
@@ -151,7 +149,7 @@ test.serial('getComponentPackageJson should use the cache if available', async (
   const expectedPackageJson: PackageJson = {
     version: '0.1.0',
   };
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsReadFileStub, fsWriteFileStub } = setupApiService({
     fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
     resource: expectedPackageJson,
     options: {
@@ -167,14 +165,13 @@ test.serial('getComponentPackageJson should use the cache if available', async (
   const packageJson = await apiService.getComponentPackageJson('vf-box');
 
   // assert
-  t.is(fsExistsSyncStub.callCount, 1);
-  t.is(fsReadFileSyncStub.callCount, 1);
-  t.is(fsWriteFileSyncStub.callCount, 0);
+  t.is(fsReadFileStub.callCount, 1);
+  t.is(fsWriteFileStub.callCount, 0);
   t.false(fetchMock.called());
   t.deepEqual(packageJson, expectedPackageJson);
 });
 
-test.serial('getComponentPackageJson should throw an error if vfCoreLatestReleaseVersion is not set', async (t) => {
+test.serial('getYamlComponentConfig should throw an error if vfCoreLatestReleaseVersion is not set', async (t) => {
   // arrange
   const configurationService = ConfigurationService.getInstance();
   configurationService.update('vfCoreVersion', '', false);
@@ -186,20 +183,38 @@ test.serial('getComponentPackageJson should throw an error if vfCoreLatestReleas
   const apiService: ApiService = ApiServiceType.getInstance();
 
   // act
-  const error = await t.throwsAsync(apiService.getComponentPackageJson('vf-box'));
+  const error = await t.throwsAsync(apiService.getYamlComponentConfig('vf-box'));
 
   // assert
   t.is(error.name, 'MissingConfigurationError');
 });
 
-test.serial('getComponentConfig should get the resource from remote', async (t) => {
+test.serial('getJsComponentConfig should throw an error if vfCoreLatestReleaseVersion is not set', async (t) => {
+  // arrange
+  const configurationService = ConfigurationService.getInstance();
+  configurationService.update('vfCoreVersion', '', false);
+
+  const mkdirpStub = sinon.stub();
+  const ApiServiceType = proxyquire('../src/services/api', {
+    mkdirp: mkdirpStub,
+  }).default;
+  const apiService: ApiService = ApiServiceType.getInstance();
+
+  // act
+  const error = await t.throwsAsync(apiService.getJsComponentConfig('vf-box'));
+
+  // assert
+  t.is(error.name, 'MissingConfigurationError');
+});
+
+test.serial('getYamlComponentConfig should get the resource from remote', async (t) => {
   // arrange
   const expectedComponentConfig: ComponentConfig = {
     label: 'vf-box',
     status: 'live',
     title: 'Box',
   };
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsReadFileStub, fsWriteFileStub } = setupApiService({
     fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
     resource: expectedComponentConfig,
     options: {
@@ -212,24 +227,23 @@ test.serial('getComponentConfig should get the resource from remote', async (t) 
   });
 
   // act
-  const componentConfig = await apiService.getComponentConfig('vf-box');
+  const componentConfig = await apiService.getYamlComponentConfig('vf-box');
 
   // assert
-  t.is(fsExistsSyncStub.callCount, 1);
-  t.is(fsReadFileSyncStub.callCount, 0);
-  t.is(fsWriteFileSyncStub.callCount, 1);
+  t.is(fsReadFileStub.callCount, 1);
+  t.is(fsWriteFileStub.callCount, 1);
   t.true(fetchMock.called());
   t.deepEqual(componentConfig, expectedComponentConfig);
 });
 
-test.serial('getComponentConfig should use the cache if available', async (t) => {
+test.serial('getYamlComponentConfig should use the cache if available', async (t) => {
   // arrange
   const expectedComponentConfig: ComponentConfig = {
     label: 'vf-box',
     status: 'live',
     title: 'Box',
   };
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsReadFileStub, fsWriteFileStub } = setupApiService({
     fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
     resource: expectedComponentConfig,
     options: {
@@ -242,38 +256,19 @@ test.serial('getComponentConfig should use the cache if available', async (t) =>
   });
 
   // act
-  const componentConfig = await apiService.getComponentConfig('vf-box');
+  const componentConfig = await apiService.getYamlComponentConfig('vf-box');
 
   // assert
-  t.is(fsExistsSyncStub.callCount, 1);
-  t.is(fsReadFileSyncStub.callCount, 1);
-  t.is(fsWriteFileSyncStub.callCount, 0);
+  t.is(fsReadFileStub.callCount, 1);
+  t.is(fsWriteFileStub.callCount, 0);
   t.false(fetchMock.called());
   t.deepEqual(componentConfig, expectedComponentConfig);
-});
-
-test.serial('getComponentConfig should throw an error if vfCoreLatestReleaseVersion is not set', async (t) => {
-  // arrange
-  const configurationService = ConfigurationService.getInstance();
-  configurationService.update('vfCoreVersion', '', false);
-
-  const mkdirpStub = sinon.stub();
-  const ApiServiceType = proxyquire('../src/services/api', {
-    mkdirp: mkdirpStub,
-  }).default;
-  const apiService: ApiService = ApiServiceType.getInstance();
-
-  // act
-  const error = await t.throwsAsync(apiService.getComponentConfig('vf-box'));
-
-  // assert
-  t.is(error.name, 'MissingConfigurationError');
 });
 
 test.serial('getComponentChangelog should get the resource from remote', async (t) => {
   // arrange
   const expectedChangelog = 'test';
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsReadFileStub, fsWriteFileStub } = setupApiService({
     fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
     resource: expectedChangelog,
     options: {
@@ -289,9 +284,8 @@ test.serial('getComponentChangelog should get the resource from remote', async (
   const componentChangelog = await apiService.getComponentChangelog('vf-box');
 
   // assert
-  t.is(fsExistsSyncStub.callCount, 1);
-  t.is(fsReadFileSyncStub.callCount, 0);
-  t.is(fsWriteFileSyncStub.callCount, 1);
+  t.is(fsReadFileStub.callCount, 1);
+  t.is(fsWriteFileStub.callCount, 1);
   t.true(fetchMock.called());
   t.deepEqual(componentChangelog, expectedChangelog);
 });
@@ -299,7 +293,7 @@ test.serial('getComponentChangelog should get the resource from remote', async (
 test.serial('getComponentChangelog should use the cache if available', async (t) => {
   // arrange
   const expectedChangelog = 'test';
-  const { apiService, fsExistsSyncStub, fsReadFileSyncStub, fsWriteFileSyncStub } = setupApiService({
+  const { apiService, fsReadFileStub, fsWriteFileStub } = setupApiService({
     fetchUrl: 'https://raw.githubusercontent.com/visual-framework/vf-core',
     resource: expectedChangelog,
     options: {
@@ -315,9 +309,8 @@ test.serial('getComponentChangelog should use the cache if available', async (t)
   const componentChangelog = await apiService.getComponentChangelog('vf-box');
 
   // assert
-  t.is(fsExistsSyncStub.callCount, 1);
-  t.is(fsReadFileSyncStub.callCount, 1);
-  t.is(fsWriteFileSyncStub.callCount, 0);
+  t.is(fsReadFileStub.callCount, 1);
+  t.is(fsWriteFileStub.callCount, 0);
   t.false(fetchMock.called());
   t.deepEqual(componentChangelog, expectedChangelog);
 });

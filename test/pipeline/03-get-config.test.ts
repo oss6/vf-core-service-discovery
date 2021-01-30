@@ -14,12 +14,14 @@ test('getConfig should extend a discovery item with their configuration', async 
   loggerService.registerLogger('debug', 'test.log', true);
 
   const apiService = ApiService.getInstance();
-  const getComponentConfigStub = sinon.stub(apiService, 'getComponentConfig');
-  getComponentConfigStub.withArgs('vf-box').resolves({
+  const getYamlComponentConfigStub = sinon.stub(apiService, 'getYamlComponentConfig');
+  getYamlComponentConfigStub.withArgs('vf-box').resolves({
     label: 'Box',
     status: 'live',
     title: 'vf-box',
   });
+  const getJsComponentConfigStub = sinon.stub(apiService, 'getJsComponentConfig');
+  getJsComponentConfigStub.withArgs('vf-box').resolves(null);
 
   // act
   const discoveryItem = await getConfig({

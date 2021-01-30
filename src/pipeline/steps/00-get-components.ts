@@ -12,11 +12,17 @@ export default async function getComponents(context: PipelineContext): Promise<s
 
   const packageJsonFile = path.join(context.rootDirectory, 'package.json');
 
-  if (!fs.existsSync(packageJsonFile)) {
-    throw new FileNotFoundError(packageJsonFile);
-  }
+  let packageJson: PackageJson;
 
-  const packageJson: PackageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf-8'));
+  try {
+    packageJson = JSON.parse(await fs.promises.readFile(packageJsonFile, 'utf-8'));
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new FileNotFoundError(packageJsonFile);
+    }
+
+    throw error;
+  }
 
   const dependencies: string[] = Object.keys(packageJson.dependencies || {}).filter((dep) =>
     dep.startsWith(context.vfPackagePrefix),

@@ -5,19 +5,23 @@ import { LockObject, PDiscoveryItem, PipelineContext } from '../../types';
 import { AppError, FileNotFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
 
-export function parseLockFile(rootDirectory: string): LockObject {
+export async function parseLockFile(rootDirectory: string): Promise<LockObject> {
   const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
 
-  if (fs.existsSync(npmLockFileName)) {
-    const npmLockFile = JSON.parse(fs.readFileSync(npmLockFileName, 'utf-8'));
+  try {
+    const npmLockFile = JSON.parse(await fs.promises.readFile(npmLockFileName, 'utf-8'));
 
     return npmLockFile.dependencies as LockObject;
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
   }
 
   const yarnLockFileName = path.join(rootDirectory, 'yarn.lock');
 
-  if (fs.existsSync(yarnLockFileName)) {
-    const yarnLockFile: LockObject = parseYarnLockFile(fs.readFileSync(yarnLockFileName, 'utf-8')).object;
+  try {
+    const yarnLockFile: LockObject = parseYarnLockFile(await fs.promises.readFile(yarnLockFileName, 'utf-8')).object;
 
     return Object.entries(yarnLockFile).reduce(
       (obj, [pkg, lockItem]) => ({
@@ -26,12 +30,16 @@ export function parseLockFile(rootDirectory: string): LockObject {
       }),
       {},
     );
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
   }
 
   throw new FileNotFoundError(`${npmLockFileName} and ${yarnLockFileName}`);
 }
 
-export default function getExactVersion(
+export default async function getExactVersion(
   discoveryItem: PDiscoveryItem,
   context: PipelineContext,
 ): Promise<PDiscoveryItem> {
@@ -44,7 +52,7 @@ export default function getExactVersion(
 
   logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving exact version`);
 
-  const lockObject: LockObject = parseLockFile(context.rootDirectory);
+  const lockObject: LockObject = await parseLockFile(context.rootDirectory);
 
   if (!lockObject[discoveryItem.name]) {
     throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not retrieve exact version`);

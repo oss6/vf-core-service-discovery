@@ -46,84 +46,124 @@ export default class ApiService {
       throw new MissingConfigurationError(['vfCoreVersion']);
     }
 
+    const fetchFromRemote = async (): Promise<PackageJson> => {
+      this.logger.debug(`${name} - retrieving package.json from remote`);
+
+      const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'package.json');
+      const packageJson: PackageJson = await response.json();
+
+      await mkdirp(path.dirname(cachedContentFileName));
+      await fs.promises.writeFile(cachedContentFileName, JSON.stringify(packageJson), 'utf-8');
+
+      return packageJson;
+    };
     const options = this.optionsService.getOptions();
     const cachedContentFileName = getCachedComponentsDirectory(name, 'package.json');
 
-    if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`${name} - retrieving package.json from cache`);
-
-      const cachedContent = JSON.parse(fs.readFileSync(cachedContentFileName, 'utf-8'));
-      return cachedContent;
+    if (options.forceRun) {
+      return await fetchFromRemote();
     }
 
-    this.logger.debug(`${name} - retrieving package.json from remote`);
+    try {
+      this.logger.debug(`${name} - retrieving package.json from cache`);
 
-    const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'package.json');
-    const packageJson: PackageJson = await response.json();
-
-    await mkdirp(path.dirname(cachedContentFileName));
-    fs.writeFileSync(cachedContentFileName, JSON.stringify(packageJson), 'utf-8');
-
-    return packageJson;
+      const cachedContent = JSON.parse(await fs.promises.readFile(cachedContentFileName, 'utf-8'));
+      return cachedContent;
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return await fetchFromRemote();
+      } else {
+        throw error;
+      }
+    }
   }
 
-  async getComponentConfig(name: string): Promise<ComponentConfig> {
+  async getYamlComponentConfig(name: string): Promise<ComponentConfig | null> {
     const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
     if (!vfCoreLatestReleaseVersion) {
       throw new MissingConfigurationError(['vfCoreVersion']);
     }
 
-    // YAML configuration
-    // ------------------
-    const options = this.optionsService.getOptions();
-    let cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.yml`);
-
-    if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`${name} - retrieving configuration from cache`);
-
-      const cachedContent = fs.readFileSync(cachedContentFileName, 'utf-8');
-      return yaml.parse(cachedContent);
-    }
-
     this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
 
-    try {
-      const yamlConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.yml`);
+    const options = this.optionsService.getOptions();
+    const cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.yml`);
+    const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
+      try {
+        const yamlConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.yml`);
 
-      const content = await yamlConfigResponse.text();
+        const content = await yamlConfigResponse.text();
 
-      await mkdirp(path.dirname(cachedContentFileName));
-      fs.writeFileSync(cachedContentFileName, content, 'utf-8');
+        await mkdirp(path.dirname(cachedContentFileName));
+        await fs.promises.writeFile(cachedContentFileName, content, 'utf-8');
 
-      return yaml.parse(content);
-    } catch (error) {
-      this.logger.debug(`${name} - YAML configuration not found`);
+        return yaml.parse(content);
+      } catch (error) {
+        this.logger.debug(`${name} - YAML configuration not found`);
+        return null;
+      }
+    };
+
+    if (options.forceRun) {
+      return await fetchFromRemote();
     }
 
-    // JS configuration
-    // ----------------
+    try {
+      this.logger.debug(`${name} - retrieving configuration from cache`);
+
+      const cachedContent = await fs.promises.readFile(cachedContentFileName, 'utf-8');
+      return yaml.parse(cachedContent);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return await fetchFromRemote();
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getJsComponentConfig(name: string): Promise<ComponentConfig | null> {
+    const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
+
+    if (!vfCoreLatestReleaseVersion) {
+      throw new MissingConfigurationError(['vfCoreVersion']);
+    }
+
     this.logger.debug(`${name} - attempting to retrieve JS configuration`);
 
-    cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.js`);
+    const options = this.optionsService.getOptions();
+    const cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.js`);
+    const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
+      try {
+        const jsConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.js`);
 
-    if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
+        const content = await jsConfigResponse.text();
+
+        await mkdirp(path.dirname(cachedContentFileName));
+        await fs.promises.writeFile(cachedContentFileName, content, 'utf-8');
+
+        return require(cachedContentFileName);
+      } catch (error) {
+        this.logger.debug(`${name} - YAML configuration not found`);
+        return null;
+      }
+    };
+
+    if (options.forceRun) {
+      return await fetchFromRemote();
+    }
+
+    try {
       this.logger.debug(`${name} - retrieving configuration from cache`);
 
       return require(cachedContentFileName);
-    }
-
-    try {
-      const jsConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.js`);
-
-      const content = await jsConfigResponse.text();
-
-      await mkdirp(path.dirname(cachedContentFileName));
-      fs.writeFileSync(cachedContentFileName, content, 'utf-8');
-
-      return require(cachedContentFileName);
     } catch (error) {
-      throw new AppError(`${name} - could not find a configuration file`);
+      if (error === 'ENOENT') {
+        return await fetchFromRemote();
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -136,23 +176,34 @@ export default class ApiService {
 
     const options = this.optionsService.getOptions();
     const cachedContentFileName = getCachedComponentsDirectory(name, 'CHANGELOG.md');
+    const fetchFromRemote = async (): Promise<string> => {
+      this.logger.debug(`${name} - retrieving changelog from remote`);
 
-    if (fs.existsSync(cachedContentFileName) && !options.forceRun) {
-      this.logger.debug(`${name} - retrieving changelog from cache`);
+      const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md');
+      const content = await response.text();
 
-      const cachedContent = fs.readFileSync(cachedContentFileName, 'utf-8');
-      return cachedContent;
+      await mkdirp(path.dirname(cachedContentFileName));
+      await fs.promises.writeFile(cachedContentFileName, content, 'utf-8');
+
+      return content;
+    };
+
+    if (options.forceRun) {
+      return await fetchFromRemote();
     }
 
-    this.logger.debug(`${name} - retrieving changelog from remote`);
+    try {
+      this.logger.debug(`${name} - retrieving changelog from cache`);
 
-    const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md');
-    const content = await response.text();
-
-    await mkdirp(path.dirname(cachedContentFileName));
-    fs.writeFileSync(cachedContentFileName, content, 'utf-8');
-
-    return content;
+      const cachedContent = await fs.promises.readFile(cachedContentFileName, 'utf-8');
+      return cachedContent;
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return await fetchFromRemote();
+      } else {
+        throw error;
+      }
+    }
   }
 
   private async attemptFetch(

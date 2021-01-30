@@ -22,7 +22,7 @@ test.serial.afterEach((t) => {
   sinon.restore();
 });
 
-test.serial('parseLockFile should correctly parse an npm lock file', (t) => {
+test.serial('parseLockFile should correctly parse an npm lock file', async (t) => {
   // arrange
   const lockFile = {
     name: 'vf-core-service-discovery-example',
@@ -49,22 +49,20 @@ test.serial('parseLockFile should correctly parse an npm lock file', (t) => {
   };
   const rootDirectory = '/test';
   const lockFileName = path.join(rootDirectory, 'package-lock.json');
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(lockFileName).returns(true);
-  const fsReadFileSyncStub = t.context.sinonSandbox
-    .stub(fs, 'readFileSync')
+  const fsReadFileStub = t.context.sinonSandbox
+    .stub(fs.promises, 'readFile')
     .withArgs(lockFileName, 'utf-8')
-    .returns(JSON.stringify(lockFile));
+    .resolves(JSON.stringify(lockFile));
 
   // act
-  const parsedLockFile = parseLockFile(rootDirectory);
+  const parsedLockFile = await parseLockFile(rootDirectory);
 
   // assert
   t.deepEqual(parsedLockFile, lockFile.dependencies);
-  t.true(fsExistsSyncStub.calledOnce);
-  t.true(fsReadFileSyncStub.calledOnce);
+  t.true(fsReadFileStub.calledOnce);
 });
 
-test.serial('parseLockFile should correctly parse a yarn lock file', (t) => {
+test.serial('parseLockFile should correctly parse a yarn lock file', async (t) => {
   // arrange
   const expectedLockFile: LockObject = {
     '@visual-framework/vf-box': {
@@ -79,15 +77,10 @@ test.serial('parseLockFile should correctly parse a yarn lock file', (t) => {
     },
   };
   const rootDirectory = '/test';
-  const yarnLockFileName = path.join(rootDirectory, 'yarn.lock');
-  const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
+  const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
 
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync');
-  fsExistsSyncStub.withArgs(yarnLockFileName).returns(true);
-  fsExistsSyncStub.withArgs(npmLockFileName).returns(false);
-
-  const fsReadFileSyncStub = t.context.sinonSandbox.stub(fs, 'readFileSync').withArgs(yarnLockFileName, 'utf-8')
-    .returns(`
+  fsReadFileStub.onCall(0).rejects({ code: 'ENOENT' });
+  fsReadFileStub.onCall(1).resolves(`
 "@visual-framework/vf-box@^2.3.0":
   version "2.3.0"
   resolved "test"
@@ -97,41 +90,29 @@ test.serial('parseLockFile should correctly parse a yarn lock file', (t) => {
   version "2.3.3"
   resolved "test"
   integrity test
-    `);
+  `);
 
   // act
-  const parsedLockFile = parseLockFile(rootDirectory);
+  const parsedLockFile = await parseLockFile(rootDirectory);
 
   // assert
   t.deepEqual(parsedLockFile, expectedLockFile);
-  t.true(fsExistsSyncStub.calledTwice);
-  t.true(fsReadFileSyncStub.calledOnce);
+  t.true(fsReadFileStub.calledTwice);
 });
 
-test.serial('parseLockFile should throw an error if no lock file has been found', (t) => {
+test.serial('parseLockFile should throw an error if no lock file has been found', async (t) => {
   // arrange
   const rootDirectory = '/test';
-  const yarnLockFileName = path.join(rootDirectory, 'yarn.lock');
-  const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
+  const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
 
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync');
-  fsExistsSyncStub.withArgs(yarnLockFileName).returns(false);
-  fsExistsSyncStub.withArgs(npmLockFileName).returns(false);
-  fsExistsSyncStub.callThrough();
+  fsReadFileStub.onCall(0).rejects({ code: 'ENOENT' });
+  fsReadFileStub.onCall(1).rejects({ code: 'ENOENT' });
 
   // act
-  const error = t.throws(
-    () => {
-      parseLockFile(rootDirectory);
-    },
-    { instanceOf: FileNotFoundError },
-  );
+  const error = await t.throwsAsync(parseLockFile(rootDirectory));
 
   // assert
-  const fsExistsSyncCalls = fsExistsSyncStub
-    .getCalls()
-    .filter((c) => c.firstArg === yarnLockFileName || c.firstArg === npmLockFileName);
-  t.is(fsExistsSyncCalls.length, 2);
+  t.true(fsReadFileStub.calledTwice);
   t.is(error.name, 'FileNotFoundError');
 });
 
@@ -165,11 +146,10 @@ test.serial('getExactVersion should return the exact version of the input compon
   };
   const rootDirectory = '/test';
   const lockFileName = path.join(rootDirectory, 'package-lock.json');
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(lockFileName).returns(true);
-  const fsReadFileSyncStub = t.context.sinonSandbox
-    .stub(fs, 'readFileSync')
+  const fsReadFileStub = t.context.sinonSandbox
+    .stub(fs.promises, 'readFile')
     .withArgs(lockFileName, 'utf-8')
-    .returns(JSON.stringify(lockFile));
+    .resolves(JSON.stringify(lockFile));
   const inputDiscoveryItem: PDiscoveryItem = {
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
@@ -191,6 +171,5 @@ test.serial('getExactVersion should return the exact version of the input compon
     nameWithoutPrefix: 'vf-box',
     version: '2.2.0',
   });
-  t.true(fsExistsSyncStub.calledOnce);
-  t.true(fsReadFileSyncStub.calledOnce);
+  t.true(fsReadFileStub.calledOnce);
 });

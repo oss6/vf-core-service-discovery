@@ -31,14 +31,17 @@ test.serial('getComponents should throw an error if package.json is not found', 
     vfPackagePrefix: '@visual-framework',
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(false);
+  const fsReadFileStub = t.context.sinonSandbox
+    .stub(fs.promises, 'readFile')
+    .withArgs(packageJsonFileName, 'utf-8')
+    .rejects({ code: 'ENOENT' });
 
   // act
   const error = await t.throwsAsync(getComponents(context));
 
   // assert
   t.true(error.message.includes('has not been found'));
-  t.true(fsExistsSyncStub.calledOnce);
+  t.true(fsReadFileStub.calledOnce);
 });
 
 test.serial('getComponents should throw an error if no vf-core dependencies are found', async (t) => {
@@ -51,19 +54,17 @@ test.serial('getComponents should throw an error if no vf-core dependencies are 
     vfPackagePrefix: '@visual-framework',
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(true);
-  const fsReadFileSyncStub = t.context.sinonSandbox
-    .stub(fs, 'readFileSync')
+  const fsReadFileStub = t.context.sinonSandbox
+    .stub(fs.promises, 'readFile')
     .withArgs(packageJsonFileName, 'utf-8')
-    .returns('{}');
+    .resolves('{}');
 
   // act
   const error = await t.throwsAsync(getComponents(context));
 
   // assert
   t.is(error.name, 'NoVfDependenciesFoundError');
-  t.true(fsExistsSyncStub.calledOnce);
-  t.true(fsReadFileSyncStub.calledOnce);
+  t.true(fsReadFileStub.calledOnce);
 });
 
 test.serial('getComponents should return the installed components', async (t) => {
@@ -76,9 +77,6 @@ test.serial('getComponents should return the installed components', async (t) =>
     vfPackagePrefix: '@visual-framework',
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
-
-  const fsExistsSyncStub = t.context.sinonSandbox.stub(fs, 'existsSync').withArgs(packageJsonFileName).returns(true);
-
   const packageJson: PackageJson = {
     version: '2.4.3',
     dependencies: {
@@ -90,17 +88,16 @@ test.serial('getComponents should return the installed components', async (t) =>
       '@visual-framework/vf-analytics-google': '3.6.4',
     },
   };
-  const fsReadFileSyncStub = t.context.sinonSandbox
-    .stub(fs, 'readFileSync')
+  const fsReadFileStub = t.context.sinonSandbox
+    .stub(fs.promises, 'readFile')
     .withArgs(packageJsonFileName, 'utf-8')
-    .returns(JSON.stringify(packageJson));
+    .resolves(JSON.stringify(packageJson));
 
   // act
   const components: string[] = await getComponents(context);
 
   // assert
-  t.true(fsExistsSyncStub.calledOnce);
-  t.true(fsReadFileSyncStub.calledOnce);
+  t.true(fsReadFileStub.calledOnce);
   t.deepEqual(components, [
     '@visual-framework/vf-footer',
     '@visual-framework/vf-box',
