@@ -2,7 +2,7 @@ import test from 'ava';
 import sinon from 'sinon';
 import ApiService from '../../src/services/api';
 import getChangelog from '../../src/pipeline/steps/04-get-changelog';
-import { exampleChangelog } from '../fixture/05-get-changelog.fixture';
+import { exampleChangelog } from '../fixture/04-get-changelog.fixture';
 import LoggerService from '../../src/services/logger';
 
 test.afterEach(() => {

@@ -5,7 +5,7 @@ import path from 'path';
 import getExactVersion, { parseLockFile } from '../../src/pipeline/steps/01-get-exact-version';
 import { LockObject, PDiscoveryItem, PipelineContext } from '../../src/types';
 import LoggerService from '../../src/services/logger';
-import { FileNotFoundError } from '../../src/errors';
+import OptionsService from '../../src/services/options';
 
 interface Context {
   sinonSandbox: sinon.SinonSandbox;
@@ -118,6 +118,14 @@ test.serial('parseLockFile should throw an error if no lock file has been found'
 
 test.serial('getExactVersion should return the exact version of the input component', async (t) => {
   // arrange
+  const optionsService = OptionsService.getInstance();
+  optionsService.setOptions({
+    forceRun: true,
+    logFile: '',
+    loggingEnabled: false,
+    verbose: false,
+  });
+
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
 

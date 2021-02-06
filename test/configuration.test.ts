@@ -6,7 +6,7 @@ import ConfigurationService from '../src/services/configuration';
 import LoggerService from '../src/services/logger';
 import OptionsService from '../src/services/options';
 import { AppConfig, Options } from '../src/types';
-import { getAppConfigFileName, getAppDirectory, getCachedComponentsDirectory } from '../src/helpers';
+import { getAppConfigFileName, getAppDirectory, getCachedResource } from '../src/helpers';
 import { shouldInvalidateFixture } from './fixture/configuration.fixture';
 import { FileNotFoundError } from '../src/errors';
 
@@ -53,7 +53,7 @@ function setupConfigurationService(t: ExecutionContext<Context>, args: SystemUnd
 
   fsExistsSyncStub.withArgs(getAppDirectory()).returns(args.appDirectoryExists);
   fsExistsSyncStub.withArgs(getAppConfigFileName()).returns(args.appConfigFileNameExists);
-  fsExistsSyncStub.withArgs(getCachedComponentsDirectory()).returns(args.cachedComponentsDirectoryExists);
+  fsExistsSyncStub.withArgs(getCachedResource()).returns(args.cachedComponentsDirectoryExists);
 
   const fsReadFileSyncStub = t.context.sinonSandbox
     .stub(fs, 'readFileSync')
@@ -175,7 +175,7 @@ test.serial('setup should initialise the configuration if the directory is not e
 
   const appDirectory = getAppDirectory();
   const appConfigFileName = getAppConfigFileName();
-  const cachedComponentsDirectory = getCachedComponentsDirectory();
+  const cachedComponentsDirectory = getCachedResource();
 
   // act
   await configurationService.setup();
@@ -212,7 +212,7 @@ test.serial('setup should use the existing configuration', async (t) => {
 
   const appDirectory = getAppDirectory();
   const appConfigFileName = getAppConfigFileName();
-  const cachedComponentsDirectory = getCachedComponentsDirectory();
+  const cachedComponentsDirectory = getCachedResource();
 
   // act
   await configurationService.setup();
