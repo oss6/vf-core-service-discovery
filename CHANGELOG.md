@@ -1,8 +1,14 @@
 # Changelog
-All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.1.0-beta.2](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.1...v0.1.0-beta.2) (2021-02-06)
+
+
+### Refactoring
+
+* pipeline processing (closes [#24](https://github.com/oss6/vf-core-service-discovery/issues/24), closes [#26](https://github.com/oss6/vf-core-service-discovery/issues/26)) ([ea5cf2a](https://github.com/oss6/vf-core-service-discovery/commits/ea5cf2a21137cb60377090eeb922248674bbabaa))
+* use non-blocking fs functions (closes [#25](https://github.com/oss6/vf-core-service-discovery/issues/25)) ([42a6433](https://github.com/oss6/vf-core-service-discovery/commits/42a643333ad0533d1fb45ed1cd505d8f3b0b6274))
 
 ## 0.1.0-beta.1
 
