@@ -1,0 +1,15 @@
+{
+  "types": [
+    {"type": "chore", "section":"Others", "hidden": false},
+    {"type": "feat", "section": "Features", "hidden": false},
+    {"type": "fix", "section": "Bug Fixes", "hidden": false},
+    {"type": "docs", "section": "Docs", "hidden": false},
+    {"type": "style", "section": "Styling", "hidden": false},
+    {"type": "refactor", "section": "Refactoring", "hidden": false},
+    {"type": "perf", "section": "Performance Improvements", "hidden": false},
+    {"type": "test", "section": "Tests", "hidden": false},
+    {"type": "ci", "section": "CI", "hidden": false}
+  ],
+  "commitUrlFormat": "https://github.com/oss6/vf-core-service-discovery/commits/{{hash}}",
+  "compareUrlFormat": "https://github.com/oss6/vf-core-service-discovery/compare/{{previousTag}}...{{currentTag}}"
+}

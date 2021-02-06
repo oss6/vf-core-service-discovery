@@ -307,6 +307,12 @@ import ServiceDiscovery from 'vf-core-service-discovery';
 
 Runs the service discovery.
 
+#### Parameters
+
+- `reportProgress: boolean`
+  * Whether to report the progress of the analysis in the CLI.
+  * default: `false`
+
 #### Returns
 
 `Promise<PDiscoveryItem[]>`
@@ -376,6 +382,7 @@ Runs the pipeline given a source and a context.
 
 - `source: string[]`
 - `context: PipelineContext`
+- `reportProgress: boolean`
 
 #### Returns
 

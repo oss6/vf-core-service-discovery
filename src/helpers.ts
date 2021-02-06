@@ -72,7 +72,3 @@ export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {
 
   return date;
 }
-
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}

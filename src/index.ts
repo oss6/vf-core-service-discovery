@@ -59,7 +59,7 @@ export default class ServiceDiscovery {
     }
   }
 
-  async run(): Promise<PDiscoveryItem[]> {
+  async run(reportProgress = false): Promise<PDiscoveryItem[]> {
     if (!this.hasBeenSetUp) {
       throw new AppError('The ServiceDiscovery instance has not been set up.');
     }
@@ -75,19 +75,22 @@ export default class ServiceDiscovery {
 
       this.hasBeenSetUp = false;
 
-      return pipeline.Pipeline.getInstance()
+      return await pipeline.Pipeline.getInstance()
         .addStep(pipeline.getExactVersion)
         .addStep(pipeline.getPackageJson)
         .addStep(pipeline.getConfig)
         .addStep(pipeline.getChangelog)
         .addStep(pipeline.getDependents)
-        .run(components, context);
+        .run(components, context, reportProgress);
     } catch (error) {
       this.hasBeenSetUp = false;
-      console.log('wow');
-      console.log(error.message);
       this.logger.error(error.message);
-      throw error;
+
+      if (error.context) {
+        return error.context;
+      } else {
+        throw error;
+      }
     }
   }
 }

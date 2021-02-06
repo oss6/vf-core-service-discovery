@@ -6,7 +6,6 @@ import { AppError } from '../../errors';
 import { PDiscoveryItem, PipelineContext } from '../../types';
 
 const globP = promisify(glob);
-const readFile = promisify(fs.readFile);
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
 export default async function getDependents(
@@ -20,7 +19,7 @@ export default async function getDependents(
     const matches = await globP(context.rootDirectory + '/**/*.html', { ignore: 'node_modules' });
 
     for (const filePath of matches) {
-      const html = await readFile(filePath, 'utf-8');
+      const html = await fs.promises.readFile(filePath, 'utf-8');
       const fileName = path.basename(filePath);
 
       if (html.match(new RegExp(`${discoveryItem.nameWithoutPrefix}`, 'g'))) {

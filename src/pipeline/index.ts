@@ -1,3 +1,4 @@
+import Listr from 'listr';
 import { PDiscoveryItem, PipelineContext, PipelineStep } from '../types';
 import getComponents from './steps/00-get-components';
 import getExactVersion from './steps/01-get-exact-version';
@@ -30,19 +31,30 @@ export class Pipeline {
     return this;
   }
 
-  async run(source: string[], context: PipelineContext): Promise<PDiscoveryItem[]> {
+  async run(source: string[], context: PipelineContext, reportProgress = false): Promise<PDiscoveryItem[]> {
     const discoveryItems: PDiscoveryItem[] = source.map((sourceItem) => ({
       name: sourceItem,
       nameWithoutPrefix: sourceItem.replace('@visual-framework/', ''),
     }));
 
-    const processes = discoveryItems.map((discoveryItem) =>
-      this.steps.reduce(
-        async (previousPromise, fn) => fn(await previousPromise, context),
-        Promise.resolve(discoveryItem),
-      ),
-    );
+    const processes: Listr.ListrTask<PDiscoveryItem[]>[] = discoveryItems.map((discoveryItem) => ({
+      title: discoveryItem.nameWithoutPrefix || '',
+      task: async (ctx) => {
+        const result = await this.steps.reduce(
+          async (previousPromise, fn) => fn(await previousPromise, context),
+          Promise.resolve(discoveryItem),
+        );
 
-    return await Promise.all(processes);
+        ctx.push(result);
+      },
+    }));
+
+    const tasks = new Listr(processes, {
+      concurrent: 5,
+      exitOnError: false,
+      renderer: reportProgress ? 'default' : 'silent',
+    });
+
+    return await tasks.run([]);
   }
 }

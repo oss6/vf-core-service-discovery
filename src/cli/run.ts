@@ -1,6 +1,4 @@
-import open from 'open';
 import ServiceDiscovery from '..';
-import { sleep } from '../helpers';
 import { printMainHeading, report } from '../reporters/cli-reporter';
 import { DiscoveryItem } from '../types';
 
@@ -43,11 +41,10 @@ export async function handler(argv: Arguments): Promise<void> {
       loggingEnabled: true,
     });
 
-    const discoveryItems = await serviceDiscovery.run();
+    const discoveryItems = await serviceDiscovery.run(true);
 
     report(discoveryItems as DiscoveryItem[]);
   } catch (error) {
-    console.log(error);
     process.exit(1);
   }
 }
