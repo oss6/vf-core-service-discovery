@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { parse as parseYarnLockFile } from '@yarnpkg/lockfile';
-import { LockObject, PDiscoveryItem, PipelineContext } from '../../types';
+import { DiscoveryItem, LockObject, PDiscoveryItem, PipelineContext } from '../../types';
 import { AppError, FileNotFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
+import OptionsService from '../../services/options';
+import { getCachedResource } from '../../helpers';
 
 export async function parseLockFile(rootDirectory: string): Promise<LockObject> {
   const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
@@ -39,6 +41,41 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
   throw new FileNotFoundError(`${npmLockFileName} and ${yarnLockFileName}`);
 }
 
+export async function extractVersion(discoveryItem: DiscoveryItem, rootDirectory: string): Promise<string> {
+  const loggerService = LoggerService.getInstance();
+  const logger = loggerService.getLogger();
+  const optionsService = OptionsService.getInstance();
+  const options = optionsService.getOptions();
+  const cachedVersionFileName = getCachedResource(`${path.basename(rootDirectory)}.lockfile.json`);
+  const parse = async (): Promise<string> => {
+    logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving exact version from remote`);
+
+    const lockObject = await parseLockFile(rootDirectory);
+    await fs.promises.writeFile(cachedVersionFileName, JSON.stringify(lockObject), 'utf-8');
+
+    if (!lockObject[discoveryItem.name]) {
+      throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not retrieve exact version`);
+    }
+
+    return lockObject[discoveryItem.name].version;
+  };
+
+  if (options.forceRun) {
+    return await parse();
+  }
+
+  try {
+    const lockObject: LockObject = JSON.parse(await fs.promises.readFile(cachedVersionFileName, 'utf-8'));
+    return lockObject[discoveryItem.name].version;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return await parse();
+    }
+
+    throw error;
+  }
+}
+
 export default async function getExactVersion(
   discoveryItem: PDiscoveryItem,
   context: PipelineContext,
@@ -47,19 +84,10 @@ export default async function getExactVersion(
     throw new AppError('Package name not defined, hence could not get exact version.');
   }
 
-  const loggerService = LoggerService.getInstance();
-  const logger = loggerService.getLogger();
-
-  logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving exact version`);
-
-  const lockObject: LockObject = await parseLockFile(context.rootDirectory);
-
-  if (!lockObject[discoveryItem.name]) {
-    throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not retrieve exact version`);
-  }
+  const version = await extractVersion(discoveryItem as DiscoveryItem, context.rootDirectory);
 
   return Promise.resolve({
     ...discoveryItem,
-    version: lockObject[discoveryItem.name].version,
+    version,
   });
 }

@@ -4,7 +4,7 @@ import mkdirp from 'mkdirp';
 import yaml from 'yaml';
 import path from 'path';
 import { ComponentConfig, PackageJson } from '../types';
-import { getCachedComponentsDirectory } from '../helpers';
+import { getCachedResource } from '../helpers';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
@@ -58,7 +58,7 @@ export default class ApiService {
       return packageJson;
     };
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedComponentsDirectory(name, 'package.json');
+    const cachedContentFileName = getCachedResource(name, 'package.json');
 
     if (options.forceRun) {
       return await fetchFromRemote();
@@ -88,7 +88,7 @@ export default class ApiService {
     this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
 
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.yml`);
+    const cachedContentFileName = getCachedResource(name, `${name}.config.yml`);
     const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
       try {
         const yamlConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.yml`);
@@ -133,7 +133,7 @@ export default class ApiService {
     this.logger.debug(`${name} - attempting to retrieve JS configuration`);
 
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedComponentsDirectory(name, `${name}.config.js`);
+    const cachedContentFileName = getCachedResource(name, `${name}.config.js`);
     const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
       try {
         const jsConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.js`);
@@ -175,7 +175,7 @@ export default class ApiService {
     }
 
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedComponentsDirectory(name, 'CHANGELOG.md');
+    const cachedContentFileName = getCachedResource(name, 'CHANGELOG.md');
     const fetchFromRemote = async (): Promise<string> => {
       this.logger.debug(`${name} - retrieving changelog from remote`);
 

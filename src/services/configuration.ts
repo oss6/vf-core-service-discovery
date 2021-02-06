@@ -2,7 +2,7 @@ import fs from 'fs';
 import { compareAsc, formatISO } from 'date-fns';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { getAppConfigFileName, getAppDirectory, getCachedComponentsDirectory, parseRelativeTime } from '../helpers';
+import { getAppConfigFileName, getAppDirectory, getCachedResource, parseRelativeTime } from '../helpers';
 import { AppConfig } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';
@@ -60,7 +60,7 @@ export default class ConfigurationService {
   async setup(): Promise<void> {
     const options = this.optionsService.getOptions();
     const appDirectory = getAppDirectory();
-    const cachedComponentsDirectory = getCachedComponentsDirectory();
+    const cachedComponentsDirectory = getCachedResource();
     const appConfigFileName = getAppConfigFileName();
 
     if (options.forceRun) {
@@ -103,7 +103,7 @@ export default class ConfigurationService {
   }
 
   async deleteCachedComponents(): Promise<void> {
-    const cachedComponentsDirectory = getCachedComponentsDirectory();
+    const cachedComponentsDirectory = getCachedResource();
 
     this.logger.debug(`Deleting cache ${cachedComponentsDirectory}`);
     await rimrafP(cachedComponentsDirectory);

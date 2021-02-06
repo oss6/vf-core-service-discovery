@@ -1,4 +1,5 @@
 import Listr from 'listr';
+import OptionsService from '../services/options';
 import { PDiscoveryItem, PipelineContext, PipelineStep } from '../types';
 import getComponents from './steps/00-get-components';
 import getExactVersion from './steps/01-get-exact-version';
@@ -12,6 +13,7 @@ export { getComponents, getExactVersion, getPackageJson, getConfig, getChangelog
 export class Pipeline {
   static instance: Pipeline;
   private steps: PipelineStep[];
+  private optionsService = OptionsService.getInstance();
 
   private constructor() {
     this.steps = [];
@@ -32,6 +34,7 @@ export class Pipeline {
   }
 
   async run(source: string[], context: PipelineContext, reportProgress = false): Promise<PDiscoveryItem[]> {
+    const options = this.optionsService.getOptions();
     const discoveryItems: PDiscoveryItem[] = source.map((sourceItem) => ({
       name: sourceItem,
       nameWithoutPrefix: sourceItem.replace('@visual-framework/', ''),
@@ -52,7 +55,7 @@ export class Pipeline {
     const tasks = new Listr(processes, {
       concurrent: 5,
       exitOnError: false,
-      renderer: reportProgress ? 'default' : 'silent',
+      renderer: reportProgress && !options.verbose ? 'default' : 'silent',
     });
 
     return await tasks.run([]);

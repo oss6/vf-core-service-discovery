@@ -11,7 +11,7 @@ export function getAppConfigFileName(): string {
   return path.join(getAppDirectory(), 'config.json');
 }
 
-export function getCachedComponentsDirectory(...segments: string[]): string {
+export function getCachedResource(...segments: string[]): string {
   return path.join(getAppDirectory(), 'cached', ...segments);
 }
 
