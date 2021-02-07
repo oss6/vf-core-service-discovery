@@ -31,7 +31,9 @@
   * [Types](#module-documentation-types)
     - [`Options`](#module-documentation-types-options)
     - [`DiscoveryItem`](#module-documentation-types-discovery-item)
+    - [`PipelineItem`](#module-documentation-types-pipeline-item)
     - [`PDiscoveryItem`](#module-documentation-types-pdiscovery-item)
+    - [`PipelineStep`](#module-documentation-types-pipeline-step)
     - [`PipelineContext`](#module-documentation-types-pipeline-context)
   * [`ServiceDiscovery`](#module-documentation-service-discovery)
     - [`setup`](#module-documentation-service-discovery-setup)
@@ -100,17 +102,22 @@ An output example:
 `vf-core-service-discovery` can also be used as a module. A use case for this is if you want to have more control on the process.
 
 ```js
-import runServiceDiscovery from 'vf-core-service-discovery';
+import ServiceDiscovery from 'vf-core-service-discovery';
 
 async function run() {
-  const discoveryOutput = await runServiceDiscovery({
+  const serviceDiscovery = ServiceDiscovery.getInstance();
+
+  await serviceDiscovery.setup({
     forceRun: false,
     verbose: true,
-    logFile: 'vf-core-service-discovery.log',
+    logFile: 'test.log',
     loggingEnabled: true,
+    profile: false,
   });
 
-  console.log(discoveryOutput);
+  const items = await serviceDiscovery.run(true);
+
+  console.log(items);
 }
 
 run();
@@ -142,6 +149,7 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-v`, `--verbose`           | boolean | false                           | Show debug information      |
 | `-l`, `--log-file`          | string  | 'vf-core-service-discovery.log' | Log file location           |
 | `-f`, `--force`             | boolean | false                           | By-pass the cache           |
+| `-p`, `--profile`             | boolean | false                           | Profile the service discovery           |
 
 ## <a name="cli-documentation-config"></a>`config`
 
@@ -198,16 +206,27 @@ interface DiscoveryItem {
 }
 ```
 
+### <a name="module-documentation-types-pipeline-item"></a>`PipelineItem`
+
+Defines the context that goes through the pipeline, containing the discovery item and other information.
+
+```ts
+export interface PipelineItem {
+  discoveryItem: PDiscoveryItem;
+  profilingInformation: ProfilingInformation;
+}
+```
+
 ### <a name="module-documentation-types-pdiscovery-item"></a>`PDiscoveryItem`
 
 An alias for `Partial<DiscoveryItem>`
 
-`PipelineStep`
+### <a name="module-documentation-types-pipeline-step"></a>`PipelineStep`
 
 A pipeline step is a function that takes a source discovery item and a processing/pipeline context and returns the processed/extended discovery item.
 
 ```ts
-export type PipelineStep = (source: PDiscoveryItem, context: PipelineContext) => Promise<PDiscoveryItem>;
+export type PipelineStep = (source: PipelineItem, context: PipelineContext) => Promise<PipelineItem>;
 ```
 
 ### <a name="module-documentation-types-pipeline-context"></a>`PipelineContext`
@@ -280,7 +299,7 @@ Runs the service discovery.
 
 #### Returns
 
-`Promise<PDiscoveryItem[]>`
+`Promise<PipelineItem[]>`
 
 #### Example
 
@@ -292,9 +311,9 @@ import ServiceDiscovery from 'vf-core-service-discovery';
 
   // complete setup (see above)...
 
-  const discoveryItems = await serviceDiscovery.run();
+  const pipelineItems = await serviceDiscovery.run();
 
-  console.log(discoveryItems);
+  console.log(pipelineItems);
 })();
 ```
 
@@ -351,7 +370,7 @@ Runs the pipeline given a source and a context.
 
 #### Returns
 
-`Promise<PDiscoveryItem[]>`
+`Promise<PipelineItem[]>`
 
 #### Example
 
@@ -366,13 +385,13 @@ const context: PipelineContext = {
 };
 
 (async () => {
-  const discoveryItems = vfPipeline
+  const pipelineItems = await vfPipeline
     .addStep(step1)
     .addStep(step2)
     .addStep(step3)
     .run(source, context);
 
-  console.log(discoveryItems);
+  console.log(pipelineItems);
 })();
 ```
 
@@ -380,7 +399,7 @@ const context: PipelineContext = {
 
 
 Each pipeline step extends from the previous step.
-Each component item (discovery item) goes through these steps.
+Each pipeline item (containing the discovery item and additional information) goes through these steps.
 
 ### <a name="module-documentation-pipeline-steps-get-components"></a>`getComponents`
 
@@ -417,12 +436,12 @@ Extends the discovery item with the exact version of the installed component fro
 
 #### Parameters
 
-- `discoveryItem: PDiscoveryItem`
+- `pipelineItem: PipelineItem`
 - `context: PipelineContext`
 
 #### Returns
 
-`Promise<PDiscoveryItem>`
+`Promise<PipelineItem>`
 
 #### Example
 
@@ -430,7 +449,7 @@ Extends the discovery item with the exact version of the installed component fro
 import { pipeline } from 'vf-core-service-discovery';
 
 (async () => {
-  const discoveryItem = await pipeline.getExactVersion({
+  const { discoveryItem } = await pipeline.getExactVersion({
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
   });
@@ -446,11 +465,11 @@ Extends the discovery item with the latest package.json of the installed compone
 
 #### Parameters
 
-- `discoveryItem: PDiscoveryItem`
+- `pipelineItem: PipelineItem`
 
 #### Returns
 
-`Promise<PDiscoveryItem>`
+`Promise<PipelineItem>`
 
 #### Example
 
@@ -458,7 +477,7 @@ Extends the discovery item with the latest package.json of the installed compone
 import { pipeline } from 'vf-core-service-discovery';
 
 (async () => {
-  const discoveryItem = await pipeline.getPackageJson({
+  const { discoveryItem } = await pipeline.getPackageJson({
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
     version: '1.2.3',
@@ -475,11 +494,11 @@ Extends the discovery item with the latest component configuration file (YAML or
 
 #### Parameters
 
-- `discoveryItem: PDiscoveryItem`
+- `pipelineItem: PipelineItem`
 
 #### Returns
 
-`Promise<PDiscoveryItem>`
+`Promise<PipelineItem>`
 
 #### Example
 
@@ -487,7 +506,7 @@ Extends the discovery item with the latest component configuration file (YAML or
 import { pipeline } from 'vf-core-service-discovery';
 
 (async () => {
-  const discoveryItem = await pipeline.getConfig({
+  const { discoveryItem } = await pipeline.getConfig({
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
     version: '1.2.3',
@@ -507,11 +526,11 @@ Extends the discovery item with the changelog between the installed and the late
 
 #### Parameters
 
-- `discoveryItem: PDiscoveryItem`
+- `pipelineItem: PipelineItem`
 
 #### Returns
 
-`Promise<PDiscoveryItem>`
+`Promise<PipelineItem>`
 
 #### Example
 
@@ -519,7 +538,7 @@ Extends the discovery item with the changelog between the installed and the late
 import { pipeline } from 'vf-core-service-discovery';
 
 (async () => {
-  const discoveryItem = await pipeline.getChangelog({
+  const { discoveryItem } = await pipeline.getChangelog({
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
     version: '1.2.3',
@@ -544,12 +563,12 @@ Extends the discovery item with the dependents of the component.
 
 #### Parameters
 
-- `discoveryItem: PDiscoveryItem`
+- `discoveryItem: PipelineItem`
 - `context: PipelineContext`
 
 #### Returns
 
-`Promise<PDiscoveryItem>`
+`Promise<PipelineItem>`
 
 #### Example
 
@@ -557,7 +576,7 @@ Extends the discovery item with the dependents of the component.
 import { pipeline } from 'vf-core-service-discovery';
 
 (async () => {
-  const discoveryItem = await pipeline.getDependents({
+  const { discoveryItem } = await pipeline.getDependents({
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
     version: '1.2.3',
@@ -578,13 +597,10 @@ import { pipeline } from 'vf-core-service-discovery';
 
 # What's next
 
-
 1. Find dependents in different types of projects (for a start Angular and React).
-2. API documentation.
-3. Parallelise processing.
-4. Better user experience and interface.
+2. API documentation using TypeDoc.
+3. Add performance tests.
 
 # Contributing
-
 
 We welcome contributors and maintainers! To contribute please check the [contributing page](CONTRIBUTING.md) out.
