@@ -48,7 +48,6 @@ function setupApiService<T>(args: SystemUnderTestArguments<T>): TestObject {
   // mock file system
   const resource = typeof args.resource === 'string' ? args.resource : JSON.stringify(args.resource);
   const fsReadFileStub = sinon.stub(fs.promises, 'readFile');
-  // .resolves(args.cached ? null : { code: 'ENOENT' }, resource);
   const fsWriteFileStub = sinon.stub(fs.promises, 'writeFile');
 
   if (args.cached) {

@@ -1,11 +1,13 @@
 import anyTest, { TestInterface } from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import getExactVersion, { parseLockFile } from '../../src/pipeline/steps/01-get-exact-version';
 import { LockObject, PDiscoveryItem, PipelineContext } from '../../src/types';
 import LoggerService from '../../src/services/logger';
 import OptionsService from '../../src/services/options';
+import { getCachedResource } from '../../src/helpers';
 
 interface Context {
   sinonSandbox: sinon.SinonSandbox;
@@ -155,10 +157,15 @@ test.serial('getExactVersion should return the exact version of the input compon
   };
   const rootDirectory = '/test';
   const lockFileName = path.join(rootDirectory, 'package-lock.json');
-  const fsReadFileStub = t.context.sinonSandbox
-    .stub(fs.promises, 'readFile')
-    .withArgs(lockFileName, 'utf-8')
-    .resolves(JSON.stringify(lockFile));
+  const cachedVersionFileName = getCachedResource(`${path.basename(rootDirectory)}.lockfile.json`);
+
+  const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
+  fsReadFileStub.withArgs(lockFileName, 'utf-8').resolves(JSON.stringify(lockFile));
+  fsReadFileStub.withArgs(cachedVersionFileName, 'utf-8').rejects({ code: 'ENOENT' });
+
+  const fsWriteFileStub = t.context.sinonSandbox.stub(fs.promises, 'writeFile');
+  fsWriteFileStub.withArgs(lockFileName, JSON.stringify(lockFile), 'utf-8');
+
   const inputDiscoveryItem: PDiscoveryItem = {
     name: '@visual-framework/vf-box',
     nameWithoutPrefix: 'vf-box',
@@ -168,8 +175,7 @@ test.serial('getExactVersion should return the exact version of the input compon
     vfPackagePrefix: '@visual-framework',
   };
 
-  // TODO: check if it doesn't interfere (use mock-fs in the future)
-  t.context.sinonSandbox.stub(process, 'cwd').returns(rootDirectory);
+  t.context.sinonSandbox.stub(os, 'homedir').returns('/');
 
   // act
   const { discoveryItem } = await getExactVersion(

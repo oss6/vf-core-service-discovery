@@ -18,7 +18,7 @@
     "build": "yarn clean:dist && tsc --project ./",
     "clean:dist": "rimraf dist",
     "test": "nyc --reporter=lcov ava",
-    "test:dev": "nyc ava",
+    "test:dev": "nyc ava --verbose",
     "coverage": "codecov",
     "lint": "eslint . --ext .ts",
     "prepublish": "yarn build",
