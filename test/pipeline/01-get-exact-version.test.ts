@@ -124,6 +124,7 @@ test.serial('getExactVersion should return the exact version of the input compon
     logFile: '',
     loggingEnabled: false,
     verbose: false,
+    profile: false,
   });
 
   const loggerService = LoggerService.getInstance();
@@ -171,7 +172,13 @@ test.serial('getExactVersion should return the exact version of the input compon
   t.context.sinonSandbox.stub(process, 'cwd').returns(rootDirectory);
 
   // act
-  const discoveryItem: PDiscoveryItem = await getExactVersion(inputDiscoveryItem, context);
+  const { discoveryItem } = await getExactVersion(
+    {
+      discoveryItem: inputDiscoveryItem,
+      profilingInformation: {},
+    },
+    context,
+  );
 
   // assert
   t.deepEqual(discoveryItem, {

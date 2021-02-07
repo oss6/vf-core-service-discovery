@@ -33,7 +33,6 @@
     - [`DiscoveryItem`](#module-documentation-types-discovery-item)
     - [`PDiscoveryItem`](#module-documentation-types-pdiscovery-item)
     - [`PipelineContext`](#module-documentation-types-pipeline-context)
-    - [`GitHubDeviceLogin`](#module-documentation-types-github-device-login)
   * [`ServiceDiscovery`](#module-documentation-service-discovery)
     - [`setup`](#module-documentation-service-discovery-setup)
     - [`run`](#module-documentation-service-discovery-run)
@@ -106,7 +105,6 @@ import runServiceDiscovery from 'vf-core-service-discovery';
 async function run() {
   const discoveryOutput = await runServiceDiscovery({
     forceRun: false,
-    forceGitHubAuth: false,
     verbose: true,
     logFile: 'vf-core-service-discovery.log',
     loggingEnabled: true,
@@ -144,7 +142,6 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-v`, `--verbose`           | boolean | false                           | Show debug information      |
 | `-l`, `--log-file`          | string  | 'vf-core-service-discovery.log' | Log file location           |
 | `-f`, `--force`             | boolean | false                           | By-pass the cache           |
-| `-g`, `--force-github-auth` | boolean | false                           | Force GitHub authentication |
 
 ## <a name="cli-documentation-config"></a>`config`
 
@@ -156,7 +153,6 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 |---------------------|--------|---------|------------------------------------------|
 | `cacheExpiry`       | string | 8h      | Time before the cache expires            |
 | `lastInvalidation`  | Date   | null    | Last time the cache has been invalidated |
-| `gitHubAccessToken` | string | ''      | GitHub access token                      |
 | `vfCoreVersion`     | string | ''      | Latest vf-core release version           |
 
 ### <a name="cli-documentation-config-options"></a>Options
@@ -180,7 +176,6 @@ The options to the service discovery runner.
 ```ts
 interface Options {
   forceRun: boolean;
-  forceGitHubAuth: boolean;
   verbose: boolean;
   loggingEnabled: boolean;
   logFile: string;
@@ -226,20 +221,6 @@ interface PipelineContext {
 }
 ```
 
-### <a name="module-documentation-types-github-device-login"></a>`GitHubDeviceLogin`
-
-Defines the response from `POST https://github.com/login/device/code`.
-
-```ts
-export interface GitHubDeviceLogin {
-  userCode: string;
-  verificationUri: string;
-  interval: number;
-  deviceCode: string;
-  expiresIn: number;
-}
-```
-
 ## <a name="module-documentation-service-discovery"></a>`ServiceDiscovery`
 
 Class that defines a service discovery session/run.
@@ -256,9 +237,6 @@ Static method that gets the `ServiceDiscovery` singleton.
 
 Sets up the service discovery runner.
 
-It returns an `AsyncGenerator` because in the case of GitHub authentication the first `next()` returns the `GitHubDeviceLogin`,
-then the setup resumes.
-
 - Sets the options
 - Prepares the configuration
 - Check whether to invalidate
@@ -269,7 +247,7 @@ then the setup resumes.
 
 #### Returns
 
-`AsyncGenerator<GitHubDeviceLogin, void, unknown>`
+`Promise<void>`
 
 #### Example
 
@@ -279,27 +257,14 @@ import ServiceDiscovery from 'vf-core-service-discovery';
 (async () => {
   const serviceDiscovery = ServiceDiscovery.getInstance();
 
-  const setupGenerator = serviceDiscovery.setup({
+  await serviceDiscovery.setup({
     forceRun: false,
-    forceGitHubAuth: true,
     verbose: true,
     logFile: 'vf-core-service-discovery.log',
     loggingEnabled: true,
   });
 
-  let setupResult = await setupGenerator.next();
-
-  if (!setupResult.done) {
-    const { expiresIn, userCode, verificationUri } = setupResult.value as GitHubDeviceLogin;
-    const expiry = Math.floor(expiresIn / 60);
-
-    console.log(`Please enter the code ${userCode} at ${verificationUri}. This expires in ${expiry} minutes.`);
-
-    await sleep(2000);
-    await open(verificationUri);
-
-    setupResult = await setupGenerator.next();
-  }
+  // ...
 })();
 ```
 

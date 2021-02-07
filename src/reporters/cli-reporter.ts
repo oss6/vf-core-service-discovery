@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import boxen from 'boxen';
-import { DiscoveryItem } from '../types';
+import { DiscoveryItem, PipelineItem } from '../types';
 
 export function printMainHeading(): void {
   console.log('\n');
@@ -8,10 +8,11 @@ export function printMainHeading(): void {
   console.log('\n');
 }
 
-export function report(discoveryItems: DiscoveryItem[]): void {
+export function report(items: PipelineItem[]): void {
   console.log('\n\n');
 
-  for (const discoveryItem of discoveryItems) {
+  for (const { discoveryItem: ds, profilingInformation } of items) {
+    const discoveryItem = ds as DiscoveryItem;
     const isOldVersion = discoveryItem.version !== discoveryItem.packageJson.version;
 
     console.log(
@@ -43,6 +44,19 @@ export function report(discoveryItems: DiscoveryItem[]): void {
 
     if (discoveryItem.dependents?.length > 0) {
       console.log(`${discoveryItem.dependents.map((dep) => `\n\t\t\t${dep}`).join('')}`);
+    }
+
+    if (
+      Object.keys(profilingInformation).length > 0 &&
+      Object.values(profilingInformation).some((p) => p !== undefined)
+    ) {
+      console.log(`  Profiling information`);
+      console.log(
+        `${Object.entries(profilingInformation)
+          .filter(([_, took]) => took !== undefined)
+          .map(([key, took]) => `\n\t\t\t${key}: ${took}`)
+          .join('')}`,
+      );
     }
 
     console.log(`\n\n`);

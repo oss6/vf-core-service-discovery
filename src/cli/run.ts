@@ -1,12 +1,11 @@
 import ServiceDiscovery from '..';
 import { printMainHeading, report } from '../reporters/cli-reporter';
-import { DiscoveryItem } from '../types';
 
 interface Arguments {
   verbose: boolean;
   'log-file': string;
   force: boolean;
-  'force-github-auth': boolean;
+  profile: boolean;
 }
 
 export const command = 'run';
@@ -20,11 +19,11 @@ export const builder = {
     default: false,
     alias: 'f',
   },
-  'force-github-auth': {
-    description: 'Force GitHub authentication',
+  profile: {
+    description: 'Return profiling information',
     type: 'boolean',
     default: false,
-    alias: 'g',
+    alias: 'p',
   },
 };
 
@@ -39,11 +38,12 @@ export async function handler(argv: Arguments): Promise<void> {
       verbose: argv.verbose,
       logFile: argv['log-file'],
       loggingEnabled: true,
+      profile: argv.profile,
     });
 
-    const discoveryItems = await serviceDiscovery.run(true);
+    const items = await serviceDiscovery.run(true);
 
-    report(discoveryItems as DiscoveryItem[]);
+    report(items);
   } catch (error) {
     process.exit(1);
   }

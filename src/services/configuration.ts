@@ -7,6 +7,7 @@ import { AppConfig } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';
 import { FileNotFoundError } from '../errors';
+import mkdirp from 'mkdirp';
 
 const rimrafP = promisify(rimraf);
 
@@ -107,6 +108,7 @@ export default class ConfigurationService {
 
     this.logger.debug(`Deleting cache ${cachedComponentsDirectory}`);
     await rimrafP(cachedComponentsDirectory);
+    mkdirp(cachedComponentsDirectory);
   }
 
   update<T>(key: keyof AppConfig, value: T, persist = true): void {

@@ -1,4 +1,4 @@
-import { Options, PDiscoveryItem, PipelineContext } from './types';
+import { Options, PipelineContext, PipelineItem } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
@@ -59,7 +59,7 @@ export default class ServiceDiscovery {
     }
   }
 
-  async run(reportProgress = false): Promise<PDiscoveryItem[]> {
+  async run(reportProgress = false): Promise<PipelineItem[]> {
     if (!this.hasBeenSetUp) {
       throw new AppError('The ServiceDiscovery instance has not been set up.');
     }

@@ -1,6 +1,6 @@
 import Listr from 'listr';
 import OptionsService from '../services/options';
-import { PDiscoveryItem, PipelineContext, PipelineStep } from '../types';
+import { PDiscoveryItem, PipelineContext, PipelineItem, PipelineStep } from '../types';
 import getComponents from './steps/00-get-components';
 import getExactVersion from './steps/01-get-exact-version';
 import getPackageJson from './steps/02-get-package-json';
@@ -33,19 +33,22 @@ export class Pipeline {
     return this;
   }
 
-  async run(source: string[], context: PipelineContext, reportProgress = false): Promise<PDiscoveryItem[]> {
+  async run(source: string[], context: PipelineContext, reportProgress = false): Promise<PipelineItem[]> {
     const options = this.optionsService.getOptions();
     const discoveryItems: PDiscoveryItem[] = source.map((sourceItem) => ({
       name: sourceItem,
       nameWithoutPrefix: sourceItem.replace('@visual-framework/', ''),
     }));
 
-    const processes: Listr.ListrTask<PDiscoveryItem[]>[] = discoveryItems.map((discoveryItem) => ({
+    const processes: Listr.ListrTask<PipelineItem[]>[] = discoveryItems.map((discoveryItem) => ({
       title: discoveryItem.nameWithoutPrefix || '',
       task: async (ctx) => {
         const result = await this.steps.reduce(
           async (previousPromise, fn) => fn(await previousPromise, context),
-          Promise.resolve(discoveryItem),
+          Promise.resolve({
+            discoveryItem,
+            profilingInformation: {},
+          }),
         );
 
         ctx.push(result);

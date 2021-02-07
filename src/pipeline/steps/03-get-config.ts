@@ -1,9 +1,11 @@
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import { AppError } from '../../errors';
-import { PDiscoveryItem } from '../../types';
+import { PipelineItem } from '../../types';
+import { runAndMeasure } from '../../helpers';
+import OptionsService from '../../services/options';
 
-export default async function getConfig(discoveryItem: PDiscoveryItem): Promise<PDiscoveryItem> {
+export default async function getConfig({ discoveryItem, profilingInformation }: PipelineItem): Promise<PipelineItem> {
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get component config.');
   }
@@ -11,30 +13,53 @@ export default async function getConfig(discoveryItem: PDiscoveryItem): Promise<
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.getLogger();
   const apiService = ApiService.getInstance();
+  const optionsService = OptionsService.getInstance();
+  const { profile } = optionsService.getOptions();
 
   logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving package configuration`);
 
   try {
-    const yamlConfig = await apiService.getYamlComponentConfig(discoveryItem.nameWithoutPrefix);
+    const { result: yamlConfig, took: yamlConfigResponseTime } = await runAndMeasure(
+      async () => apiService.getYamlComponentConfig(discoveryItem.nameWithoutPrefix as string),
+      profile,
+    );
 
     if (yamlConfig) {
       return {
-        ...discoveryItem,
-        config: yamlConfig,
+        discoveryItem: {
+          ...discoveryItem,
+          config: yamlConfig,
+        },
+        profilingInformation: {
+          ...profilingInformation,
+          getConfig: yamlConfigResponseTime,
+        },
       };
     }
 
-    const jsConfig = await apiService.getJsComponentConfig(discoveryItem.nameWithoutPrefix);
+    const { result: jsConfig, took: jsConfigResponseTime } = await runAndMeasure(
+      async () => apiService.getJsComponentConfig(discoveryItem.nameWithoutPrefix as string),
+      profile,
+    );
 
     if (jsConfig) {
       return {
-        ...discoveryItem,
-        config: jsConfig,
+        discoveryItem: {
+          ...discoveryItem,
+          config: jsConfig,
+        },
+        profilingInformation: {
+          ...profilingInformation,
+          getConfig: jsConfigResponseTime,
+        },
       };
     }
 
     throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not find a configuration file`);
   } catch (error) {
-    return discoveryItem;
+    return {
+      discoveryItem,
+      profilingInformation,
+    };
   }
 }

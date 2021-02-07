@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import ApiService from '../../src/services/api';
 import getConfig from '../../src/pipeline/steps/03-get-config';
 import LoggerService from '../../src/services/logger';
+import OptionsService from '../../src/services/options';
 
 test.afterEach(() => {
   sinon.restore();
@@ -12,6 +13,15 @@ test('getConfig should extend a discovery item with their configuration', async 
   // arrange
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
+
+  const optionsService = OptionsService.getInstance();
+  optionsService.setOptions({
+    forceRun: false,
+    logFile: '',
+    loggingEnabled: false,
+    profile: false,
+    verbose: false,
+  });
 
   const apiService = ApiService.getInstance();
   const getYamlComponentConfigStub = sinon.stub(apiService, 'getYamlComponentConfig');
@@ -24,11 +34,14 @@ test('getConfig should extend a discovery item with their configuration', async 
   getJsComponentConfigStub.withArgs('vf-box').resolves(null);
 
   // act
-  const discoveryItem = await getConfig({
-    name: '@visual-framework/vf-box',
-    nameWithoutPrefix: 'vf-box',
-    version: '1.4.0',
-    packageJson: { version: '1.4.0' },
+  const { discoveryItem } = await getConfig({
+    discoveryItem: {
+      name: '@visual-framework/vf-box',
+      nameWithoutPrefix: 'vf-box',
+      version: '1.4.0',
+      packageJson: { version: '1.4.0' },
+    },
+    profilingInformation: {},
   });
 
   // assert

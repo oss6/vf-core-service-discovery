@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { parse as parseYarnLockFile } from '@yarnpkg/lockfile';
-import { DiscoveryItem, LockObject, PDiscoveryItem, PipelineContext } from '../../types';
+import { DiscoveryItem, LockObject, PipelineContext, PipelineItem } from '../../types';
 import { AppError, FileNotFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
-import { getCachedResource } from '../../helpers';
+import { getCachedResource, runAndMeasure } from '../../helpers';
 
 export async function parseLockFile(rootDirectory: string): Promise<LockObject> {
   const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
@@ -77,17 +77,28 @@ export async function extractVersion(discoveryItem: DiscoveryItem, rootDirectory
 }
 
 export default async function getExactVersion(
-  discoveryItem: PDiscoveryItem,
+  { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,
-): Promise<PDiscoveryItem> {
+): Promise<PipelineItem> {
   if (!discoveryItem.name || !discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get exact version.');
   }
 
-  const version = await extractVersion(discoveryItem as DiscoveryItem, context.rootDirectory);
+  const optionsService = OptionsService.getInstance();
+  const { profile } = optionsService.getOptions();
+  const { result, took } = await runAndMeasure(
+    async () => extractVersion(discoveryItem as DiscoveryItem, context.rootDirectory),
+    profile,
+  );
 
   return Promise.resolve({
-    ...discoveryItem,
-    version,
+    discoveryItem: {
+      ...discoveryItem,
+      version: result,
+    },
+    profilingInformation: {
+      ...profilingInformation,
+      getExactVersion: took,
+    },
   });
 }

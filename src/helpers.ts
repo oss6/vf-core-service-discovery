@@ -1,7 +1,7 @@
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears } from 'date-fns';
 import path from 'path';
 import os from 'os';
-import { ParsedRelativeTime } from './types';
+import { ParsedRelativeTime, ProfiledResult } from './types';
 
 export function getAppDirectory(...segments: string[]): string {
   return path.join(os.homedir(), '.vf-core-service-discovery', ...segments);
@@ -71,4 +71,21 @@ export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {
   }
 
   return date;
+}
+
+export async function runAndMeasure<T>(fn: () => Promise<T>, profile = true): Promise<ProfiledResult<T>> {
+  if (profile) {
+    const hrstart = process.hrtime();
+    const result = await fn();
+    const hrend = process.hrtime(hrstart);
+
+    return {
+      result,
+      took: hrend[1] / 1000000,
+    };
+  } else {
+    return {
+      result: await fn(),
+    };
+  }
 }

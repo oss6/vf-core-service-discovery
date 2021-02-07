@@ -7,6 +7,7 @@ export interface AppConfig {
 export interface Options {
   forceRun: boolean;
   verbose: boolean;
+  profile: boolean;
   loggingEnabled: boolean;
   logFile: string;
 }
@@ -40,7 +41,16 @@ export interface DiscoveryItem {
 
 export type PDiscoveryItem = Partial<DiscoveryItem>;
 
-export type PipelineStep = (source: PDiscoveryItem, context: PipelineContext) => Promise<PDiscoveryItem>;
+export interface ProfilingInformation {
+  [key: string]: number | undefined;
+}
+
+export interface PipelineItem {
+  discoveryItem: PDiscoveryItem;
+  profilingInformation: ProfilingInformation;
+}
+
+export type PipelineStep = (source: PipelineItem, context: PipelineContext) => Promise<PipelineItem>;
 
 export interface PipelineContext {
   rootDirectory: string;
@@ -67,4 +77,9 @@ export interface ParsedRelativeTime {
   hours?: number;
   minutes?: number;
   seconds?: number;
+}
+
+export interface ProfiledResult<T> {
+  result: T;
+  took?: number;
 }
