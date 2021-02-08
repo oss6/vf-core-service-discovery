@@ -83,3 +83,5 @@ export interface ProfiledResult<T> {
   result: T;
   took?: number;
 }
+
+export type Reporter = (items: PipelineItem[]) => Promise<void>;
