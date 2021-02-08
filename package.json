@@ -1,6 +1,6 @@
 {
   "name": "vf-core-service-discovery",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "description": "A tool to analyse the usage of vf-core in your project",
   "author": "Ossama Edbali <ossedb@gmail.com>",
   "license": "MIT",
