@@ -87,6 +87,7 @@ test.serial('getVfCoreLatestReleaseVersion should return the correct vf-core ver
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: false,
   });
@@ -133,6 +134,7 @@ test.serial('getComponentPackageJson should call the remote resource', async (t)
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: false,
   });
@@ -162,6 +164,7 @@ test.serial('getComponentPackageJson should use the cache if available', async (
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: true,
   });
@@ -229,6 +232,7 @@ test.serial('getYamlComponentConfig should get the resource from remote', async 
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: false,
   });
@@ -260,6 +264,7 @@ test.serial('getYamlComponentConfig should use the cache if available', async (t
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: true,
   });
@@ -287,6 +292,7 @@ test.serial('getComponentChangelog should get the resource from remote', async (
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: false,
   });
@@ -314,6 +320,7 @@ test.serial('getComponentChangelog should use the cache if available', async (t)
       verbose: false,
       profile: false,
       disabled: [],
+      onlyOutdated: false,
     },
     cached: true,
   });

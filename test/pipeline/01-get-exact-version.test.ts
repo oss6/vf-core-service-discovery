@@ -128,6 +128,7 @@ test.serial('getExactVersion should return the exact version of the input compon
     verbose: false,
     profile: false,
     disabled: [],
+    onlyOutdated: false,
   });
 
   const loggerService = LoggerService.getInstance();

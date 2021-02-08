@@ -9,6 +9,7 @@ interface Arguments {
   'log-file': string;
   force: boolean;
   profile: boolean;
+  'only-outdated': boolean;
   reporters: string[];
   disabled: string[];
 }
@@ -48,6 +49,12 @@ export const builder = {
     default: [],
     alias: 'd',
   },
+  'only-outdated': {
+    description: 'Display only outdated components',
+    type: 'boolean',
+    default: false,
+    alias: 'o',
+  },
 };
 
 export async function handler(argv: Arguments): Promise<void> {
@@ -61,8 +68,9 @@ export async function handler(argv: Arguments): Promise<void> {
       verbose: argv.verbose,
       logFile: argv['log-file'],
       loggingEnabled: true,
+      onlyOutdated: argv['only-outdated'],
       profile: argv.profile,
-      disabled: argv.disabled,
+      disabled: argv['only-outdated'] ? ['getConfig', 'getChangelog', 'getDependents'] : argv.disabled,
     });
 
     const items = await serviceDiscovery.run(true);

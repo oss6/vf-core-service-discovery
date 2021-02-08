@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import OptionsService from '../services/options';
 import { DiscoveryItem, PipelineItem } from '../types';
 
 const stringBuilder = {
@@ -54,48 +55,72 @@ function addData(data: Map<string, string[]>) {
   addNewLine(2);
 }
 
+function defaultFormatter({ discoveryItem: ds, profilingInformation }: PipelineItem) {
+  const discoveryItem = ds as DiscoveryItem;
+  const data = new Map<string, string[]>();
+  const isOldVersion = discoveryItem.version !== discoveryItem.packageJson.version;
+
+  addComponentTitle(discoveryItem);
+  addNewLine();
+
+  data.set('Used version', [`${isOldVersion ? chalk.red(discoveryItem.version) : discoveryItem.version}`]);
+  data.set('Latest version', [
+    `${isOldVersion ? chalk.green(discoveryItem.packageJson.version) : discoveryItem.packageJson.version}`,
+  ]);
+
+  if (discoveryItem.config) {
+    data.set('Status', [`${discoveryItem.config.status}`]);
+  }
+
+  if (discoveryItem.changelog?.length > 0) {
+    data.set('Changelog', discoveryItem.changelog.map((item) => [`${chalk.bold(item.version)}`, item.changes]).flat(2));
+  }
+
+  if (discoveryItem.dependents) {
+    data.set('Dependents', discoveryItem.dependents.length > 0 ? discoveryItem.dependents : [chalk.red('None')]);
+  }
+
+  if (
+    Object.keys(profilingInformation).length > 0 &&
+    Object.values(profilingInformation).some((p) => p !== undefined)
+  ) {
+    data.set(
+      'Profiling information',
+      Object.entries(profilingInformation)
+        .filter(([_, took]) => took !== undefined)
+        .map(([key, took]) => `${key}: ${took}`),
+    );
+  }
+
+  addData(data);
+}
+
+function onlyOutdatedFormatter({ discoveryItem: ds }: PipelineItem) {
+  const discoveryItem = ds as DiscoveryItem;
+
+  if (discoveryItem.version === discoveryItem.packageJson.version) {
+    return;
+  }
+
+  stringBuilder.add(
+    chalk.bold(`${discoveryItem.nameWithoutPrefix}${discoveryItem.config ? ` (${discoveryItem.config?.title})` : ''}`),
+  );
+
+  stringBuilder.add(` (${chalk.red(discoveryItem.version)} -> ${chalk.green(discoveryItem.packageJson.version)})\n`);
+}
+
 export default async function report(items: PipelineItem[]): Promise<void> {
+  const optionsService = OptionsService.getInstance();
+  const { onlyOutdated } = optionsService.getOptions();
+
   addNewLine(2);
 
-  for (const { discoveryItem: ds, profilingInformation } of items) {
-    const data = new Map<string, string[]>();
-    const discoveryItem = ds as DiscoveryItem;
-    const isOldVersion = discoveryItem.version !== discoveryItem.packageJson.version;
-
-    addComponentTitle(discoveryItem);
-    addNewLine();
-
-    data.set('Used version', [`${isOldVersion ? chalk.red(discoveryItem.version) : discoveryItem.version}`]);
-    data.set('Latest version', [`${isOldVersion ? chalk.red(discoveryItem.version) : discoveryItem.version}`]);
-
-    if (discoveryItem.config) {
-      data.set('Status', [`${discoveryItem.config.status}`]);
+  for (const pipelineItem of items) {
+    if (onlyOutdated) {
+      onlyOutdatedFormatter(pipelineItem);
+    } else {
+      defaultFormatter(pipelineItem);
     }
-
-    if (discoveryItem.changelog?.length > 0) {
-      data.set(
-        'Changelog',
-        discoveryItem.changelog.map((item) => [`${chalk.bold(item.version)}`, item.changes]).flat(2),
-      );
-    }
-
-    if (discoveryItem.dependents) {
-      data.set('Dependents', discoveryItem.dependents.length > 0 ? discoveryItem.dependents : [chalk.red('None')]);
-    }
-
-    if (
-      Object.keys(profilingInformation).length > 0 &&
-      Object.values(profilingInformation).some((p) => p !== undefined)
-    ) {
-      data.set(
-        'Profiling information',
-        Object.entries(profilingInformation)
-          .filter(([_, took]) => took !== undefined)
-          .map(([key, took]) => `${key}: ${took}`),
-      );
-    }
-
-    addData(data);
   }
 
   console.log(stringBuilder.value);

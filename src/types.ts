@@ -9,6 +9,7 @@ export interface Options {
   verbose: boolean;
   profile: boolean;
   loggingEnabled: boolean;
+  onlyOutdated: boolean;
   logFile: string;
   disabled: string[];
 }

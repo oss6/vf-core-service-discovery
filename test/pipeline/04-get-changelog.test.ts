@@ -23,6 +23,7 @@ test('getChangelog should extend a discovery item with its changelog if applicab
     profile: false,
     verbose: false,
     disabled: [],
+    onlyOutdated: false,
   });
 
   const apiService = ApiService.getInstance();
