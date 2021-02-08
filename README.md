@@ -33,6 +33,7 @@
     - [`DiscoveryItem`](#module-documentation-types-discovery-item)
     - [`PipelineItem`](#module-documentation-types-pipeline-item)
     - [`PDiscoveryItem`](#module-documentation-types-pdiscovery-item)
+    - [`PipelineStepFn`](#module-documentation-types-pipeline-step-fn)
     - [`PipelineStep`](#module-documentation-types-pipeline-step)
     - [`PipelineContext`](#module-documentation-types-pipeline-context)
   * [`ServiceDiscovery`](#module-documentation-service-discovery)
@@ -149,7 +150,10 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-v`, `--verbose`           | boolean | false                           | Show debug information      |
 | `-l`, `--log-file`          | string  | 'vf-core-service-discovery.log' | Log file location           |
 | `-f`, `--force`             | boolean | false                           | By-pass the cache           |
-| `-p`, `--profile`             | boolean | false                           | Profile the service discovery           |
+| `-p`, `--profile`             | boolean | false                         | Profile the service discovery           |
+| `-r`, `--reporters`             | array | ['cli']                       | The reporters to use (cli and json)     |
+| `-d`, `--disabled`             | array | []                       | List of disabled steps (from getConfig, getChangelog getDependents)     |
+| `-o`, `--only-outdated` | boolean | false | Display only outdated components |
 
 ## <a name="cli-documentation-config"></a>`config`
 
@@ -185,8 +189,11 @@ The options to the service discovery runner.
 interface Options {
   forceRun: boolean;
   verbose: boolean;
+  profile: boolean;
   loggingEnabled: boolean;
+  onlyOutdated: boolean;
   logFile: string;
+  disabled: string[];
 }
 ```
 
@@ -211,7 +218,7 @@ interface DiscoveryItem {
 Defines the context that goes through the pipeline, containing the discovery item and other information.
 
 ```ts
-export interface PipelineItem {
+interface PipelineItem {
   discoveryItem: PDiscoveryItem;
   profilingInformation: ProfilingInformation;
 }
@@ -221,12 +228,19 @@ export interface PipelineItem {
 
 An alias for `Partial<DiscoveryItem>`
 
+### <a name="module-documentation-types-pipeline-step-fn"></a>`PipelineStepFn`
+
+A pipeline step function is a function that takes a source discovery item and a processing/pipeline context and returns the processed/extended discovery item.
+
 ### <a name="module-documentation-types-pipeline-step"></a>`PipelineStep`
 
-A pipeline step is a function that takes a source discovery item and a processing/pipeline context and returns the processed/extended discovery item.
+A pipeline step is an object that defines the pipeline step function and whether this is enabled in the context of the function.
 
 ```ts
-export type PipelineStep = (source: PipelineItem, context: PipelineContext) => Promise<PipelineItem>;
+interface PipelineStep {
+  fn: PipelineStepFn;
+  enabled: boolean;
+}
 ```
 
 ### <a name="module-documentation-types-pipeline-context"></a>`PipelineContext`
