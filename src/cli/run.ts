@@ -10,6 +10,7 @@ interface Arguments {
   force: boolean;
   profile: boolean;
   reporters: string[];
+  disabled: string[];
 }
 
 function printMainHeading(): void {
@@ -41,6 +42,12 @@ export const builder = {
     default: ['cli'],
     alias: 'r',
   },
+  disabled: {
+    description: 'List of disabled steps (from getConfig, getChangelog, getDependents)',
+    type: 'array',
+    default: [],
+    alias: 'd',
+  },
 };
 
 export async function handler(argv: Arguments): Promise<void> {
@@ -55,6 +62,7 @@ export async function handler(argv: Arguments): Promise<void> {
       logFile: argv['log-file'],
       loggingEnabled: true,
       profile: argv.profile,
+      disabled: argv.disabled,
     });
 
     const items = await serviceDiscovery.run(true);

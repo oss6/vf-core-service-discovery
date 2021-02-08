@@ -21,6 +21,7 @@ test('getPackageJson should extend a discovery item with their package.json', as
     loggingEnabled: false,
     profile: false,
     verbose: false,
+    disabled: [],
   });
 
   const apiService = ApiService.getInstance();

@@ -43,13 +43,15 @@ export class Pipeline {
     const processes: Listr.ListrTask<PipelineItem[]>[] = discoveryItems.map((discoveryItem) => ({
       title: discoveryItem.nameWithoutPrefix || '',
       task: async (ctx) => {
-        const result = await this.steps.reduce(
-          async (previousPromise, fn) => fn(await previousPromise, context),
-          Promise.resolve({
-            discoveryItem,
-            profilingInformation: {},
-          }),
-        );
+        const result = await this.steps
+          .filter((step) => step.enabled)
+          .reduce(
+            async (previousPromise, step) => step.fn(await previousPromise, context),
+            Promise.resolve({
+              discoveryItem,
+              profilingInformation: {},
+            }),
+          );
 
         ctx.push(result);
       },

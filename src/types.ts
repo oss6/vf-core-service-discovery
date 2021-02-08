@@ -10,6 +10,7 @@ export interface Options {
   profile: boolean;
   loggingEnabled: boolean;
   logFile: string;
+  disabled: string[];
 }
 
 export interface PackageJson {
@@ -50,7 +51,12 @@ export interface PipelineItem {
   profilingInformation: ProfilingInformation;
 }
 
-export type PipelineStep = (source: PipelineItem, context: PipelineContext) => Promise<PipelineItem>;
+export type PipelineStepFn = (source: PipelineItem, context: PipelineContext) => Promise<PipelineItem>;
+
+export interface PipelineStep {
+  fn: PipelineStepFn;
+  enabled: boolean;
+}
 
 export interface PipelineContext {
   rootDirectory: string;

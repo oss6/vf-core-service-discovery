@@ -17,6 +17,7 @@ export default class ServiceDiscovery {
   private apiService: ApiService;
   private hasBeenSetUp = false;
   private logger: Logger;
+  private optionalSteps = ['getConfig', 'getChangelog', 'getDependents'];
 
   static getInstance(): ServiceDiscovery {
     if (ServiceDiscovery.instance) {
@@ -67,20 +68,22 @@ export default class ServiceDiscovery {
     try {
       this.logger.debug('Running service discovery');
 
+      this.hasBeenSetUp = false;
+
+      const { disabled } = this.optionsService.getOptions();
+      const disabledSteps: string[] = disabled.filter((value) => this.optionalSteps.includes(value));
       const context: PipelineContext = {
         rootDirectory: process.cwd(),
         vfPackagePrefix: '@visual-framework',
       };
       const components = await pipeline.getComponents(context);
 
-      this.hasBeenSetUp = false;
-
       return await pipeline.Pipeline.getInstance()
-        .addStep(pipeline.getExactVersion)
-        .addStep(pipeline.getPackageJson)
-        .addStep(pipeline.getConfig)
-        .addStep(pipeline.getChangelog)
-        .addStep(pipeline.getDependents)
+        .addStep({ fn: pipeline.getExactVersion, enabled: true })
+        .addStep({ fn: pipeline.getPackageJson, enabled: true })
+        .addStep({ fn: pipeline.getConfig, enabled: !disabledSteps.includes('getConfig') })
+        .addStep({ fn: pipeline.getChangelog, enabled: !disabledSteps.includes('getChangelog') })
+        .addStep({ fn: pipeline.getDependents, enabled: !disabledSteps.includes('getDependents') })
         .run(components, context, reportProgress);
     } catch (error) {
       this.hasBeenSetUp = false;

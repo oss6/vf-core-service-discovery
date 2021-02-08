@@ -79,7 +79,9 @@ export default async function report(items: PipelineItem[]): Promise<void> {
       );
     }
 
-    data.set('Dependents', discoveryItem.dependents?.length > 0 ? discoveryItem.dependents : [chalk.red('None')]);
+    if (discoveryItem.dependents) {
+      data.set('Dependents', discoveryItem.dependents.length > 0 ? discoveryItem.dependents : [chalk.red('None')]);
+    }
 
     if (
       Object.keys(profilingInformation).length > 0 &&

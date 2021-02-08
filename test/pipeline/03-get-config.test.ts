@@ -21,6 +21,7 @@ test('getConfig should extend a discovery item with their configuration', async 
     loggingEnabled: false,
     profile: false,
     verbose: false,
+    disabled: [],
   });
 
   const apiService = ApiService.getInstance();
