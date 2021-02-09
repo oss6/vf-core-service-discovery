@@ -21,6 +21,7 @@
     "test:dev": "nyc ava --verbose",
     "coverage": "codecov",
     "lint": "eslint . --ext .ts",
+    "docs": "npx typedoc",
     "prepublish": "yarn build",
     "release": "standard-version",
     "release:minor": "standard-version --release-as minor",
@@ -57,6 +58,7 @@
     "sinon": "^9.2.2",
     "standard-version": "^9.1.0",
     "ts-node": "^9.1.1",
+    "typedoc": "^0.20.23",
     "typescript": "^4.0.5"
   },
   "dependencies": {

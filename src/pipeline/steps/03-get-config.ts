@@ -5,6 +5,10 @@ import { PipelineItem } from '../../types';
 import { runAndMeasure } from '../../helpers';
 import OptionsService from '../../services/options';
 
+/**
+ * Returns the configuration of the vf-core component.
+ * @param pipelineItem The pipeline item to process.
+ */
 export default async function getConfig({ discoveryItem, profilingInformation }: PipelineItem): Promise<PipelineItem> {
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get component config.');

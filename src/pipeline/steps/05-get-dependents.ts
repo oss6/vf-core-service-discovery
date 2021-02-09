@@ -10,6 +10,11 @@ import { PDiscoveryItem, PipelineContext, PipelineItem } from '../../types';
 const globP = promisify(glob);
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
+/**
+ * Returns the dependents of the component.
+ * @param pipelineItem The pipeline item to process.
+ * @param context The pipeline context.
+ */
 export default async function getDependents(
   { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,

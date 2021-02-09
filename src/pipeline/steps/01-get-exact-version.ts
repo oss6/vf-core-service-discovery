@@ -76,6 +76,11 @@ export async function extractVersion(discoveryItem: DiscoveryItem, rootDirectory
   }
 }
 
+/**
+ * Returns the exact version of the installed component.
+ * @param pipelineItem The pipeline item to process.
+ * @param context The pipeline context.
+ */
 export default async function getExactVersion(
   { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,

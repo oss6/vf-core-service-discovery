@@ -9,7 +9,10 @@ import { Logger } from 'winston';
 
 export { pipeline };
 
-export default class ServiceDiscovery {
+/**
+ * Represents a service discovery instance.
+ */
+export class ServiceDiscovery {
   private static instance: ServiceDiscovery;
   private loggerService = LoggerService.getInstance();
   private optionsService: OptionsService;
@@ -19,6 +22,12 @@ export default class ServiceDiscovery {
   private logger: Logger;
   private optionalSteps = ['getConfig', 'getChangelog', 'getDependents'];
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
+
+  /**
+   * Returns the {@link ServiceDiscovery} singleton.
+   */
   static getInstance(): ServiceDiscovery {
     if (ServiceDiscovery.instance) {
       return ServiceDiscovery.instance;
@@ -28,6 +37,10 @@ export default class ServiceDiscovery {
     return ServiceDiscovery.instance;
   }
 
+  /**
+   * Sets up the service discovery prior to a run.
+   * @param options Options to define the service discovery behaviour.
+   */
   async setup(options: Options): Promise<void> {
     this.logger = this.loggerService.registerLogger(
       options.verbose ? 'debug' : 'info',
@@ -60,6 +73,10 @@ export default class ServiceDiscovery {
     }
   }
 
+  /**
+   * Runs the service discovery.
+   * @param reportProgress Whether to report progress in the cli.
+   */
   async run(reportProgress = false): Promise<PipelineItem[]> {
     if (!this.hasBeenSetUp) {
       throw new AppError('The ServiceDiscovery instance has not been set up.');
@@ -97,3 +114,5 @@ export default class ServiceDiscovery {
     }
   }
 }
+
+export default ServiceDiscovery;

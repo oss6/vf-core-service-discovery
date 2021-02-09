@@ -10,6 +10,9 @@ import getDependents from './steps/05-get-dependents';
 
 export { getComponents, getExactVersion, getPackageJson, getConfig, getChangelog, getDependents };
 
+/**
+ * Defines a pipeline which processes discovery items.
+ */
 export class Pipeline {
   static instance: Pipeline;
   private steps: PipelineStep[];
@@ -19,6 +22,9 @@ export class Pipeline {
     this.steps = [];
   }
 
+  /**
+   * Returns the {@link Pipeline} singleton.
+   */
   static getInstance(): Pipeline {
     if (Pipeline.instance) {
       return Pipeline.instance;
@@ -28,11 +34,21 @@ export class Pipeline {
     return Pipeline.instance;
   }
 
+  /**
+   * Adds a pipeline step.
+   * @param step The pipeline step to add.
+   */
   addStep(step: PipelineStep): Pipeline {
     this.steps.push(step);
     return this;
   }
 
+  /**
+   * Runs the pipeline.
+   * @param source The components to work on.
+   * @param context The pipeline context containing the root directory and the vf package prefix.
+   * @param reportProgress Whether to report progress in the cli.
+   */
   async run(source: string[], context: PipelineContext, reportProgress = false): Promise<PipelineItem[]> {
     const options = this.optionsService.getOptions();
     const discoveryItems: PDiscoveryItem[] = source.map((sourceItem) => ({

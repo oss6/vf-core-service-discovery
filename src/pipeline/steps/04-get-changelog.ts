@@ -6,6 +6,10 @@ import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
 import { ChangelogItem, PipelineItem } from '../../types';
 
+/**
+ * Returns the changelog if the installed version is different than the latest version.
+ * @param pipelineItem The pipeline item to process.
+ */
 export default async function getChangelog({
   discoveryItem,
   profilingInformation,

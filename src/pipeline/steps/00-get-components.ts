@@ -4,6 +4,10 @@ import { FileNotFoundError, NoVfDependenciesFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
 import { PackageJson, PipelineContext } from '../../types';
 
+/**
+ * Returns the components used by the project.
+ * @param context The pipeline context.
+ */
 export default async function getComponents(context: PipelineContext): Promise<string[]> {
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.getLogger();
