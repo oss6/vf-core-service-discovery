@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { Options, PipelineContext, PipelineItem } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
@@ -6,6 +7,7 @@ import ApiService from './services/api';
 import * as pipeline from './pipeline';
 import { AppError } from './errors';
 import { Logger } from 'winston';
+import { getCacheFileName } from './helpers';
 
 export { pipeline };
 
@@ -89,19 +91,27 @@ export class ServiceDiscovery {
 
       const { disabled } = this.optionsService.getOptions();
       const disabledSteps: string[] = disabled.filter((value) => this.optionalSteps.includes(value));
+
+      const cache = await this.configurationService.getCache();
       const context: PipelineContext = {
         rootDirectory: process.cwd(),
         vfPackagePrefix: '@visual-framework',
+        cache,
       };
+
       const components = await pipeline.getComponents(context);
 
-      return await pipeline.Pipeline.getInstance()
+      const pipelineItems = await pipeline.Pipeline.getInstance()
         .addStep({ fn: pipeline.getExactVersion, enabled: true })
         .addStep({ fn: pipeline.getPackageJson, enabled: true })
         .addStep({ fn: pipeline.getConfig, enabled: !disabledSteps.includes('getConfig') })
         .addStep({ fn: pipeline.getChangelog, enabled: !disabledSteps.includes('getChangelog') })
         .addStep({ fn: pipeline.getDependents, enabled: !disabledSteps.includes('getDependents') })
         .run(components, context, reportProgress);
+
+      await fs.promises.writeFile(getCacheFileName(), JSON.stringify(context.cache));
+
+      return pipelineItems;
     } catch (error) {
       this.hasBeenSetUp = false;
       this.logger.error(error.message);

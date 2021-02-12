@@ -62,6 +62,26 @@ export interface PipelineStep {
 export interface PipelineContext {
   rootDirectory: string;
   vfPackagePrefix: string;
+  cache: Cache;
+}
+
+export interface Cache {
+  lockObjects: LockObjectsCacheMap;
+  components: ComponentsCacheMap;
+}
+
+export interface LockObjectsCacheMap {
+  [key: string]: LockObject;
+}
+
+export interface ComponentsCacheMap {
+  [key: string]: ComponentsCacheMapItems;
+}
+
+export interface ComponentsCacheMapItems {
+  packageJson: PackageJson;
+  config: ComponentConfig;
+  changelog: string;
 }
 
 export interface LockItem {

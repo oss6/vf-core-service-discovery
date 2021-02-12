@@ -1,7 +1,7 @@
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import { AppError } from '../../errors';
-import { PipelineItem } from '../../types';
+import { PipelineContext, PipelineItem } from '../../types';
 import { runAndMeasure } from '../../helpers';
 import OptionsService from '../../services/options';
 
@@ -9,7 +9,10 @@ import OptionsService from '../../services/options';
  * Returns the configuration of the vf-core component.
  * @param pipelineItem The pipeline item to process.
  */
-export default async function getConfig({ discoveryItem, profilingInformation }: PipelineItem): Promise<PipelineItem> {
+export default async function getConfig(
+  { discoveryItem, profilingInformation }: PipelineItem,
+  context: PipelineContext,
+): Promise<PipelineItem> {
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get component config.');
   }
@@ -22,48 +25,41 @@ export default async function getConfig({ discoveryItem, profilingInformation }:
 
   logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving package configuration`);
 
-  try {
-    const { result: yamlConfig, took: yamlConfigResponseTime } = await runAndMeasure(
-      async () => apiService.getYamlComponentConfig(discoveryItem.nameWithoutPrefix as string),
-      profile,
-    );
+  const { result: yamlConfig, took: yamlConfigResponseTime } = await runAndMeasure(
+    async () => apiService.getYamlComponentConfig(discoveryItem.nameWithoutPrefix as string, context),
+    profile,
+  );
 
-    if (yamlConfig) {
-      return {
-        discoveryItem: {
-          ...discoveryItem,
-          config: yamlConfig,
-        },
-        profilingInformation: {
-          ...profilingInformation,
-          getConfig: yamlConfigResponseTime,
-        },
-      };
-    }
-
-    const { result: jsConfig, took: jsConfigResponseTime } = await runAndMeasure(
-      async () => apiService.getJsComponentConfig(discoveryItem.nameWithoutPrefix as string),
-      profile,
-    );
-
-    if (jsConfig) {
-      return {
-        discoveryItem: {
-          ...discoveryItem,
-          config: jsConfig,
-        },
-        profilingInformation: {
-          ...profilingInformation,
-          getConfig: jsConfigResponseTime,
-        },
-      };
-    }
-
-    throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not find a configuration file`);
-  } catch (error) {
+  if (yamlConfig) {
     return {
-      discoveryItem,
-      profilingInformation,
+      discoveryItem: {
+        ...discoveryItem,
+        config: yamlConfig,
+      },
+      profilingInformation: {
+        ...profilingInformation,
+        getConfig: yamlConfigResponseTime,
+      },
     };
   }
+
+  const { result: jsConfig, took: jsConfigResponseTime } = await runAndMeasure(
+    async () => apiService.getJsComponentConfig(discoveryItem.nameWithoutPrefix as string, context),
+    profile,
+  );
+
+  if (jsConfig) {
+    return {
+      discoveryItem: {
+        ...discoveryItem,
+        config: jsConfig,
+      },
+      profilingInformation: {
+        ...profilingInformation,
+        getConfig: jsConfigResponseTime,
+      },
+    };
+  }
+
+  throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not find a configuration file`);
 }

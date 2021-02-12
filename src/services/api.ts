@@ -1,10 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import 'isomorphic-fetch';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
 import yaml from 'yaml';
-import path from 'path';
-import { ComponentConfig, PackageJson } from '../types';
-import { getCachedResource } from '../helpers';
+import { ComponentConfig, PackageJson, PipelineContext } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
@@ -39,66 +37,63 @@ export default class ApiService {
     return latestReleaseVersion;
   }
 
-  async getComponentPackageJson(name: string): Promise<PackageJson> {
-    const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
-
-    if (!vfCoreLatestReleaseVersion) {
-      throw new MissingConfigurationError(['vfCoreVersion']);
-    }
-
+  async getComponentPackageJson(name: string, context: PipelineContext): Promise<PackageJson> {
+    const options = this.optionsService.getOptions();
     const fetchFromRemote = async (): Promise<PackageJson> => {
       this.logger.debug(`${name} - retrieving package.json from remote`);
+
+      const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
+
+      if (!vfCoreLatestReleaseVersion) {
+        throw new MissingConfigurationError(['vfCoreVersion']);
+      }
 
       const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'package.json');
       const packageJson: PackageJson = await response.json();
 
-      await mkdirp(path.dirname(cachedContentFileName));
-      await fs.promises.writeFile(cachedContentFileName, JSON.stringify(packageJson), 'utf-8');
+      context.cache.components[name] = {
+        ...(context.cache.components[name] || {}),
+        packageJson,
+      };
 
       return packageJson;
     };
-    const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedResource(name, 'package.json');
 
     if (options.forceRun) {
       return await fetchFromRemote();
     }
 
-    try {
+    if (context.cache.components[name]?.packageJson) {
       this.logger.debug(`${name} - retrieving package.json from cache`);
-
-      const cachedContent = JSON.parse(await fs.promises.readFile(cachedContentFileName, 'utf-8'));
-      return cachedContent;
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        return await fetchFromRemote();
-      } else {
-        throw error;
-      }
+      return context.cache.components[name].packageJson;
+    } else {
+      return await fetchFromRemote();
     }
   }
 
-  async getYamlComponentConfig(name: string): Promise<ComponentConfig | null> {
-    const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
-
-    if (!vfCoreLatestReleaseVersion) {
-      throw new MissingConfigurationError(['vfCoreVersion']);
-    }
-
-    this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
-
+  async getYamlComponentConfig(name: string, context: PipelineContext): Promise<ComponentConfig | null> {
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedResource(name, `${name}.config.yml`);
     const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
+      this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
+
+      const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
+
+      if (!vfCoreLatestReleaseVersion) {
+        throw new MissingConfigurationError(['vfCoreVersion']);
+      }
+
       try {
         const yamlConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.yml`);
 
         const content = await yamlConfigResponse.text();
+        const config = yaml.parse(content);
 
-        await mkdirp(path.dirname(cachedContentFileName));
-        await fs.promises.writeFile(cachedContentFileName, content, 'utf-8');
+        context.cache.components[name] = {
+          ...(context.cache.components[name] || {}),
+          config,
+        };
 
-        return yaml.parse(content);
+        return config;
       } catch (error) {
         this.logger.debug(`${name} - YAML configuration not found`);
         return null;
@@ -109,41 +104,41 @@ export default class ApiService {
       return await fetchFromRemote();
     }
 
-    try {
+    if (context.cache.components[name]?.config) {
       this.logger.debug(`${name} - retrieving configuration from cache`);
-
-      const cachedContent = await fs.promises.readFile(cachedContentFileName, 'utf-8');
-      return yaml.parse(cachedContent);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        return await fetchFromRemote();
-      } else {
-        throw error;
-      }
+      return context.cache.components[name].config;
+    } else {
+      return await fetchFromRemote();
     }
   }
 
-  async getJsComponentConfig(name: string): Promise<ComponentConfig | null> {
-    const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
-
-    if (!vfCoreLatestReleaseVersion) {
-      throw new MissingConfigurationError(['vfCoreVersion']);
-    }
-
-    this.logger.debug(`${name} - attempting to retrieve JS configuration`);
-
+  async getJsComponentConfig(name: string, context: PipelineContext): Promise<ComponentConfig | null> {
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedResource(name, `${name}.config.js`);
     const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
+      this.logger.debug(`${name} - attempting to retrieve JS configuration`);
+
+      const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
+
+      if (!vfCoreLatestReleaseVersion) {
+        throw new MissingConfigurationError(['vfCoreVersion']);
+      }
+
       try {
         const jsConfigResponse = await this.attemptFetch(vfCoreLatestReleaseVersion, name, `${name}.config.js`);
 
         const content = await jsConfigResponse.text();
 
-        await mkdirp(path.dirname(cachedContentFileName));
-        await fs.promises.writeFile(cachedContentFileName, content, 'utf-8');
+        const tempConfigFileName = `${name}.config-tmp.js`;
+        await fs.promises.writeFile(tempConfigFileName, content, 'utf-8');
+        const config = require(tempConfigFileName);
+        await fs.promises.unlink(tempConfigFileName);
 
-        return require(cachedContentFileName);
+        context.cache.components[name] = {
+          ...(context.cache.components[name] || {}),
+          config,
+        };
+
+        return config;
       } catch (error) {
         this.logger.debug(`${name} - YAML configuration not found`);
         return null;
@@ -154,55 +149,45 @@ export default class ApiService {
       return await fetchFromRemote();
     }
 
-    try {
+    if (context.cache.components[name]?.config) {
       this.logger.debug(`${name} - retrieving configuration from cache`);
-
-      return require(cachedContentFileName);
-    } catch (error) {
-      if (error === 'ENOENT') {
-        return await fetchFromRemote();
-      } else {
-        throw error;
-      }
+      return context.cache.components[name].config;
+    } else {
+      return await fetchFromRemote();
     }
   }
 
-  async getComponentChangelog(name: string): Promise<string> {
-    const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
-
-    if (!vfCoreLatestReleaseVersion) {
-      throw new MissingConfigurationError(['vfCoreVersion']);
-    }
-
+  async getComponentChangelog(name: string, context: PipelineContext): Promise<string> {
     const options = this.optionsService.getOptions();
-    const cachedContentFileName = getCachedResource(name, 'CHANGELOG.md');
     const fetchFromRemote = async (): Promise<string> => {
       this.logger.debug(`${name} - retrieving changelog from remote`);
 
+      const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
+
+      if (!vfCoreLatestReleaseVersion) {
+        throw new MissingConfigurationError(['vfCoreVersion']);
+      }
+
       const response = await this.attemptFetch(vfCoreLatestReleaseVersion, name, 'CHANGELOG.md');
-      const content = await response.text();
+      const changelog = await response.text();
 
-      await mkdirp(path.dirname(cachedContentFileName));
-      await fs.promises.writeFile(cachedContentFileName, content, 'utf-8');
+      context.cache.components[name] = {
+        ...(context.cache.components[name] || {}),
+        changelog,
+      };
 
-      return content;
+      return changelog;
     };
 
     if (options.forceRun) {
       return await fetchFromRemote();
     }
 
-    try {
+    if (context.cache.components[name]?.changelog) {
       this.logger.debug(`${name} - retrieving changelog from cache`);
-
-      const cachedContent = await fs.promises.readFile(cachedContentFileName, 'utf-8');
-      return cachedContent;
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        return await fetchFromRemote();
-      } else {
-        throw error;
-      }
+      return context.cache.components[name].changelog;
+    } else {
+      return await fetchFromRemote();
     }
   }
 

@@ -5,15 +5,24 @@ import { DiscoveryItem, LockObject, PipelineContext, PipelineItem } from '../../
 import { AppError, FileNotFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
-import { getCachedResource, runAndMeasure } from '../../helpers';
+import { runAndMeasure } from '../../helpers';
 
 export async function parseLockFile(rootDirectory: string): Promise<LockObject> {
   const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
 
   try {
     const npmLockFile = JSON.parse(await fs.promises.readFile(npmLockFileName, 'utf-8'));
+    const fullLockObject = npmLockFile.dependencies as LockObject;
 
-    return npmLockFile.dependencies as LockObject;
+    return Object.entries(fullLockObject)
+      .filter(([pkg, _]) => pkg.includes('visual-framework'))
+      .reduce(
+        (obj, [pkg, lockItem]) => ({
+          ...obj,
+          [pkg]: lockItem,
+        }),
+        {},
+      );
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;
@@ -25,13 +34,15 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
   try {
     const yarnLockFile: LockObject = parseYarnLockFile(await fs.promises.readFile(yarnLockFileName, 'utf-8')).object;
 
-    return Object.entries(yarnLockFile).reduce(
-      (obj, [pkg, lockItem]) => ({
-        ...obj,
-        [pkg.split('@').slice(0, -1).join('@')]: lockItem,
-      }),
-      {},
-    );
+    return Object.entries(yarnLockFile)
+      .filter(([pkg, _]) => pkg.includes('visual-framework'))
+      .reduce(
+        (obj, [pkg, lockItem]) => ({
+          ...obj,
+          [pkg.split('@').slice(0, -1).join('@')]: lockItem,
+        }),
+        {},
+      );
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;
@@ -41,17 +52,16 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
   throw new FileNotFoundError(`${npmLockFileName} and ${yarnLockFileName}`);
 }
 
-export async function extractVersion(discoveryItem: DiscoveryItem, rootDirectory: string): Promise<string> {
+export async function extractVersion(discoveryItem: DiscoveryItem, context: PipelineContext): Promise<string> {
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.getLogger();
   const optionsService = OptionsService.getInstance();
   const options = optionsService.getOptions();
-  const cachedVersionFileName = getCachedResource(`${path.basename(rootDirectory)}.lockfile.json`);
   const parse = async (): Promise<string> => {
     logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving exact version from remote`);
 
-    const lockObject = await parseLockFile(rootDirectory);
-    await fs.promises.writeFile(cachedVersionFileName, JSON.stringify(lockObject), 'utf-8');
+    const lockObject = await parseLockFile(context.rootDirectory);
+    context.cache.lockObjects[context.rootDirectory] = lockObject;
 
     if (!lockObject[discoveryItem.name]) {
       throw new AppError(`${discoveryItem.nameWithoutPrefix} - could not retrieve exact version`);
@@ -64,15 +74,12 @@ export async function extractVersion(discoveryItem: DiscoveryItem, rootDirectory
     return await parse();
   }
 
-  try {
-    const lockObject: LockObject = JSON.parse(await fs.promises.readFile(cachedVersionFileName, 'utf-8'));
-    return lockObject[discoveryItem.name].version;
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return await parse();
-    }
+  const lockObject = context.cache.lockObjects[context.rootDirectory];
 
-    throw error;
+  if (lockObject && lockObject[discoveryItem.name]) {
+    return lockObject[discoveryItem.name].version;
+  } else {
+    return await parse();
   }
 }
 
@@ -92,7 +99,7 @@ export default async function getExactVersion(
   const optionsService = OptionsService.getInstance();
   const { profile } = optionsService.getOptions();
   const { result, took } = await runAndMeasure(
-    async () => extractVersion(discoveryItem as DiscoveryItem, context.rootDirectory),
+    async () => extractVersion(discoveryItem as DiscoveryItem, context),
     profile,
   );
 

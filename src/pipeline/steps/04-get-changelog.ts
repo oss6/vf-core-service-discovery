@@ -4,16 +4,16 @@ import { runAndMeasure } from '../../helpers';
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
-import { ChangelogItem, PipelineItem } from '../../types';
+import { ChangelogItem, PipelineContext, PipelineItem } from '../../types';
 
 /**
  * Returns the changelog if the installed version is different than the latest version.
  * @param pipelineItem The pipeline item to process.
  */
-export default async function getChangelog({
-  discoveryItem,
-  profilingInformation,
-}: PipelineItem): Promise<PipelineItem> {
+export default async function getChangelog(
+  { discoveryItem, profilingInformation }: PipelineItem,
+  context: PipelineContext,
+): Promise<PipelineItem> {
   const loggerService = LoggerService.getInstance();
   const logger = loggerService.getLogger();
   const apiService = ApiService.getInstance();
@@ -34,7 +34,10 @@ export default async function getChangelog({
   }
 
   const { result: changelog, took } = await runAndMeasure(async () => {
-    const changelogContents = await apiService.getComponentChangelog(discoveryItem.nameWithoutPrefix as string);
+    const changelogContents = await apiService.getComponentChangelog(
+      discoveryItem.nameWithoutPrefix as string,
+      context,
+    );
     const lines = changelogContents.split('\n');
     const changelog: ChangelogItem[] = [];
     let changelogItem: ChangelogItem | undefined = undefined;

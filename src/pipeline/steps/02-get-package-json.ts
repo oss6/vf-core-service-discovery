@@ -1,7 +1,7 @@
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import { AppError } from '../../errors';
-import { PipelineItem } from '../../types';
+import { PipelineContext, PipelineItem } from '../../types';
 import { runAndMeasure } from '../../helpers';
 import OptionsService from '../../services/options';
 
@@ -9,10 +9,10 @@ import OptionsService from '../../services/options';
  * Returns the package.json of the latest version of the component.
  * @param pipelineItem The pipeline item to process.
  */
-export default async function getPackageJson({
-  discoveryItem,
-  profilingInformation,
-}: PipelineItem): Promise<PipelineItem> {
+export default async function getPackageJson(
+  { discoveryItem, profilingInformation }: PipelineItem,
+  context: PipelineContext,
+): Promise<PipelineItem> {
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get package.json.');
   }
@@ -26,7 +26,7 @@ export default async function getPackageJson({
   logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving latest package information`);
 
   const { result, took } = await runAndMeasure(
-    async () => apiService.getComponentPackageJson(discoveryItem.nameWithoutPrefix as string),
+    async () => apiService.getComponentPackageJson(discoveryItem.nameWithoutPrefix as string, context),
     profile,
   );
 

@@ -29,6 +29,10 @@ test.serial('getComponents should throw an error if package.json is not found', 
   const context: PipelineContext = {
     rootDirectory: '/test',
     vfPackagePrefix: '@visual-framework',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const fsReadFileStub = t.context.sinonSandbox
@@ -52,6 +56,10 @@ test.serial('getComponents should throw an error if no vf-core dependencies are 
   const context: PipelineContext = {
     rootDirectory: '/test',
     vfPackagePrefix: '@visual-framework',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const fsReadFileStub = t.context.sinonSandbox
@@ -75,6 +83,10 @@ test.serial('getComponents should return the installed components', async (t) =>
   const context: PipelineContext = {
     rootDirectory: '/test',
     vfPackagePrefix: '@visual-framework',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const packageJson: PackageJson = {

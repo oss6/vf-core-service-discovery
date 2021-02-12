@@ -6,7 +6,7 @@ import ConfigurationService from '../src/services/configuration';
 import LoggerService from '../src/services/logger';
 import OptionsService from '../src/services/options';
 import { AppConfig, Options } from '../src/types';
-import { getAppConfigFileName, getAppDirectory, getCachedResource } from '../src/helpers';
+import { getAppConfigFileName, getAppDirectory, getCacheDirectory, getCacheFileName } from '../src/helpers';
 import { shouldInvalidateFixture } from './fixture/configuration.fixture';
 import { FileNotFoundError } from '../src/errors';
 
@@ -18,7 +18,7 @@ interface SystemUnderTestArguments {
   options: Options;
   appDirectoryExists: boolean;
   appConfigFileNameExists: boolean;
-  cachedComponentsDirectoryExists: boolean;
+  cached: boolean;
 }
 
 interface TestObject {
@@ -53,7 +53,8 @@ function setupConfigurationService(t: ExecutionContext<Context>, args: SystemUnd
 
   fsExistsSyncStub.withArgs(getAppDirectory()).returns(args.appDirectoryExists);
   fsExistsSyncStub.withArgs(getAppConfigFileName()).returns(args.appConfigFileNameExists);
-  fsExistsSyncStub.withArgs(getCachedResource()).returns(args.cachedComponentsDirectoryExists);
+  fsExistsSyncStub.withArgs(getCacheDirectory()).returns(args.cached);
+  fsExistsSyncStub.withArgs(getCacheFileName()).returns(args.cached);
 
   const fsReadFileSyncStub = t.context.sinonSandbox
     .stub(fs, 'readFileSync')
@@ -173,12 +174,12 @@ test.serial('setup should initialise the configuration if the directory is not e
     },
     appDirectoryExists: false,
     appConfigFileNameExists: false,
-    cachedComponentsDirectoryExists: false,
+    cached: false,
   });
 
   const appDirectory = getAppDirectory();
   const appConfigFileName = getAppConfigFileName();
-  const cachedComponentsDirectory = getCachedResource();
+  const cacheDirectory = getCacheDirectory();
 
   // act
   await configurationService.setup();
@@ -186,9 +187,9 @@ test.serial('setup should initialise the configuration if the directory is not e
   // assert
   t.true(fsExistsSyncStub.calledWith(appDirectory), '');
   t.true(fsExistsSyncStub.calledWith(appConfigFileName));
-  t.true(fsExistsSyncStub.calledWith(cachedComponentsDirectory));
+  t.true(fsExistsSyncStub.calledWith(cacheDirectory));
   t.true(fsMkdirSyncStub.calledWith(appDirectory));
-  t.true(fsMkdirSyncStub.calledWith(cachedComponentsDirectory));
+  t.true(fsMkdirSyncStub.calledWith(cacheDirectory));
   t.true(fsWriteFileSyncStub.calledWith(appConfigFileName));
   t.true(fsReadFileSyncStub.notCalled);
 });
@@ -213,12 +214,12 @@ test.serial('setup should use the existing configuration', async (t) => {
     },
     appDirectoryExists: true,
     appConfigFileNameExists: true,
-    cachedComponentsDirectoryExists: true,
+    cached: true,
   });
 
   const appDirectory = getAppDirectory();
   const appConfigFileName = getAppConfigFileName();
-  const cachedComponentsDirectory = getCachedResource();
+  const cacheDirectory = getCacheDirectory();
 
   // act
   await configurationService.setup();
@@ -226,7 +227,7 @@ test.serial('setup should use the existing configuration', async (t) => {
   // assert
   t.true(fsExistsSyncStub.calledWith(appDirectory));
   t.true(fsExistsSyncStub.calledWith(appConfigFileName));
-  t.true(fsExistsSyncStub.calledWith(cachedComponentsDirectory));
+  t.true(fsExistsSyncStub.calledWith(cacheDirectory));
   t.true(fsMkdirSyncStub.notCalled);
   t.true(fsWriteFileSyncStub.notCalled);
   t.true(fsReadFileSyncStub.calledWith(appConfigFileName, 'utf-8'));

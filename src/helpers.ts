@@ -11,8 +11,12 @@ export function getAppConfigFileName(): string {
   return path.join(getAppDirectory(), 'config.json');
 }
 
-export function getCachedResource(...segments: string[]): string {
-  return path.join(getAppDirectory(), 'cached', ...segments);
+export function getCacheDirectory(): string {
+  return path.join(getAppDirectory(), 'cached');
+}
+
+export function getCacheFileName(): string {
+  return path.join(getCacheDirectory(), 'cache.json');
 }
 
 export function parseRelativeTime(relativeTime: string, fromDate: Date): Date {

@@ -2,8 +2,14 @@ import fs from 'fs';
 import { compareAsc, formatISO } from 'date-fns';
 import rimraf from 'rimraf';
 import { promisify } from 'util';
-import { getAppConfigFileName, getAppDirectory, getCachedResource, parseRelativeTime } from '../helpers';
-import { AppConfig } from '../types';
+import {
+  getAppConfigFileName,
+  getAppDirectory,
+  getCacheDirectory,
+  getCacheFileName,
+  parseRelativeTime,
+} from '../helpers';
+import { AppConfig, Cache } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';
 import { FileNotFoundError } from '../errors';
@@ -22,6 +28,10 @@ export default class ConfigurationService {
   private loggerService = LoggerService.getInstance();
   private configuration: AppConfig;
   private logger = this.loggerService.getLogger();
+  private defaultCache: Partial<Cache> = {
+    components: {},
+    lockObjects: {},
+  };
 
   static getInstance(): ConfigurationService {
     if (ConfigurationService.instance) {
@@ -61,7 +71,8 @@ export default class ConfigurationService {
   async setup(): Promise<void> {
     const options = this.optionsService.getOptions();
     const appDirectory = getAppDirectory();
-    const cachedComponentsDirectory = getCachedResource();
+    const cacheDirectory = getCacheDirectory();
+    const cacheFileName = getCacheFileName();
     const appConfigFileName = getAppConfigFileName();
 
     if (options.forceRun) {
@@ -86,12 +97,21 @@ export default class ConfigurationService {
       this.deserialize(appConfigContents);
     }
 
-    if (!fs.existsSync(cachedComponentsDirectory)) {
-      this.logger.debug(`Creating cache ${cachedComponentsDirectory}`);
-      fs.mkdirSync(cachedComponentsDirectory);
+    if (!fs.existsSync(cacheDirectory)) {
+      this.logger.debug(`Creating cache directory ${cacheDirectory}`);
+      fs.mkdirSync(cacheDirectory);
+    }
+
+    if (!fs.existsSync(cacheFileName)) {
+      this.logger.debug(`Creating cache ${cacheFileName}`);
+      fs.writeFileSync(cacheFileName, JSON.stringify(this.defaultCache));
     }
 
     this.logger.debug('App configuration loaded successfully');
+  }
+
+  async getCache(): Promise<Cache> {
+    return JSON.parse(await fs.promises.readFile(getCacheFileName(), 'utf-8'));
   }
 
   shouldInvalidate(): boolean {
@@ -104,11 +124,13 @@ export default class ConfigurationService {
   }
 
   async deleteCachedComponents(): Promise<void> {
-    const cachedComponentsDirectory = getCachedResource();
+    const cacheDirectory = getCacheDirectory();
+    const cacheFileName = getCacheFileName();
 
-    this.logger.debug(`Deleting cache ${cachedComponentsDirectory}`);
-    await rimrafP(cachedComponentsDirectory);
-    mkdirp(cachedComponentsDirectory);
+    this.logger.debug(`Invalidating cache ${cacheDirectory}`);
+    await rimrafP(cacheDirectory);
+    mkdirp(cacheDirectory);
+    await fs.promises.writeFile(cacheFileName, JSON.stringify(this.defaultCache), 'utf-8');
   }
 
   update<T>(key: keyof AppConfig, value: T, persist = true): void {
