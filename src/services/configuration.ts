@@ -129,7 +129,7 @@ export default class ConfigurationService {
 
     this.logger.debug(`Invalidating cache ${cacheDirectory}`);
     await rimrafP(cacheDirectory);
-    mkdirp(cacheDirectory);
+    await mkdirp(cacheDirectory);
     await fs.promises.writeFile(cacheFileName, JSON.stringify(this.defaultCache), 'utf-8');
   }
 
