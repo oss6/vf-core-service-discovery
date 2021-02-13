@@ -3,7 +3,7 @@ import { glob } from 'glob';
 import path from 'path';
 import { promisify } from 'util';
 import { AppError } from '../../errors';
-import { runAndMeasure } from '../../helpers';
+import { runAndMeasure } from '../../helpers/misc';
 import OptionsService from '../../services/options';
 import { PDiscoveryItem, PipelineContext, PipelineItem } from '../../types';
 

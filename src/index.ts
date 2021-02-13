@@ -7,7 +7,7 @@ import ApiService from './services/api';
 import * as pipeline from './pipeline';
 import { AppError } from './errors';
 import { Logger } from 'winston';
-import { getCacheFileName } from './helpers';
+import { getCacheFileName } from './helpers/misc';
 
 export { pipeline };
 

@@ -8,7 +8,7 @@ import {
   getCacheDirectory,
   getCacheFileName,
   parseRelativeTime,
-} from '../helpers';
+} from '../helpers/misc';
 import { AppConfig, Cache } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';

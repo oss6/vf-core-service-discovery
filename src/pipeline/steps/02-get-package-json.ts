@@ -2,7 +2,7 @@ import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import { AppError } from '../../errors';
 import { PipelineContext, PipelineItem } from '../../types';
-import { runAndMeasure } from '../../helpers';
+import { runAndMeasure } from '../../helpers/misc';
 import OptionsService from '../../services/options';
 
 /**

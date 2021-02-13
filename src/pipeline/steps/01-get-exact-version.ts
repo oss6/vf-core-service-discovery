@@ -5,7 +5,7 @@ import { DiscoveryItem, LockObject, PipelineContext, PipelineItem } from '../../
 import { AppError, FileNotFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
-import { runAndMeasure } from '../../helpers';
+import { runAndMeasure } from '../../helpers/misc';
 
 export async function parseLockFile(rootDirectory: string): Promise<LockObject> {
   const npmLockFileName = path.join(rootDirectory, 'package-lock.json');

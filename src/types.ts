@@ -111,4 +111,4 @@ export interface ProfiledResult<T> {
   took?: number;
 }
 
-export type Reporter = (items: PipelineItem[]) => Promise<void>;
+export type Reporter = (items: PipelineItem[], format?: string) => Promise<void>;

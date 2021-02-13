@@ -1,6 +1,6 @@
 import semver from 'semver';
 import { AppError } from '../../errors';
-import { runAndMeasure } from '../../helpers';
+import { runAndMeasure } from '../../helpers/misc';
 import ApiService from '../../services/api';
 import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';

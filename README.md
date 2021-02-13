@@ -127,6 +127,46 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-r`, `--reporters`             | array | ['cli']                       | The reporters to use (cli and json)     |
 | `-d`, `--disabled`             | array | []                       | List of disabled steps (from getConfig, getChangelog getDependents)     |
 | `-o`, `--only-outdated` | boolean | false | Display only outdated components |
+| `-m`, `--format` | string | '' | Specifies the formatting for the results |
+
+#### Custom formatting
+
+If you would like to use your own formatting for displaying the results in the CLI you can specify the `--format` option.
+The following tokens are used for displaying specific information for each discovery item:
+
+- `%name`: component name
+- `%usedVersion`: the version installed by your project
+- `%latestVersion`: the package's latest version
+- `%changelog(...)`: the changelog if applicable (i.e. if used version != latest version)
+- `%changelog(...%version...)`: the version of a changelog item
+- `%changelog(...%changes(...)...)`: the changes of a changelog item
+- `%changes(...$change...)`: the actual change in a changelog item
+- `$dependents(...)`: the dependents
+- `$dependents(...$depenent...)`: the dependent item
+
+**Examples**
+
+```
+$ vf-core-service-discovery --format "%name (%usedVersion, %latestVersion)"
+$ ...
+$ vf-box (1.5.6, 1.6.0)
+$ vf-card (2.1.4, 2.1.4)
+```
+
+```
+$ vf-core-service-discovery --format "%name\nChangelog\n%changelog(%version\n%changes(> %change)\n)"
+$ vf-box
+$ Changelog
+$ 2.3.0
+$ > updates font size for title/heading> makes sure the text is black inside the `--easy` variant.
+
+$ vf-grid
+$ Changelog
+$ 1.4.0
+$ > fixes flexbox fallback grid when there are items on two or more rows> fixes widths on flexbox fallback grid.
+$ 1.3.0
+$ > makes the layout something that can now use 'extends' within nunjucks
+```
 
 ## <a name="cli-documentation-config"></a>`config`
 

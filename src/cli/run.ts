@@ -12,6 +12,7 @@ interface Arguments {
   'only-outdated': boolean;
   reporters: string[];
   disabled: string[];
+  format: string;
 }
 
 function printMainHeading(): void {
@@ -55,6 +56,12 @@ export const builder = {
     default: false,
     alias: 'o',
   },
+  format: {
+    description: 'Defines the CLI output format',
+    type: 'string',
+    default: '',
+    alias: 'm',
+  },
 };
 
 export async function handler(argv: Arguments): Promise<void> {
@@ -80,9 +87,10 @@ export async function handler(argv: Arguments): Promise<void> {
     );
 
     for (const report of reporters) {
-      await report(items);
+      await report(items, argv.format);
     }
   } catch (error) {
+    console.log(error);
     process.exit(1);
   }
 }

@@ -1,7 +1,7 @@
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears } from 'date-fns';
 import path from 'path';
 import os from 'os';
-import { ParsedRelativeTime, ProfiledResult } from './types';
+import { ParsedRelativeTime, ProfiledResult } from '../types';
 
 export function getAppDirectory(...segments: string[]): string {
   return path.join(os.homedir(), '.vf-core-service-discovery', ...segments);

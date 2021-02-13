@@ -6,7 +6,7 @@ import ConfigurationService from '../src/services/configuration';
 import LoggerService from '../src/services/logger';
 import OptionsService from '../src/services/options';
 import { AppConfig, Options } from '../src/types';
-import { getAppConfigFileName, getAppDirectory, getCacheDirectory, getCacheFileName } from '../src/helpers';
+import { getAppConfigFileName, getAppDirectory, getCacheDirectory, getCacheFileName } from '../src/helpers/misc';
 import { shouldInvalidateFixture } from './fixture/configuration.fixture';
 import { FileNotFoundError } from '../src/errors';
 

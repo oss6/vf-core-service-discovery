@@ -1,5 +1,5 @@
 import test from 'ava';
-import { parseRelativeTime } from '../src/helpers';
+import { parseRelativeTime } from '../src/helpers/misc';
 
 test('parseRelativeTime should return the correct values', (t) => {
   // arrange
