@@ -120,14 +120,14 @@ Synopsis: `vf-core-service-discovery run [options]`
 
 | Option                  | Type    | Default                         | Description                 |
 |-------------------------|---------|---------------------------------|-----------------------------|
-| `-v`, `--verbose`           | boolean | false                           | Show debug information      |
-| `-l`, `--log-file`          | string  | 'vf-core-service-discovery.log' | Log file location           |
-| `-f`, `--force`             | boolean | false                           | By-pass the cache           |
-| `-p`, `--profile`             | boolean | false                         | Profile the service discovery           |
-| `-r`, `--reporters`             | array | ['cli']                       | The reporters to use (cli and json)     |
-| `-d`, `--disabled`             | array | []                       | List of disabled steps (from getConfig, getChangelog getDependents)     |
-| `-o`, `--only-outdated` | boolean | false | Display only outdated components |
-| `-m`, `--format` | string | '' | Specifies the formatting for the results |
+| `-v`, `--verbose`           | boolean | `false`                           | Show debug information      |
+| `-l`, `--log-file`          | string  | `'vf-core-service-discovery.log'` | Log file location           |
+| `-f`, `--force`             | boolean | `false`                           | By-pass the cache           |
+| `-p`, `--profile`             | boolean | `false`                         | Profile the service discovery           |
+| `-r`, `--reporters`             | array | `['cli']`                       | The reporters to use (cli and json)     |
+| `-d`, `--disabled`             | array | `[]`                       | List of disabled steps (from getConfig, getChangelog getDependents)     |
+| `-o`, `--only-outdated` | boolean | `false` | Display only outdated components |
+| `-m`, `--format` | string | `''` | Specifies the formatting for the results |
 
 #### Custom formatting
 
@@ -176,17 +176,17 @@ Synopsis: `vf-core-service-discovery config [key] [value] [options]`
 
 | Key                 | Value  | Default | Description                              |
 |---------------------|--------|---------|------------------------------------------|
-| `cacheExpiry`       | string | 8h      | Time before the cache expires            |
-| `lastInvalidation`  | Date   | null    | Last time the cache has been invalidated |
-| `vfCoreVersion`     | string | ''      | Latest vf-core release version           |
+| `cacheExpiry`       | string | `'8h'`      | Time before the cache expires            |
+| `lastInvalidation`  | Date   | `null`    | Last time the cache has been invalidated |
+| `vfCoreVersion`     | string | `''`      | Latest vf-core release version           |
 
 ### <a name="cli-documentation-config-options"></a>Options
 
 | Option             | Type    | Default                         | Description                     |
 |--------------------|---------|---------------------------------|---------------------------------|
-| `-v`, `--verbose`  | boolean | false                           | Show debug information          |
-| `-l`, `--log-file` | string  | 'vf-core-service-discovery.log' | Log file location               |
-| `-r`, `--reset`    | boolean | false                           | Reset configuration to defaults |
+| `-v`, `--verbose`  | boolean | `false`                           | Show debug information          |
+| `-l`, `--log-file` | string  | `'vf-core-service-discovery.log'` | Log file location               |
+| `-r`, `--reset`    | boolean | `false`                           | Reset configuration to defaults |
 
 # Module documentation
 
