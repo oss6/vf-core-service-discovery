@@ -8,6 +8,8 @@
 
 > :warning: This project is currently in active development; use with caution. Thanks!
 
+> Demo: https://youtu.be/gF6YAm6Totg
+
 `vf-core-service-discovery` is a tool to analyse the usage of [vf-core](https://github.com/visual-framework/vf-core) in your project.
 
 # Table of contents
