@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0-beta.4](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2021-02-26)
+
+
+### Features
+
+* add formatters for cli-reporter (closes [#34](https://github.com/oss6/vf-core-service-discovery/issues/34)) ([67108bf](https://github.com/oss6/vf-core-service-discovery/commits/67108bfecde92ef8429985998b08957f5c3c25a5))
+* add versions visual comparison ([d4c9847](https://github.com/oss6/vf-core-service-discovery/commits/d4c98471650ee9c77d5d0f0c51a7c451e24ee927))
+
+
+### Bug Fixes
+
+* cache invalidation ([3041cfe](https://github.com/oss6/vf-core-service-discovery/commits/3041cfed97f6726a123aa438f0deec3a61f283df))
+
+
+### Refactoring
+
+* use single cache file (closes [#38](https://github.com/oss6/vf-core-service-discovery/issues/38)) ([defe9fc](https://github.com/oss6/vf-core-service-discovery/commits/defe9fcbeb057f242fb82e312764a1683b48f1ac))
+
+
+### Docs
+
+* add module docs from TypeDoc ([4a5606c](https://github.com/oss6/vf-core-service-discovery/commits/4a5606c438c1d243cb384148a5eeb758a9126111))
+* make default values preformatted ([501e09c](https://github.com/oss6/vf-core-service-discovery/commits/501e09c62845f5220b3ab24928b8727fb80c7be1))
+
+
+### Others
+
+* bump version ([a2d329b](https://github.com/oss6/vf-core-service-discovery/commits/a2d329b1de34932425e529b8b580cbbbc3f8e1b3))
+* remove docs from readme and point to docs ([95d7258](https://github.com/oss6/vf-core-service-discovery/commits/95d72582fc48c1c49dfa340c6ab0f81cc190fbce))
+
 ## [0.1.0-beta.3](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.2...v0.1.0-beta.3) (2021-02-08)
 
 
