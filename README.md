@@ -128,6 +128,7 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-d`, `--disabled`             | array | `[]`                       | List of disabled steps (from getConfig, getChangelog getDependents)     |
 | `-o`, `--only-outdated` | boolean | `false` | Display only outdated components |
 | `-m`, `--format` | string | `''` | Specifies the formatting for the results |
+| `-c`, `--compare-versions` | boolean | `false` | Shows the visual difference between different component versions |
 
 #### Custom formatting
 

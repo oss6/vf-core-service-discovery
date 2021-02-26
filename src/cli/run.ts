@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { promisify } from 'util';
+import path from 'path';
 import chalk from 'chalk';
 import boxen from 'boxen';
+import rimraf from 'rimraf';
+import compareVersions from 'vf-core-service-discovery-versions-comparison';
 import ServiceDiscovery from '..';
 import { Reporter } from '../types';
+import { PassThrough } from 'stream';
+
+const rimrafP = promisify(rimraf);
 
 interface Arguments {
   verbose: boolean;
@@ -10,6 +17,7 @@ interface Arguments {
   force: boolean;
   profile: boolean;
   'only-outdated': boolean;
+  'compare-versions': boolean;
   reporters: string[];
   disabled: string[];
   format: string;
@@ -62,6 +70,12 @@ export const builder = {
     default: '',
     alias: 'm',
   },
+  'compare-versions': {
+    description: "Compare components' versions",
+    type: 'boolean',
+    default: false,
+    alias: 'c',
+  },
 };
 
 export async function handler(argv: Arguments): Promise<void> {
@@ -88,6 +102,39 @@ export async function handler(argv: Arguments): Promise<void> {
 
     for (const report of reporters) {
       await report(items, argv.format);
+    }
+
+    const discoveryItemsForComparison = items
+      .map((item) => item.discoveryItem)
+      .filter((item) => item.version !== item.packageJson?.version);
+
+    if (argv['compare-versions'] && discoveryItemsForComparison.length > 0) {
+      const temporaryWebServerFilesDirectory = path.join(process.cwd(), 'vf-core-service-discovery-tmp');
+      const logStream = new PassThrough({ encoding: 'utf-8' });
+
+      logStream.on('data', (data) => {
+        console.log(data);
+      });
+
+      await compareVersions(
+        temporaryWebServerFilesDirectory,
+        {
+          components: discoveryItemsForComparison.map((item) => ({
+            name: item.name,
+            nameWithoutPrefix: item.nameWithoutPrefix,
+            installedVersion: item.version,
+            latestVersion: item.packageJson?.version,
+          })),
+        },
+        logStream,
+      );
+
+      // TODO: check windows
+      process.on('SIGINT', async () => {
+        console.log(`Deleting temporary web server files directory: ${temporaryWebServerFilesDirectory}`);
+        await rimrafP(temporaryWebServerFilesDirectory);
+        process.exit();
+      });
     }
   } catch (error) {
     console.log(error);
