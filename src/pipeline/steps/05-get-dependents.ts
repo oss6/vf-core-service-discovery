@@ -26,13 +26,12 @@ export default async function getDependents(
 
     const { result: processedDiscoveryItem, took } = await runAndMeasure(async () => {
       const processedDiscoveryItem: PDiscoveryItem = { ...discoveryItem, dependents: [] };
-      const matches = await globP(context.rootDirectory + '/**/*.html', { ignore: 'node_modules' });
 
-      for (const filePath of matches) {
-        const html = await fs.promises.readFile(filePath, 'utf-8');
+      for (const { filePath, matcher } of context.potentialDependents) {
+        const contents = await fs.promises.readFile(filePath, 'utf-8');
         const fileName = path.basename(filePath);
 
-        if (html.match(new RegExp(`${discoveryItem.nameWithoutPrefix}`, 'g'))) {
+        if (matcher(processedDiscoveryItem, contents)) {
           processedDiscoveryItem.dependents?.push(fileName);
         }
       }
@@ -48,6 +47,7 @@ export default async function getDependents(
       },
     };
   } catch (error) {
+    console.log(error);
     throw new AppError('An error has occurred when searching for dependents.');
   }
 }

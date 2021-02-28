@@ -8,6 +8,7 @@ import * as pipeline from './pipeline';
 import { AppError } from './errors';
 import { Logger } from 'winston';
 import { getCacheFileName } from './helpers/misc';
+import DependentsService from './services/dependents';
 
 export { pipeline };
 
@@ -17,6 +18,7 @@ export { pipeline };
 export class ServiceDiscovery {
   private static instance: ServiceDiscovery;
   private loggerService = LoggerService.getInstance();
+  private dependentsService = DependentsService.getInstance();
   private optionsService: OptionsService;
   private configurationService: ConfigurationService;
   private apiService: ApiService;
@@ -89,14 +91,21 @@ export class ServiceDiscovery {
 
       this.hasBeenSetUp = false;
 
+      const rootDirectory = process.cwd();
       const { disabled } = this.optionsService.getOptions();
       const disabledSteps: string[] = disabled.filter((value) => this.optionalSteps.includes(value));
-
       const cache = await this.configurationService.getCache();
+      const potentialDependents = await this.dependentsService.getPotentialDependents(
+        rootDirectory,
+        ['html'],
+        ['node_modules'],
+      );
+
       const context: PipelineContext = {
-        rootDirectory: process.cwd(),
+        rootDirectory,
         vfPackagePrefix: '@visual-framework',
         cache,
+        potentialDependents,
       };
 
       const components = await pipeline.getComponents(context);

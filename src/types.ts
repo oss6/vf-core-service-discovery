@@ -63,6 +63,7 @@ export interface PipelineContext {
   rootDirectory: string;
   vfPackagePrefix: string;
   cache: Cache;
+  potentialDependents: PotentialDependent[];
 }
 
 export interface Cache {
@@ -112,3 +113,10 @@ export interface ProfiledResult<T> {
 }
 
 export type Reporter = (items: PipelineItem[], format?: string) => Promise<void>;
+
+export type DependentMatcher = (discoveryItem: PDiscoveryItem, contents: string) => boolean;
+
+export interface PotentialDependent {
+  filePath: string;
+  matcher: DependentMatcher;
+}
