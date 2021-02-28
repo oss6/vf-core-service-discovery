@@ -1,13 +1,9 @@
 import fs from 'fs';
-import { glob } from 'glob';
 import path from 'path';
-import { promisify } from 'util';
 import { AppError } from '../../errors';
 import { runAndMeasure } from '../../helpers/misc';
 import OptionsService from '../../services/options';
 import { PDiscoveryItem, PipelineContext, PipelineItem } from '../../types';
-
-const globP = promisify(glob);
 
 // TODO: should optimise (this is a very naive implementation to demonstrate the concept)
 /**
