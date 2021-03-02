@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Options, PipelineContext, PipelineItem } from './types';
+import { Options, PipelineContext, PipelineItem, ProjectType } from './types';
 import ConfigurationService from './services/configuration';
 import OptionsService from './services/options';
 import LoggerService from './services/logger';
@@ -18,7 +18,7 @@ export { pipeline };
 export class ServiceDiscovery {
   private static instance: ServiceDiscovery;
   private loggerService = LoggerService.getInstance();
-  private dependentsService = DependentsService.getInstance();
+  private dependentsService: DependentsService;
   private optionsService: OptionsService;
   private configurationService: ConfigurationService;
   private apiService: ApiService;
@@ -55,6 +55,7 @@ export class ServiceDiscovery {
     this.optionsService = OptionsService.getInstance();
     this.configurationService = ConfigurationService.getInstance();
     this.apiService = ApiService.getInstance();
+    this.dependentsService = DependentsService.getInstance();
 
     try {
       this.optionsService.setOptions(options);
@@ -92,13 +93,14 @@ export class ServiceDiscovery {
       this.hasBeenSetUp = false;
 
       const rootDirectory = process.cwd();
-      const { disabled } = this.optionsService.getOptions();
-      const disabledSteps: string[] = disabled.filter((value) => this.optionalSteps.includes(value));
+      const options = this.optionsService.getOptions();
+      const disabledSteps: string[] = options.disabled.filter((value) => this.optionalSteps.includes(value));
       const cache = await this.configurationService.getCache();
+      const projectType = (<any>ProjectType)[options.dependentsProjectType];
       const potentialDependents = await this.dependentsService.getPotentialDependents(
         rootDirectory,
-        ['html'],
-        ['node_modules'],
+        projectType,
+        options.dependentsIgnore,
       );
 
       const context: PipelineContext = {

@@ -21,6 +21,8 @@ interface Arguments {
   reporters: string[];
   disabled: string[];
   format: string;
+  'project-type': string;
+  ignore: string[];
 }
 
 function printMainHeading(): void {
@@ -76,6 +78,19 @@ export const builder = {
     default: false,
     alias: 'c',
   },
+  'project-type': {
+    description:
+      'Defines the project type for use in the dependents discovery phase. Possible values are: html, angular, react, autoDetect',
+    type: 'string',
+    default: 'autoDetect',
+    alias: 't',
+  },
+  ignore: {
+    description: 'Defines the ignored paths for the dependents discovery phase',
+    type: 'array',
+    default: ['node_modules'],
+    alias: 'i',
+  },
 };
 
 export async function handler(argv: Arguments): Promise<void> {
@@ -92,6 +107,8 @@ export async function handler(argv: Arguments): Promise<void> {
       onlyOutdated: argv['only-outdated'],
       profile: argv.profile,
       disabled: argv['only-outdated'] ? ['getConfig', 'getChangelog', 'getDependents'] : argv.disabled,
+      dependentsProjectType: argv['project-type'],
+      dependentsIgnore: argv.ignore,
     });
 
     const items = await serviceDiscovery.run(true);
@@ -137,7 +154,6 @@ export async function handler(argv: Arguments): Promise<void> {
       });
     }
   } catch (error) {
-    console.log(error);
     process.exit(1);
   }
 }

@@ -131,6 +131,8 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-o`, `--only-outdated` | boolean | `false` | Display only outdated components |
 | `-m`, `--format` | string | `''` | Specifies the formatting for the results |
 | `-c`, `--compare-versions` | boolean | `false` | Shows the visual difference between different component versions |
+| `-t`, `--project-type` | string | `autoDetect` | Defines the project type for use in the dependents discovery phase. Possible values are: `html`, `angular`, `react`, `autoDetect` |
+| `-i`, `--ignore` | array | `[node_modules]` | Defines the ignored paths for the dependents discovery phase |
 
 #### Custom formatting
 

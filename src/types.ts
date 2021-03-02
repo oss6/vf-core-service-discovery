@@ -12,6 +12,8 @@ export interface Options {
   onlyOutdated: boolean;
   logFile: string;
   disabled: string[];
+  dependentsProjectType: string;
+  dependentsIgnore: string[];
 }
 
 export interface PackageJson {
@@ -119,4 +121,11 @@ export type DependentMatcher = (discoveryItem: PDiscoveryItem, contents: string)
 export interface PotentialDependent {
   filePath: string;
   matcher: DependentMatcher;
+}
+
+export enum ProjectType {
+  autoDetect,
+  angular,
+  react,
+  html,
 }

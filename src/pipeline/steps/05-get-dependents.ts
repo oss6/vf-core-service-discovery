@@ -5,7 +5,6 @@ import { runAndMeasure } from '../../helpers/misc';
 import OptionsService from '../../services/options';
 import { PDiscoveryItem, PipelineContext, PipelineItem } from '../../types';
 
-// TODO: should optimise (this is a very naive implementation to demonstrate the concept)
 /**
  * Returns the dependents of the component.
  * @param pipelineItem The pipeline item to process.
@@ -15,7 +14,6 @@ export default async function getDependents(
   { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,
 ): Promise<PipelineItem> {
-  // TODO: consider other patterns (e.g. templates in .ts files in Angular)
   try {
     const optionsService = OptionsService.getInstance();
     const { profile } = optionsService.getOptions();
@@ -43,7 +41,6 @@ export default async function getDependents(
       },
     };
   } catch (error) {
-    console.log(error);
     throw new AppError('An error has occurred when searching for dependents.');
   }
 }
