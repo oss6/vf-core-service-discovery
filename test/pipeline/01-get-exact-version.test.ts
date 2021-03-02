@@ -159,6 +159,8 @@ test.serial('getExactVersion should return the exact version of the input compon
     profile: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const loggerService = LoggerService.getInstance();
@@ -204,6 +206,7 @@ test.serial('getExactVersion should return the exact version of the input compon
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
 
   // t.context.sinonSandbox.stub(os, 'homedir').returns('/');
@@ -237,6 +240,8 @@ test.serial('getExactVersion should throw an error when it could not retrieve th
     profile: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const loggerService = LoggerService.getInstance();
@@ -277,6 +282,7 @@ test.serial('getExactVersion should throw an error when it could not retrieve th
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
 
   // act
@@ -306,6 +312,8 @@ test.serial('getExactVersion should return the exact version of the input compon
     profile: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const loggerService = LoggerService.getInstance();
@@ -343,6 +351,7 @@ test.serial('getExactVersion should return the exact version of the input compon
         },
       },
     },
+    potentialDependents: [],
   };
 
   // act
@@ -372,6 +381,7 @@ test.serial('getExactVersion should throw an error when the name of the componen
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
 
   // act

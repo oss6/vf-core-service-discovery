@@ -25,6 +25,8 @@ test.serial('getChangelog should extend a discovery item with its changelog if a
     verbose: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const context: PipelineContext = {
@@ -34,6 +36,7 @@ test.serial('getChangelog should extend a discovery item with its changelog if a
     },
     rootDirectory: '',
     vfPackagePrefix: '',
+    potentialDependents: [],
   };
 
   const apiService = ApiService.getInstance();
@@ -97,6 +100,7 @@ test.serial(
       },
       rootDirectory: '',
       vfPackagePrefix: '',
+      potentialDependents: [],
     };
 
     const pipelineItem: PipelineItem = {
@@ -132,6 +136,7 @@ test.serial('getChangelog should throw an error when the name of the component i
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
 
   // act

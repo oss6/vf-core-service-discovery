@@ -33,6 +33,7 @@ test.serial('getComponents should throw an error if package.json is not found', 
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const fsReadFileStub = t.context.sinonSandbox
@@ -60,6 +61,7 @@ test.serial('getComponents should throw an error if no vf-core dependencies are 
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const fsReadFileStub = t.context.sinonSandbox
@@ -87,6 +89,7 @@ test.serial('getComponents should return the installed components', async (t) =>
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
   const packageJsonFileName = path.join(context.rootDirectory, 'package.json');
   const packageJson: PackageJson = {

@@ -24,6 +24,8 @@ test('getPackageJson should extend a discovery item with their package.json', as
     verbose: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const context: PipelineContext = {
@@ -33,6 +35,7 @@ test('getPackageJson should extend a discovery item with their package.json', as
     },
     rootDirectory: '',
     vfPackagePrefix: '',
+    potentialDependents: [],
   };
 
   const apiService = ApiService.getInstance();
@@ -73,6 +76,7 @@ test.serial('getPackageJson should throw an error when the name of the component
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
 
   // act

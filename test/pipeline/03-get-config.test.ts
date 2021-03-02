@@ -24,6 +24,8 @@ test.serial('getConfig should extend a discovery item with their YAML configurat
     verbose: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const context: PipelineContext = {
@@ -33,6 +35,7 @@ test.serial('getConfig should extend a discovery item with their YAML configurat
     },
     rootDirectory: '',
     vfPackagePrefix: '',
+    potentialDependents: [],
   };
 
   const apiService = ApiService.getInstance();
@@ -89,6 +92,8 @@ test.serial('getConfig should extend a discovery item with their JS configuratio
     verbose: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const context: PipelineContext = {
@@ -98,6 +103,7 @@ test.serial('getConfig should extend a discovery item with their JS configuratio
     },
     rootDirectory: '',
     vfPackagePrefix: '',
+    potentialDependents: [],
   };
 
   const apiService = ApiService.getInstance();
@@ -154,6 +160,8 @@ test.serial('getConfig should throw an error if no configuration has been found'
     verbose: false,
     disabled: [],
     onlyOutdated: false,
+    dependentsIgnore: [],
+    dependentsProjectType: 'autoDetect',
   });
 
   const context: PipelineContext = {
@@ -163,6 +171,7 @@ test.serial('getConfig should throw an error if no configuration has been found'
     },
     rootDirectory: '',
     vfPackagePrefix: '',
+    potentialDependents: [],
   };
 
   const apiService = ApiService.getInstance();
@@ -201,6 +210,7 @@ test.serial('getConfig should throw an error when the name of the component is n
       components: {},
       lockObjects: {},
     },
+    potentialDependents: [],
   };
 
   // act
