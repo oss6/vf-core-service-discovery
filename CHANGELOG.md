@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0-beta.5](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.4...v0.1.0-beta.5) (2021-03-06)
+
+
+### Features
+
+* add project types for dependents detection (closes [#35](https://github.com/oss6/vf-core-service-discovery/issues/35)) ([f92d62e](https://github.com/oss6/vf-core-service-discovery/commits/f92d62eb23b8cf3a9bf29ff303db30ed83931afe))
+
+
+### Refactoring
+
+* dependents detection ([7ffabc2](https://github.com/oss6/vf-core-service-discovery/commits/7ffabc22a1b2ddf53ba0de1f97f654da5fa0f00a))
+
+
+### Tests
+
+* add tests for formatters and e2e ([7895211](https://github.com/oss6/vf-core-service-discovery/commits/78952117a93e2ee00a1aaf1b42ec0353bfffe70e))
+* fix tests ([bcd8be9](https://github.com/oss6/vf-core-service-discovery/commits/bcd8be9c67d1de2e6f29daa1a621f9cb2aa82482))
+
+
+### Others
+
+* add demo ([a1addc5](https://github.com/oss6/vf-core-service-discovery/commits/a1addc5e60593a8182fdfa4b6a3ecc0947857ca3))
+* add new demo ([c13fd19](https://github.com/oss6/vf-core-service-discovery/commits/c13fd1994eef45d10d548b9ede19a3535d408c00))
+* bump version in run.ts ([33436e2](https://github.com/oss6/vf-core-service-discovery/commits/33436e27f3df9ba9afeb5f3579c2c898c2bfc727))
+* remove imports ([6cd01f9](https://github.com/oss6/vf-core-service-discovery/commits/6cd01f97ab6cc74e530a138c324ebacc26fdf228))
+* replace demo ([5bd5d14](https://github.com/oss6/vf-core-service-discovery/commits/5bd5d14d4f03c0ad20fc484bb093a597eae07760))
+
 ## [0.1.0-beta.4](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.3...v0.1.0-beta.4) (2021-02-26)
 
 
