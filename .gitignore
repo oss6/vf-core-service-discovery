@@ -118,3 +118,5 @@ dist
 .DS_Store
 
 .note/
+
+vf-core-service-discovery-e2e-projects/

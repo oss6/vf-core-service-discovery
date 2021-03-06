@@ -26,13 +26,3 @@ export class StringBuilder {
     return this.value;
   }
 }
-
-// const stringBuilder = {
-//   value: '',
-//   add(str: string): void {
-//     this.value += str;
-//   },
-//   reset(): void {
-//     this.value = '';
-//   },
-// };
