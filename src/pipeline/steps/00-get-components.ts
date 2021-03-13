@@ -41,6 +41,7 @@ export default async function getComponents(context: PipelineContext): Promise<s
     throw new NoVfDependenciesFoundError(packageJsonFile);
   }
 
-  // TODO: fix this once we know where vf-form is
-  return Promise.resolve(components.filter((c) => !c.includes('vf-form')));
+  // TODO: fix vf-form once multi-components are supported
+  const ignoredPackages = ['vf-form', 'vf-core', 'vf-config', 'vf-extensions'];
+  return Promise.resolve(components.filter((c) => ignoredPackages.every((ignored) => !c.includes(ignored))));
 }

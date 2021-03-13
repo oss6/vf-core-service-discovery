@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import 'isomorphic-fetch';
 import fs from 'fs';
+import path from 'path';
 import yaml from 'yaml';
 import { ComponentConfig, PackageJson, PipelineContext } from '../types';
 import OptionsService from './options';
 import LoggerService from './logger';
 import ConfigurationService from './configuration';
-import { AppError, MissingConfigurationError } from '../errors';
+import { AppError, errorLog, MissingConfigurationError } from '../errors';
+import { getAppDirectory } from '../helpers/misc';
 
 export default class ApiService {
   static instance: ApiService;
@@ -115,14 +117,7 @@ export default class ApiService {
 
         return config;
       } catch (error) {
-        this.loggerService.log(
-          'debug',
-          {
-            message: 'YAML configuration not found',
-            details: { component: name },
-          },
-          this.getYamlComponentConfig,
-        );
+        this.loggerService.log('warn', errorLog(error), this.getJsComponentConfig);
         return null;
       }
     };
@@ -135,7 +130,7 @@ export default class ApiService {
       this.loggerService.log(
         'debug',
         {
-          message: 'Retrieving configuration from remote',
+          message: 'Retrieving configuration from cache',
           details: { component: name },
         },
         this.getYamlComponentConfig,
@@ -169,7 +164,7 @@ export default class ApiService {
 
         const content = await jsConfigResponse.text();
 
-        const tempConfigFileName = `${name}.config-tmp.js`;
+        const tempConfigFileName = getAppDirectory(`${name}.config-tmp.js`);
         await fs.promises.writeFile(tempConfigFileName, content, 'utf-8');
         const config = require(tempConfigFileName);
         await fs.promises.unlink(tempConfigFileName);
@@ -181,14 +176,7 @@ export default class ApiService {
 
         return config;
       } catch (error) {
-        this.loggerService.log(
-          'debug',
-          {
-            message: 'JS configuration not found',
-            details: { component: name },
-          },
-          this.getJsComponentConfig,
-        );
+        this.loggerService.log('warn', errorLog(error), this.getJsComponentConfig);
         return null;
       }
     };
