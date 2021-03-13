@@ -49,7 +49,7 @@ export const builder = {
     alias: 'p',
   },
   reporters: {
-    description: 'Reporters to use',
+    description: 'Reporters to use (cli, json, html)',
     type: 'array',
     default: ['cli'],
     alias: 'r',
