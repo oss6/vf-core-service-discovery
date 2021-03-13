@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { FileNotFoundError, NoVfDependenciesFoundError } from '../../errors';
 import LoggerService from '../../services/logger';
-import { PackageJson, PipelineContext } from '../../types';
+import { PipelineContext } from '../../types';
 
 /**
  * Returns the components used by the project.
@@ -15,10 +15,8 @@ export default async function getComponents(context: PipelineContext): Promise<s
 
   const packageJsonFile = path.join(context.rootDirectory, 'package.json');
 
-  let packageJson: PackageJson;
-
   try {
-    packageJson = JSON.parse(await fs.promises.readFile(packageJsonFile, 'utf-8'));
+    context.packageJson = JSON.parse(await fs.promises.readFile(packageJsonFile, 'utf-8'));
   } catch (error) {
     if (error.code === 'ENOENT') {
       throw new FileNotFoundError(packageJsonFile);
@@ -27,11 +25,11 @@ export default async function getComponents(context: PipelineContext): Promise<s
     throw error;
   }
 
-  const dependencies: string[] = Object.keys(packageJson.dependencies || {}).filter((dep) =>
+  const dependencies: string[] = Object.keys(context.packageJson?.dependencies || {}).filter((dep) =>
     dep.startsWith(context.vfPackagePrefix),
   );
 
-  const devDependencies: string[] = Object.keys(packageJson.devDependencies || {}).filter((dep) =>
+  const devDependencies: string[] = Object.keys(context.packageJson?.devDependencies || {}).filter((dep) =>
     dep.startsWith(context.vfPackagePrefix),
   );
 

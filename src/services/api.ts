@@ -25,15 +25,15 @@ export default class ApiService {
   }
 
   async getVfCoreLatestReleaseVersion(): Promise<string> {
-    // TODO: check if tags should be used instead of releases
-    const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/releases/latest');
+    // TODO: check if releases/latest should be used instead of tags
+    const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/tags');
 
     if (!response.ok) {
       return 'develop';
     }
 
     const content = await response.json();
-    const latestReleaseVersion: string = content.tag_name;
+    const latestReleaseVersion: string = content[0].name;
 
     return latestReleaseVersion;
   }

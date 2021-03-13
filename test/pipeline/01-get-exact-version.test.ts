@@ -1,7 +1,6 @@
 import anyTest, { TestInterface } from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import getExactVersion, { parseLockFile } from '../../src/pipeline/steps/01-get-exact-version';
 import { LockObject, PDiscoveryItem, PipelineContext } from '../../src/types';
@@ -48,15 +47,23 @@ test.serial('parseLockFile should correctly parse an npm lock file', async (t) =
       },
     },
   };
-  const rootDirectory = '/test';
-  const lockFileName = path.join(rootDirectory, 'package-lock.json');
+  const context: PipelineContext = {
+    rootDirectory: '/test',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
+    potentialDependents: [],
+    vfPackagePrefix: '@visual-framework',
+  };
+  const lockFileName = path.join(context.rootDirectory, 'package-lock.json');
   const fsReadFileStub = t.context.sinonSandbox
     .stub(fs.promises, 'readFile')
     .withArgs(lockFileName, 'utf-8')
     .resolves(JSON.stringify(lockFile));
 
   // act
-  const parsedLockFile = await parseLockFile(rootDirectory);
+  const parsedLockFile = await parseLockFile(context);
 
   // assert
   t.deepEqual(parsedLockFile, lockFile.dependencies);
@@ -67,23 +74,48 @@ test.serial('parseLockFile should correctly parse a yarn lock file', async (t) =
   // arrange
   const expectedLockFile: LockObject = {
     '@visual-framework/vf-box': {
-      version: '2.3.0',
+      version: '2.2.0',
       resolved: 'test',
       integrity: 'test',
     },
     '@visual-framework/vf-card': {
-      version: '2.3.3',
+      version: '1.3.0',
       resolved: 'test',
       integrity: 'test',
     },
   };
-  const rootDirectory = '/test';
+  const context: PipelineContext = {
+    rootDirectory: '/test',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
+    potentialDependents: [],
+    vfPackagePrefix: '@visual-framework',
+    packageJson: {
+      version: '2.1.3',
+      dependencies: {
+        '@visual-framework/vf-box': '2.2.0',
+        '@visual-framework/vf-card': '1.3.0',
+      },
+    },
+  };
   const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
 
   fsReadFileStub.onCall(0).rejects({ code: 'ENOENT' });
   fsReadFileStub.onCall(1).resolves(`
 "@visual-framework/vf-box@^2.3.0":
   version "2.3.0"
+  resolved "test"
+  integrity test
+
+"@visual-framework/vf-box@2.2.0":
+  version "2.2.0"
+  resolved "test"
+  integrity test
+
+"@visual-framework/vf-card@1.3.0":
+  version "1.3.0"
   resolved "test"
   integrity test
 
@@ -94,7 +126,7 @@ test.serial('parseLockFile should correctly parse a yarn lock file', async (t) =
   `);
 
   // act
-  const parsedLockFile = await parseLockFile(rootDirectory);
+  const parsedLockFile = await parseLockFile(context);
 
   // assert
   t.deepEqual(parsedLockFile, expectedLockFile);
@@ -103,14 +135,22 @@ test.serial('parseLockFile should correctly parse a yarn lock file', async (t) =
 
 test.serial('parseLockFile should throw an error if no lock file has been found', async (t) => {
   // arrange
-  const rootDirectory = '/test';
+  const context: PipelineContext = {
+    rootDirectory: '/test',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
+    potentialDependents: [],
+    vfPackagePrefix: '@visual-framework',
+  };
   const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
 
   fsReadFileStub.onCall(0).rejects({ code: 'ENOENT' });
   fsReadFileStub.onCall(1).rejects({ code: 'ENOENT' });
 
   // act
-  const error = await t.throwsAsync(parseLockFile(rootDirectory));
+  const error = await t.throwsAsync(parseLockFile(context));
 
   // assert
   t.true(fsReadFileStub.calledTwice);
@@ -119,13 +159,21 @@ test.serial('parseLockFile should throw an error if no lock file has been found'
 
 test.serial('parseLockFile should throw an error if reading the npm lock file throws an error', async (t) => {
   // arrange
-  const rootDirectory = '/test';
+  const context: PipelineContext = {
+    rootDirectory: '/test',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
+    potentialDependents: [],
+    vfPackagePrefix: '@visual-framework',
+  };
   const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
 
   fsReadFileStub.onCall(0).rejects(new Error('Generic error'));
 
   // act
-  const error = await t.throwsAsync(parseLockFile(rootDirectory));
+  const error = await t.throwsAsync(parseLockFile(context));
 
   // assert
   t.true(fsReadFileStub.calledOnce);
@@ -134,14 +182,22 @@ test.serial('parseLockFile should throw an error if reading the npm lock file th
 
 test.serial('parseLockFile should throw an error if reading the yarn lock file throws an error', async (t) => {
   // arrange
-  const rootDirectory = '/test';
+  const context: PipelineContext = {
+    rootDirectory: '/test',
+    cache: {
+      components: {},
+      lockObjects: {},
+    },
+    potentialDependents: [],
+    vfPackagePrefix: '@visual-framework',
+  };
   const fsReadFileStub = t.context.sinonSandbox.stub(fs.promises, 'readFile');
 
   fsReadFileStub.onCall(0).rejects({ code: 'ENOENT' });
   fsReadFileStub.onCall(1).rejects(new Error('Generic error'));
 
   // act
-  const error = await t.throwsAsync(parseLockFile(rootDirectory));
+  const error = await t.throwsAsync(parseLockFile(context));
 
   // assert
   t.true(fsReadFileStub.calledTwice);

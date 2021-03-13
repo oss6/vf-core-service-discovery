@@ -7,8 +7,8 @@ import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
 import { runAndMeasure } from '../../helpers/misc';
 
-export async function parseLockFile(rootDirectory: string): Promise<LockObject> {
-  const npmLockFileName = path.join(rootDirectory, 'package-lock.json');
+export async function parseLockFile(context: PipelineContext): Promise<LockObject> {
+  const npmLockFileName = path.join(context.rootDirectory, 'package-lock.json');
 
   try {
     const npmLockFile = JSON.parse(await fs.promises.readFile(npmLockFileName, 'utf-8'));
@@ -29,13 +29,20 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
     }
   }
 
-  const yarnLockFileName = path.join(rootDirectory, 'yarn.lock');
+  const yarnLockFileName = path.join(context.rootDirectory, 'yarn.lock');
 
   try {
     const yarnLockFile: LockObject = parseYarnLockFile(await fs.promises.readFile(yarnLockFileName, 'utf-8')).object;
+    const dependencies = {
+      ...(context.packageJson?.dependencies || {}),
+      ...(context.packageJson?.devDependencies || {}),
+    };
+    const packages = Object.entries(dependencies)
+      .filter(([pkg]) => pkg.includes(context.vfPackagePrefix))
+      .map(([pkg, version]) => `${pkg}@${version}`);
 
     return Object.entries(yarnLockFile)
-      .filter(([pkg]) => pkg.includes('visual-framework'))
+      .filter(([pkg]) => packages.includes(pkg))
       .reduce(
         (obj, [pkg, lockItem]) => ({
           ...obj,
@@ -66,7 +73,7 @@ export async function extractVersion(discoveryItem: DiscoveryItem, context: Pipe
       extractVersion,
     );
 
-    const lockObject = await parseLockFile(context.rootDirectory);
+    const lockObject = await parseLockFile(context);
     context.cache.lockObjects[context.rootDirectory] = lockObject;
 
     if (!lockObject[discoveryItem.name]) {

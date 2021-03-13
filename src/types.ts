@@ -66,6 +66,7 @@ export interface PipelineContext {
   vfPackagePrefix: string;
   cache: Cache;
   potentialDependents: PotentialDependent[];
+  packageJson?: PackageJson;
 }
 
 export interface Cache {

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { promisify } from 'util';
 import path from 'path';
 import chalk from 'chalk';
 import boxen from 'boxen';
@@ -8,8 +7,6 @@ import compareVersions from 'vf-core-service-discovery-versions-comparison';
 import ServiceDiscovery from '..';
 import { Reporter } from '../types';
 import { PassThrough } from 'stream';
-
-const rimrafP = promisify(rimraf);
 
 interface Arguments {
   verbose: boolean;
@@ -147,10 +144,10 @@ export async function handler(argv: Arguments): Promise<void> {
       );
 
       // TODO: check windows
-      process.on('SIGINT', async () => {
+      process.on('SIGINT', () => {
         console.log(`Deleting temporary web server files directory: ${temporaryWebServerFilesDirectory}`);
-        await rimrafP(temporaryWebServerFilesDirectory);
-        process.exitCode = 0;
+        rimraf.sync(temporaryWebServerFilesDirectory);
+        process.exit();
       });
     }
   } catch (error) {
