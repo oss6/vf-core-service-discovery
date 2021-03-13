@@ -126,7 +126,7 @@ Synopsis: `vf-core-service-discovery run [options]`
 | `-l`, `--log-file`          | string  | `'vf-core-service-discovery.log'` | Log file location           |
 | `-f`, `--force`             | boolean | `false`                           | By-pass the cache           |
 | `-p`, `--profile`             | boolean | `false`                         | Profile the service discovery           |
-| `-r`, `--reporters`             | array | `['cli']`                       | The reporters to use (cli and json)     |
+| `-r`, `--reporters`             | array | `['cli']`                       | The reporters to use (`cli`, `json`, `html`)     |
 | `-d`, `--disabled`             | array | `[]`                       | List of disabled steps (from getConfig, getChangelog getDependents)     |
 | `-o`, `--only-outdated` | boolean | `false` | Display only outdated components |
 | `-m`, `--format` | string | `''` | Specifies the formatting for the results |
