@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import 'isomorphic-fetch';
 import fs from 'fs';
-import path from 'path';
 import yaml from 'yaml';
 import { ComponentConfig, PackageJson, PipelineContext } from '../types';
 import OptionsService from './options';
@@ -26,6 +25,7 @@ export default class ApiService {
   }
 
   async getVfCoreLatestReleaseVersion(): Promise<string> {
+    // TODO: check if tags should be used instead of releases
     const response = await fetch('https://api.github.com/repos/visual-framework/vf-core/releases/latest');
 
     if (!response.ok) {
