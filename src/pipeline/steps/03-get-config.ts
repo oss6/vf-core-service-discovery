@@ -13,17 +13,24 @@ export default async function getConfig(
   { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,
 ): Promise<PipelineItem> {
+  const loggerService = LoggerService.getInstance();
+
+  loggerService.log(
+    'debug',
+    {
+      message: 'Retrieving package configuration',
+      details: { component: discoveryItem.nameWithoutPrefix },
+    },
+    getConfig,
+  );
+
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get component config.');
   }
 
-  const loggerService = LoggerService.getInstance();
-  const logger = loggerService.getLogger();
   const apiService = ApiService.getInstance();
   const optionsService = OptionsService.getInstance();
   const { profile } = optionsService.getOptions();
-
-  logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving package configuration`);
 
   const { result: yamlConfig, took: yamlConfigResponseTime } = await runAndMeasure(
     async () => apiService.getYamlComponentConfig(discoveryItem.nameWithoutPrefix as string, context),

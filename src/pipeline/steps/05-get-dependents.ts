@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { AppError } from '../../errors';
 import { runAndMeasure } from '../../helpers/misc';
+import LoggerService from '../../services/logger';
 import OptionsService from '../../services/options';
 import { PDiscoveryItem, PipelineContext, PipelineItem } from '../../types';
 
@@ -15,6 +16,17 @@ export default async function getDependents(
   context: PipelineContext,
 ): Promise<PipelineItem> {
   try {
+    const loggerService = LoggerService.getInstance();
+
+    loggerService.log(
+      'debug',
+      {
+        message: 'Getting dependents',
+        details: { component: discoveryItem.nameWithoutPrefix },
+      },
+      getDependents,
+    );
+
     const optionsService = OptionsService.getInstance();
     const { profile } = optionsService.getOptions();
 

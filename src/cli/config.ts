@@ -1,4 +1,4 @@
-import { AppError } from '../errors';
+import { AppError, errorLog } from '../errors';
 import ConfigurationService from '../services/configuration';
 import LoggerService from '../services/logger';
 import { AppConfig } from '../types';
@@ -28,7 +28,7 @@ export function handler(argv: Arguments): void {
   const loggerService = LoggerService.getInstance();
   const configurationService = ConfigurationService.getInstance();
 
-  const logger = loggerService.registerLogger(argv.verbose ? 'debug' : 'info', argv['log-file']);
+  loggerService.registerLogger(argv.verbose ? 'debug' : 'info', argv['log-file']);
 
   try {
     if (argv.reset) {
@@ -53,13 +53,13 @@ export function handler(argv: Arguments): void {
     const value = argv.value;
 
     if (!argv.value) {
-      logger.info(configurationService.config[key]);
+      console.log(configurationService.config[key]);
     } else {
       // TODO: deserialise with validation
       configurationService.update(key, value);
-      logger.info('Configuration updated successfully.');
+      loggerService.log('info', 'Configuration updated successfully.', handler);
     }
   } catch (error) {
-    logger.error(error.message);
+    loggerService.log('error', errorLog(error), handler);
   }
 }

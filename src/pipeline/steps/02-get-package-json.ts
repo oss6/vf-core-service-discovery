@@ -13,17 +13,24 @@ export default async function getPackageJson(
   { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,
 ): Promise<PipelineItem> {
+  const loggerService = LoggerService.getInstance();
+
+  loggerService.log(
+    'debug',
+    {
+      message: 'Retrieving latest package information',
+      details: { component: discoveryItem.nameWithoutPrefix },
+    },
+    getPackageJson,
+  );
+
   if (!discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get package.json.');
   }
 
-  const loggerService = LoggerService.getInstance();
-  const logger = loggerService.getLogger();
   const apiService = ApiService.getInstance();
   const optionsService = OptionsService.getInstance();
   const { profile } = optionsService.getOptions();
-
-  logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving latest package information`);
 
   const { result, took } = await runAndMeasure(
     async () => apiService.getComponentPackageJson(discoveryItem.nameWithoutPrefix as string, context),

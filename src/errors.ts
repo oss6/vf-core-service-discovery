@@ -1,7 +1,12 @@
+import { ErrorLog } from './types';
+
 export class AppError extends Error {
-  constructor(message: string) {
+  details: string[] = [];
+
+  constructor(message: string, details: string[] = []) {
     super(message);
     this.name = 'AppError';
+    this.details = details;
   }
 }
 
@@ -19,13 +24,6 @@ export class NoVfDependenciesFoundError extends AppError {
   }
 }
 
-export class GitHubAuthenticationError extends AppError {
-  constructor(message = '') {
-    super(message || 'An error has occurred while authenticating to GitHub.');
-    this.name = 'GitHubAuthenticationError';
-  }
-}
-
 export class MissingConfigurationError extends AppError {
   constructor(keys: string[]) {
     super(
@@ -33,4 +31,13 @@ export class MissingConfigurationError extends AppError {
     );
     this.name = 'MissingConfigurationError';
   }
+}
+
+export function errorLog(error: Error): ErrorLog {
+  return {
+    type: error.name,
+    message: error.message,
+    level: 'error',
+    details: error instanceof AppError ? error.details : [],
+  };
 }

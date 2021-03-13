@@ -15,7 +15,16 @@ export default async function getChangelog(
   context: PipelineContext,
 ): Promise<PipelineItem> {
   const loggerService = LoggerService.getInstance();
-  const logger = loggerService.getLogger();
+
+  loggerService.log(
+    'debug',
+    {
+      message: 'Retrieving changelog if applicable',
+      details: { component: discoveryItem.nameWithoutPrefix },
+    },
+    getChangelog,
+  );
+
   const apiService = ApiService.getInstance();
   const optionsService = OptionsService.getInstance();
   const { profile } = optionsService.getOptions();
@@ -23,8 +32,6 @@ export default async function getChangelog(
   if (!discoveryItem.version || !discoveryItem.packageJson || !discoveryItem.nameWithoutPrefix) {
     throw new AppError('Information not complete to get changelog.');
   }
-
-  logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving changelog if applicable`);
 
   if (discoveryItem.version === discoveryItem.packageJson.version) {
     return {

@@ -10,9 +10,8 @@ import { PackageJson, PipelineContext } from '../../types';
  */
 export default async function getComponents(context: PipelineContext): Promise<string[]> {
   const loggerService = LoggerService.getInstance();
-  const logger = loggerService.getLogger();
 
-  logger.debug('Retrieving components from package.json');
+  loggerService.log('debug', 'Retrieving components from package.json', getComponents);
 
   const packageJsonFile = path.join(context.rootDirectory, 'package.json');
 

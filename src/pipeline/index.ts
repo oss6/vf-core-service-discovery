@@ -1,4 +1,5 @@
 import Listr from 'listr';
+import LoggerService from '../services/logger';
 import OptionsService from '../services/options';
 import { PDiscoveryItem, PipelineContext, PipelineItem, PipelineStep } from '../types';
 import getComponents from './steps/00-get-components';
@@ -17,6 +18,7 @@ export class Pipeline {
   static instance: Pipeline;
   private steps: PipelineStep[];
   private optionsService = OptionsService.getInstance();
+  private loggerService = LoggerService.getInstance();
 
   private constructor() {
     this.steps = [];
@@ -39,6 +41,11 @@ export class Pipeline {
    * @param step The pipeline step to add.
    */
   addStep(step: PipelineStep): Pipeline {
+    this.loggerService.log(
+      'debug',
+      `Adding step ${step.fn.name} (${step.enabled ? 'enabled' : 'disabled'})`,
+      this.addStep,
+    );
     this.steps.push(step);
     return this;
   }
@@ -50,6 +57,15 @@ export class Pipeline {
    * @param reportProgress Whether to report progress in the cli.
    */
   async run(source: string[], context: PipelineContext, reportProgress = false): Promise<PipelineItem[]> {
+    this.loggerService.log(
+      'debug',
+      {
+        message: 'Running pipeline',
+        details: { source },
+      },
+      this.run,
+    );
+
     const options = this.optionsService.getOptions();
     const discoveryItems: PDiscoveryItem[] = source.map((sourceItem) => ({
       name: sourceItem,

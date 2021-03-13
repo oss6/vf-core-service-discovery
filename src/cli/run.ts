@@ -150,10 +150,10 @@ export async function handler(argv: Arguments): Promise<void> {
       process.on('SIGINT', async () => {
         console.log(`Deleting temporary web server files directory: ${temporaryWebServerFilesDirectory}`);
         await rimrafP(temporaryWebServerFilesDirectory);
-        process.exit();
+        process.exitCode = 0;
       });
     }
   } catch (error) {
-    process.exit(1);
+    process.exitCode = 1;
   }
 }

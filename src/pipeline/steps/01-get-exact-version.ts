@@ -15,7 +15,7 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
     const fullLockObject = npmLockFile.dependencies as LockObject;
 
     return Object.entries(fullLockObject)
-      .filter(([pkg, _]) => pkg.includes('visual-framework'))
+      .filter(([pkg]) => pkg.includes('visual-framework'))
       .reduce(
         (obj, [pkg, lockItem]) => ({
           ...obj,
@@ -35,7 +35,7 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
     const yarnLockFile: LockObject = parseYarnLockFile(await fs.promises.readFile(yarnLockFileName, 'utf-8')).object;
 
     return Object.entries(yarnLockFile)
-      .filter(([pkg, _]) => pkg.includes('visual-framework'))
+      .filter(([pkg]) => pkg.includes('visual-framework'))
       .reduce(
         (obj, [pkg, lockItem]) => ({
           ...obj,
@@ -54,11 +54,17 @@ export async function parseLockFile(rootDirectory: string): Promise<LockObject> 
 
 export async function extractVersion(discoveryItem: DiscoveryItem, context: PipelineContext): Promise<string> {
   const loggerService = LoggerService.getInstance();
-  const logger = loggerService.getLogger();
   const optionsService = OptionsService.getInstance();
   const options = optionsService.getOptions();
   const parse = async (): Promise<string> => {
-    logger.debug(`${discoveryItem.nameWithoutPrefix} - retrieving exact version from remote`);
+    loggerService.log(
+      'debug',
+      {
+        message: 'Retrieving exact version from remote',
+        details: { component: discoveryItem.nameWithoutPrefix },
+      },
+      extractVersion,
+    );
 
     const lockObject = await parseLockFile(context.rootDirectory);
     context.cache.lockObjects[context.rootDirectory] = lockObject;
@@ -92,6 +98,16 @@ export default async function getExactVersion(
   { discoveryItem, profilingInformation }: PipelineItem,
   context: PipelineContext,
 ): Promise<PipelineItem> {
+  const loggerService = LoggerService.getInstance();
+  loggerService.log(
+    'debug',
+    {
+      message: 'Retrieving exact version',
+      details: { component: discoveryItem.nameWithoutPrefix },
+    },
+    getExactVersion,
+  );
+
   if (!discoveryItem.name || !discoveryItem.nameWithoutPrefix) {
     throw new AppError('Package name not defined, hence could not get exact version.');
   }

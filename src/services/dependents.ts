@@ -25,7 +25,6 @@ export default class DependentsService {
     [ProjectType.react, this.reactProjectFiles],
   ]);
   private loggerService = LoggerService.getInstance();
-  private logger = this.loggerService.getLogger();
 
   static getInstance(): DependentsService {
     if (DependentsService.instance) {
@@ -41,7 +40,14 @@ export default class DependentsService {
     projectType: ProjectType,
     ignore: string[],
   ): Promise<PotentialDependent[]> {
-    this.logger.debug('Getting potential dependents');
+    this.loggerService.log(
+      'debug',
+      {
+        message: 'Getting potential dependents',
+        details: { rootDirectory, ignore },
+      },
+      this.getPotentialDependents,
+    );
 
     const processedProjectType =
       projectType === ProjectType.autoDetect ? await this.detectProjectType(rootDirectory) : projectType;

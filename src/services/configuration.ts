@@ -27,7 +27,6 @@ export default class ConfigurationService {
   private optionsService = OptionsService.getInstance();
   private loggerService = LoggerService.getInstance();
   private configuration: AppConfig;
-  private logger = this.loggerService.getLogger();
   private defaultCache: Partial<Cache> = {
     components: {},
     lockObjects: {},
@@ -69,6 +68,8 @@ export default class ConfigurationService {
   }
 
   async setup(): Promise<void> {
+    this.loggerService.log('debug', 'Running configuration setup', this.setup);
+
     const options = this.optionsService.getOptions();
     const appDirectory = getAppDirectory();
     const cacheDirectory = getCacheDirectory();
@@ -76,38 +77,38 @@ export default class ConfigurationService {
     const appConfigFileName = getAppConfigFileName();
 
     if (options.forceRun) {
-      this.logger.debug(`Deleting app directory ${appDirectory}`);
+      this.loggerService.log('debug', `Deleting app directory ${appDirectory} because of force run`, this.setup);
       await rimrafP(appDirectory);
     }
 
     if (!fs.existsSync(appDirectory)) {
-      this.logger.debug(`Creating app directory ${appDirectory}`);
+      this.loggerService.log('debug', `Creating app directory ${appDirectory}`, this.setup);
       fs.mkdirSync(appDirectory);
     }
 
     if (!fs.existsSync(appConfigFileName)) {
-      this.logger.debug(`Creating app configuration file ${appConfigFileName}`);
+      this.loggerService.log('debug', `Creating app configuration file ${appConfigFileName}`, this.setup);
 
       this.configuration = { ...ConfigurationService.defaultAppConfig };
       fs.writeFileSync(appConfigFileName, this.serialize());
     } else {
-      this.logger.debug('Using stored configuration');
+      this.loggerService.log('debug', 'Using stored configuration', this.setup);
 
       const appConfigContents = fs.readFileSync(appConfigFileName, 'utf-8');
       this.deserialize(appConfigContents);
     }
 
     if (!fs.existsSync(cacheDirectory)) {
-      this.logger.debug(`Creating cache directory ${cacheDirectory}`);
+      this.loggerService.log('debug', `Creating cache directory ${cacheDirectory}`, this.setup);
       fs.mkdirSync(cacheDirectory);
     }
 
     if (!fs.existsSync(cacheFileName)) {
-      this.logger.debug(`Creating cache ${cacheFileName}`);
+      this.loggerService.log('debug', `Creating cache ${cacheFileName}`, this.setup);
       fs.writeFileSync(cacheFileName, JSON.stringify(this.defaultCache));
     }
 
-    this.logger.debug('App configuration loaded successfully');
+    this.loggerService.log('debug', 'App configuration loaded successfully', this.setup);
   }
 
   async getCache(): Promise<Cache> {
@@ -127,7 +128,6 @@ export default class ConfigurationService {
     const cacheDirectory = getCacheDirectory();
     const cacheFileName = getCacheFileName();
 
-    this.logger.debug(`Invalidating cache ${cacheDirectory}`);
     await rimrafP(cacheDirectory);
     await mkdirp(cacheDirectory);
     await fs.promises.writeFile(cacheFileName, JSON.stringify(this.defaultCache), 'utf-8');

@@ -129,3 +129,15 @@ export enum ProjectType {
   react,
   html,
 }
+
+export interface Log {
+  message: string;
+  timestamp?: string;
+  level?: string;
+  caller?: string;
+  details?: any;
+}
+
+export interface ErrorLog extends Log {
+  type: string;
+}

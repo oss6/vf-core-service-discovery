@@ -13,7 +13,6 @@ export default class ApiService {
   private optionsService = OptionsService.getInstance();
   private configurationService = ConfigurationService.getInstance();
   private loggerService = LoggerService.getInstance();
-  private logger = this.loggerService.getLogger();
 
   static getInstance(): ApiService {
     if (ApiService.instance) {
@@ -40,7 +39,14 @@ export default class ApiService {
   async getComponentPackageJson(name: string, context: PipelineContext): Promise<PackageJson> {
     const options = this.optionsService.getOptions();
     const fetchFromRemote = async (): Promise<PackageJson> => {
-      this.logger.debug(`${name} - retrieving package.json from remote`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Retrieving package.json from remote',
+          details: { component: name },
+        },
+        this.getComponentPackageJson,
+      );
 
       const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
@@ -64,7 +70,14 @@ export default class ApiService {
     }
 
     if (context.cache.components[name]?.packageJson) {
-      this.logger.debug(`${name} - retrieving package.json from cache`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Retrieving package.json from cache',
+          details: { component: name },
+        },
+        this.getComponentPackageJson,
+      );
       return context.cache.components[name].packageJson;
     } else {
       return await fetchFromRemote();
@@ -74,7 +87,14 @@ export default class ApiService {
   async getYamlComponentConfig(name: string, context: PipelineContext): Promise<ComponentConfig | null> {
     const options = this.optionsService.getOptions();
     const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
-      this.logger.debug(`${name} - attempting to retrieve YAML configuration`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Attempting to retrieving YAML configuration',
+          details: { component: name },
+        },
+        this.getYamlComponentConfig,
+      );
 
       const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
@@ -95,7 +115,14 @@ export default class ApiService {
 
         return config;
       } catch (error) {
-        this.logger.debug(`${name} - YAML configuration not found`);
+        this.loggerService.log(
+          'debug',
+          {
+            message: 'YAML configuration not found',
+            details: { component: name },
+          },
+          this.getYamlComponentConfig,
+        );
         return null;
       }
     };
@@ -105,7 +132,14 @@ export default class ApiService {
     }
 
     if (context.cache.components[name]?.config) {
-      this.logger.debug(`${name} - retrieving configuration from cache`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Retrieving configuration from remote',
+          details: { component: name },
+        },
+        this.getYamlComponentConfig,
+      );
       return context.cache.components[name].config;
     } else {
       return await fetchFromRemote();
@@ -115,7 +149,14 @@ export default class ApiService {
   async getJsComponentConfig(name: string, context: PipelineContext): Promise<ComponentConfig | null> {
     const options = this.optionsService.getOptions();
     const fetchFromRemote = async (): Promise<ComponentConfig | null> => {
-      this.logger.debug(`${name} - attempting to retrieve JS configuration`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Attempting to retrieve JS configuration',
+          details: { component: name },
+        },
+        this.getJsComponentConfig,
+      );
 
       const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
@@ -140,7 +181,14 @@ export default class ApiService {
 
         return config;
       } catch (error) {
-        this.logger.debug(`${name} - YAML configuration not found`);
+        this.loggerService.log(
+          'debug',
+          {
+            message: 'JS configuration not found',
+            details: { component: name },
+          },
+          this.getJsComponentConfig,
+        );
         return null;
       }
     };
@@ -150,7 +198,14 @@ export default class ApiService {
     }
 
     if (context.cache.components[name]?.config) {
-      this.logger.debug(`${name} - retrieving configuration from cache`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Retrieving configuration from cache',
+          details: { component: name },
+        },
+        this.getJsComponentConfig,
+      );
       return context.cache.components[name].config;
     } else {
       return await fetchFromRemote();
@@ -160,7 +215,14 @@ export default class ApiService {
   async getComponentChangelog(name: string, context: PipelineContext): Promise<string> {
     const options = this.optionsService.getOptions();
     const fetchFromRemote = async (): Promise<string> => {
-      this.logger.debug(`${name} - retrieving changelog from remote`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Retrieving changelog from remote',
+          details: { component: name },
+        },
+        this.getComponentChangelog,
+      );
 
       const vfCoreLatestReleaseVersion = this.configurationService.config.vfCoreVersion;
 
@@ -184,7 +246,14 @@ export default class ApiService {
     }
 
     if (context.cache.components[name]?.changelog) {
-      this.logger.debug(`${name} - retrieving changelog from cache`);
+      this.loggerService.log(
+        'debug',
+        {
+          message: 'Retrieving changelog from cache',
+          details: { component: name },
+        },
+        this.getComponentChangelog,
+      );
       return context.cache.components[name].changelog;
     } else {
       return await fetchFromRemote();

@@ -6,12 +6,7 @@ import LoggerService from '../../src/services/logger';
 import OptionsService from '../../src/services/options';
 import { PDiscoveryItem, PipelineContext } from '../../src/types';
 
-test.afterEach(() => {
-  sinon.restore();
-});
-
-test('getPackageJson should extend a discovery item with their package.json', async (t) => {
-  // arrange
+test.serial.before(() => {
   const loggerService = LoggerService.getInstance();
   loggerService.registerLogger('debug', 'test.log', true);
 
@@ -27,7 +22,14 @@ test('getPackageJson should extend a discovery item with their package.json', as
     dependentsIgnore: [],
     dependentsProjectType: 'autoDetect',
   });
+});
 
+test.serial.afterEach(() => {
+  sinon.restore();
+});
+
+test.serial('getPackageJson should extend a discovery item with their package.json', async (t) => {
+  // arrange
   const context: PipelineContext = {
     cache: {
       components: {},

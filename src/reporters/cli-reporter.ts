@@ -23,5 +23,7 @@ export default async function report(items: PipelineItem[], format: string): Pro
     }
   }
 
-  console.log(stringBuilder.getValue());
+  const cliReport = stringBuilder.getValue();
+
+  console.log(onlyOutdated && !cliReport.trim() ? 'There are no outdated components' : cliReport);
 }
