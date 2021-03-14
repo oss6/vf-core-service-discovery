@@ -24,7 +24,7 @@ interface Arguments {
 
 function printMainHeading(): void {
   console.log('\n');
-  console.log(chalk.bold(boxen('vf-core-service-discovery\n\nVersion 0.1.0-beta.5', { padding: 1 })));
+  console.log(chalk.bold(boxen('vf-core-service-discovery\n\nVersion 0.1.0-beta.6', { padding: 1 })));
   console.log('\n');
 }
 
