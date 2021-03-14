@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0-beta.6](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.5...v0.1.0-beta.6) (2021-03-14)
+
+
+### Features
+
+* add html reporter (closes [#42](https://github.com/oss6/vf-core-service-discovery/issues/42)) ([31c1d6b](https://github.com/oss6/vf-core-service-discovery/commits/31c1d6b7f48a85c3919019db185d3a6ef10fee5b))
+
+
+### Bug Fixes
+
+* getting exact versions when multiple versions are present ([82434a4](https://github.com/oss6/vf-core-service-discovery/commits/82434a477ed6c6019d16abbe75b0e6263604b3ab))
+* js config retrieval ([cd534ba](https://github.com/oss6/vf-core-service-discovery/commits/cd534ba1820b02bac6cfe84ff8b6ee7234407053))
+
+
+### Refactoring
+
+* logging and error handling (closes [#41](https://github.com/oss6/vf-core-service-discovery/issues/41)) ([5eafbfa](https://github.com/oss6/vf-core-service-discovery/commits/5eafbfa4e5a42f292bd725aa0a1665d0f23216c5))
+
+
+### Others
+
+* remove unused import and add todo ([fee26d3](https://github.com/oss6/vf-core-service-discovery/commits/fee26d3b929a47a95f82a37921b11db9c2e6852d))
+* update readme ([b5ce4ac](https://github.com/oss6/vf-core-service-discovery/commits/b5ce4aca7e6c1941c5ef6359b3e3264b0a70a28f))
+* update version in main heading ([eebff77](https://github.com/oss6/vf-core-service-discovery/commits/eebff77b28be35d0ad13c2530d3b470a9f81d49f))
+
 ## [0.1.0-beta.5](https://github.com/oss6/vf-core-service-discovery/compare/v0.1.0-beta.4...v0.1.0-beta.5) (2021-03-06)
 
 
